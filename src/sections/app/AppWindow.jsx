@@ -90,7 +90,7 @@ export default function AppWindow({ active, children, className = '' }) {
 }
 
 /** Dispara uma vez quando o elemento aparece na tela, depois que a janela já entrou. */
-export function useStart(ref, delay = 900) {
+export function useStart(ref, delay = 450) {
   const [on, setOn] = useState(false);
   useEffect(() => {
     const el = ref.current;

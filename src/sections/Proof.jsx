@@ -4,7 +4,7 @@ import { int, useCount, useStart } from './app/AppWindow';
 import './Proof.css';
 
 function Stat({ value, label, run }) {
-  const v = useCount(value, run, 1600);
+  const v = useCount(value, run, 800);
   return (
     <div data-tilt="">
       <dt>{label}</dt>
@@ -46,7 +46,7 @@ function Photo({ src, name }) {
 export default function Proof() {
   const { stats, testimonials, example } = CONFIG.proof;
   const ref = useRef(null);
-  const run = useStart(ref, 450);
+  const run = useStart(ref, 220);
   return (
     <section id="prova" className="proof" aria-labelledby="proof-title">
       <div className="proof-head" data-reveal>

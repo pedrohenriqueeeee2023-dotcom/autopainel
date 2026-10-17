@@ -69,8 +69,8 @@
   opacity: 0.12;
   transform: translateX(-40px);
   transition:
-    opacity 0.7s var(--ease),
-    transform 0.9s var(--ease);
+    opacity 0.35s var(--ease),
+    transform 0.45s var(--ease);
 }
 .solved-list li:nth-child(even) {
   margin-left: 50%;
@@ -218,9 +218,9 @@
   filter: blur(4px);
   transform: translateX(-24px);
   transition:
-    opacity 1s var(--ease),
-    transform 1.2s var(--ease),
-    filter 1s var(--ease);
+    opacity 0.5s var(--ease),
+    transform 0.6s var(--ease),
+    filter 0.5s var(--ease);
 }
 .ap .solved-list li:nth-child(even) {
   transform: translateX(24px);
