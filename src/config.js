@@ -29,7 +29,7 @@ export const CONFIG = {
    * (Admin > Fluxos de dados > Web), no formato 'G-XXXXXXXXXX'.
    * Com `null`, nada do Google é carregado.
    */
-  analytics: { ga4Id: null },
+  analytics: { ga4Id: 'G-230FHQQSQH' },
 
   offer: {
     badge: 'Lançamento',
