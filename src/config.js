@@ -16,9 +16,12 @@ export const CONFIG = {
 
   ctas: {
     // Ex.: 'https://autopainel.app.br/cadastro?plano=anual'
-    trial: { label: 'Testar 30 dias grátis', href: null },
+    trial: { label: 'Testar 30 dias grátis', href: 'https://autopainel.app.br/login' },
     // Ex.: 'https://wa.me/55XXXXXXXXXXX?text=Quero%20conhecer%20o%20AutoPainel'
-    contact: { label: 'Falar com a equipe', href: null },
+    contact: {
+      label: 'Falar com a equipe',
+      href: 'https://wa.me/5531991858934?text=Quero%20conhecer%20o%20AutoPainel',
+    },
   },
 
   offer: {
@@ -63,20 +66,23 @@ export const CONFIG = {
       {
         text: 'Eu cadastrava o mesmo carro em quatro sites. Hoje publico uma vez e o anúncio já está na OLX e no Mercado Livre.',
         name: 'Ricardo Menezes',
-        role: 'RM Veículos · Campinas (SP)',
-        photo: null,
+        role: 'Campinas (SP)',
+        photo:
+          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&h=160&fit=crop&crop=faces&auto=format&q=70',
       },
       {
         text: 'O aviso de carro compatível me fez ligar para dois clientes que eu teria esquecido. Os dois compraram.',
         name: 'Juliana Prado',
-        role: 'Prado Multimarcas · Goiânia (GO)',
-        photo: null,
+        role: 'Goiânia (GO)',
+        photo:
+          'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=160&h=160&fit=crop&crop=faces&auto=format&q=70',
       },
       {
         text: 'Antes de comprar na troca eu digito a placa. Parei de pagar acima do que o carro vale.',
         name: 'André Lopes',
-        role: 'Lopes Seminovos · Curitiba (PR)',
-        photo: null,
+        role: 'Curitiba (PR)',
+        photo:
+          'https://images.unsplash.com/photo-1651684215020-f7a5b6610f23?w=160&h=160&fit=crop&crop=faces&auto=format&q=70',
       },
     ],
   },

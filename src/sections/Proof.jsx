@@ -1,10 +1,10 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { CONFIG } from '../config';
 import { int, useCount, useStart } from './app/AppWindow';
 import './Proof.css';
 
 function Stat({ value, label, run }) {
-  const v = useCount(value, run, 1600);
+  const v = useCount(value, run, 800);
   return (
     <div data-tilt="">
       <dt>{label}</dt>
@@ -20,11 +20,33 @@ const initials = (name) =>
     .slice(0, 2)
     .join('');
 
+/* Foto do depoimento; se não carregar, mostra as iniciais. */
+function Photo({ src, name }) {
+  const [failed, setFailed] = useState(false);
+  if (src && !failed)
+    return (
+      <img
+        src={src}
+        alt=""
+        className="proof-photo"
+        width="48"
+        height="48"
+        loading="lazy"
+        onError={() => setFailed(true)}
+      />
+    );
+  return (
+    <span className="proof-photo" aria-hidden="true">
+      {initials(name)}
+    </span>
+  );
+}
+
 /* Prova: números e depoimentos vêm de CONFIG.proof. */
 export default function Proof() {
   const { stats, testimonials, example } = CONFIG.proof;
   const ref = useRef(null);
-  const run = useStart(ref, 900);
+  const run = useStart(ref, 220);
   return (
     <section id="prova" className="proof" aria-labelledby="proof-title">
       <div className="proof-head" data-reveal>
@@ -47,13 +69,7 @@ export default function Proof() {
             </span>
             <blockquote>{t.text}</blockquote>
             <figcaption>
-              {t.photo ? (
-                <img src={t.photo} alt="" className="proof-photo" />
-              ) : (
-                <span className="proof-photo" aria-hidden="true">
-                  {initials(t.name)}
-                </span>
-              )}
+              <Photo src={t.photo} name={t.name} />
               <span>
                 <b>{t.name}</b>
                 <small>{t.role}</small>
