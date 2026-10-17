@@ -1,0 +1,150 @@
+/* Perguntas frequentes e cartão do WhatsApp. */
+.faq {
+  padding: clamp(48px, 10vh, 120px) var(--gutter);
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+  gap: clamp(24px, 5vw, 80px);
+  align-items: start;
+}
+.faq-head {
+  display: grid;
+  gap: 12px;
+}
+.faq-head .h2 {
+  margin-top: 0;
+  font-size: clamp(32px, 3.6vw, 56px);
+}
+.faq-list {
+  display: grid;
+  border-top: 1px solid var(--line);
+}
+.faq-item {
+  border-bottom: 1px solid var(--line);
+}
+.faq-item summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  min-height: 44px;
+  padding: 20px 0;
+  font-weight: 600;
+  font-size: clamp(16px, 1.3vw, 19px);
+  cursor: pointer;
+  list-style: none;
+}
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+.faq-item summary:hover {
+  color: var(--accent-text);
+}
+.faq-icon {
+  position: relative;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--line-2);
+}
+.faq-icon::before,
+.faq-icon::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 10px;
+  height: 1.5px;
+  background: var(--accent);
+  translate: -50% -50%;
+  transition: transform 0.3s var(--ease);
+}
+.faq-icon::after {
+  transform: rotate(90deg);
+}
+.faq-item[open] .faq-icon::after {
+  transform: rotate(0deg);
+}
+.faq-item p {
+  padding: 0 44px 22px 0;
+  color: var(--fg-2);
+  max-width: 60ch;
+}
+@media (max-width: 960px) {
+  .faq {
+    grid-template-columns: 1fr;
+  }
+}
+.ap .faq {
+  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr);
+  padding-bottom: clamp(96px, 16vh, 160px);
+}
+.faq-main {
+  display: grid;
+  gap: 28px;
+  min-width: 0;
+}
+.faq-wa {
+  position: sticky;
+  top: 96px;
+  display: grid;
+  justify-items: start;
+  gap: 14px;
+  padding: clamp(24px, 3vw, 36px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  background: radial-gradient(90% 120% at 100% 0%, rgba(0, 163, 236, 0.35), transparent 60%), #062a6b;
+}
+.faq-wa h3 {
+  font-family: var(--display);
+  font-stretch: 100%;
+  font-size: clamp(22px, 2vw, 28px);
+  letter-spacing: -0.02em;
+}
+.faq-wa p {
+  color: var(--fg-2);
+}
+.faq-wa .btn {
+  width: 100%;
+}
+.faq-wa-ico {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #25d366;
+}
+.faq-wa-ico svg {
+  width: 28px;
+  height: 28px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 1.7;
+  stroke-linejoin: round;
+}
+@media (max-width: 960px) {
+  .ap .faq {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .faq-wa {
+    position: static;
+  }
+}
+.faq-item {
+  transition: padding 0.3s var(--ease);
+}
+.faq-item:hover {
+  padding-left: 8px;
+}
+.ap .faq-head .h2 {
+  font-size: clamp(30px, 3.6vw, 54px);
+}
+.ap .faq-wa h3 {
+  font-weight: 500;
+}
+.ap .faq-item summary {
+  font-weight: 500;
+}

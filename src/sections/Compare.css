@@ -1,0 +1,129 @@
+/* Comparativo Planilha + WhatsApp × AutoPainel. */
+.cmp {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(56px, 10vh, 120px) var(--gutter);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(28px, 4vh, 48px);
+}
+.cmp-head {
+  text-align: center;
+}
+.cmp-head .h2 {
+  margin: 0;
+  font-size: clamp(30px, 3.8vw, 56px);
+}
+.cmp {
+  max-width: 1040px;
+}
+.cmp-table {
+  display: grid;
+}
+.cmp-row {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr) minmax(0, 1.1fr);
+  align-items: stretch;
+  border-bottom: 1px solid var(--line);
+}
+.cmp-row > span {
+  padding: 18px 20px;
+}
+.cmp-th {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+.cmp-th .cmp-us {
+  border-radius: 18px 18px 0 0;
+  color: #fff;
+}
+.cmp-row:last-child {
+  border-bottom: 0;
+}
+.cmp-row:last-child .cmp-us {
+  border-radius: 0 0 18px 18px;
+}
+.cmp-what {
+  font-weight: 600;
+}
+.cmp-old {
+  color: var(--fg-2);
+}
+.cmp-old > span {
+  color: #ff7a7a;
+  margin-right: 4px;
+}
+.cmp-us {
+  background: rgba(0, 163, 236, 0.12);
+  box-shadow:
+    inset 1px 0 rgba(0, 163, 236, 0.35),
+    inset -1px 0 rgba(0, 163, 236, 0.35);
+  font-weight: 600;
+}
+.cmp-row .cmp-us > span {
+  color: var(--ok);
+  margin-right: 4px;
+}
+.cmp-th .cmp-us {
+  box-shadow:
+    inset 1px 1px rgba(0, 163, 236, 0.35),
+    inset -1px 0 rgba(0, 163, 236, 0.35);
+}
+@media (max-width: 640px) {
+  .cmp-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .cmp-row > span {
+    padding: 12px 12px;
+    font-size: 14px;
+  }
+  .cmp-th > span:first-child {
+    display: none;
+  }
+  .cmp-what {
+    grid-column: 1 / -1;
+    padding-bottom: 0 !important;
+  }
+  .cmp-row:not(.cmp-th) .cmp-us {
+    border-radius: 12px;
+    box-shadow: inset 0 0 0 1px rgba(0, 163, 236, 0.35);
+    margin: 0 0 12px;
+  }
+  .cmp-row:not(.cmp-th) .cmp-old {
+    margin-bottom: 12px;
+  }
+  .cmp-th .cmp-us {
+    border-radius: 12px;
+    box-shadow: none;
+    background: none;
+  }
+}
+.cmp-row:not(.cmp-th) {
+  transition: background-color 0.25s;
+}
+.cmp-row:not(.cmp-th):hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+.cmp-row:not(.cmp-th):hover .cmp-us {
+  background: rgba(0, 163, 236, 0.22);
+}
+.cmp-row:not(.cmp-th):hover .cmp-what {
+  color: var(--accent-text);
+}
+.ap .cmp-head .h2 {
+  font-size: clamp(30px, 3.6vw, 54px);
+}
+.ap .cmp-th {
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  font-size: 11px;
+}
+.ap .cmp-us {
+  background: rgba(0, 163, 236, 0.07);
+}
+.ap .cmp {
+  padding-block: clamp(80px, 14vh, 168px);
+}

@@ -16,13 +16,13 @@ export const CONFIG = {
 
   ctas: {
     // Ex.: 'https://autopainel.app.br/cadastro?plano=anual'
-    trial: { label: 'Quero experimentar grátis', href: null },
+    trial: { label: 'Testar 30 dias grátis', href: null },
     // Ex.: 'https://wa.me/55XXXXXXXXXXX?text=Quero%20conhecer%20o%20AutoPainel'
     contact: { label: 'Falar com a equipe', href: null },
   },
 
   offer: {
-    badge: 'Oferta de lançamento',
+    badge: 'Lançamento',
     text: '30 dias grátis para os 3 primeiros clientes.',
   },
 
@@ -47,8 +47,39 @@ export const CONFIG = {
     },
   ],
 
-  // Valores iniciais da calculadora de compra.
-  calculator: { resale: 31000, margin: 35, costs: 2000, asking: 17500 },
+  /**
+   * Prova social. `example: true` marca dados de exemplo: a página mostra um
+   * aviso discreto. Troque pelos números e depoimentos reais antes de publicar
+   * e mude para `false`.
+   */
+  proof: {
+    example: true,
+    stats: [
+      { label: 'revendas usando o painel', value: 37 },
+      { label: 'carros anunciados', value: 2480 },
+      { label: 'leads atendidos no CRM', value: 9600 },
+    ],
+    testimonials: [
+      {
+        text: 'Eu cadastrava o mesmo carro em quatro sites. Hoje publico uma vez e o anúncio já está na OLX e no Mercado Livre.',
+        name: 'Ricardo Menezes',
+        role: 'RM Veículos · Campinas (SP)',
+        photo: null,
+      },
+      {
+        text: 'O aviso de carro compatível me fez ligar para dois clientes que eu teria esquecido. Os dois compraram.',
+        name: 'Juliana Prado',
+        role: 'Prado Multimarcas · Goiânia (GO)',
+        photo: null,
+      },
+      {
+        text: 'Antes de comprar na troca eu digito a placa. Parei de pagar acima do que o carro vale.',
+        name: 'André Lopes',
+        role: 'Lopes Seminovos · Curitiba (PR)',
+        photo: null,
+      },
+    ],
+  },
 };
 
 /** Resolve o destino de um CTA, com fallback explícito para a seção de planos. */
@@ -56,6 +87,6 @@ export function ctaHref(key) {
   const cta = CONFIG.ctas[key];
   if (cta && cta.href) return cta.href;
   if (import.meta.env.DEV)
-    console.warn(`[AutoPainel] Destino do CTA "${key}" não configurado em src/autopainel/config.js`);
+    console.warn(`[AutoPainel] Destino do CTA "${key}" não configurado em src/config.js`);
   return '#planos';
 }

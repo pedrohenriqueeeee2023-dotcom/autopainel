@@ -1,0 +1,337 @@
+/* Planos como cartas de baralho. */
+.offer {
+  padding: 64px var(--gutter) clamp(64px, 10vh, 120px);
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  gap: 48px;
+}
+.offer .h2 {
+  font-size: clamp(36px, 5.6vw, 88px);
+  max-width: 16ch;
+}
+.offer-badge {
+  margin-top: 28px;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  font-size: clamp(16px, 1.4vw, 20px);
+  font-weight: 500;
+}
+.offer-badge span {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.plan-price {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: clamp(56px, 7vw, 96px);
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+.plan-price small {
+  font-size: 0.32em;
+  vertical-align: 0.95em;
+  margin-right: 6px;
+  letter-spacing: 0;
+  color: var(--fg-2);
+}
+.plan-price span {
+  font-size: 0.24em;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--fg-2);
+  margin-left: 4px;
+}
+.plan-billing {
+  font-size: 14px;
+  color: var(--fg-2);
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+@media (max-width: 640px) {
+}
+.plan-price {
+  font-stretch: 100%;
+}
+.offer-head {
+  display: grid;
+  gap: 12px;
+}
+.offer-head .h2 {
+  margin-top: 0;
+}
+.offer-head {
+  justify-items: center;
+  text-align: center;
+}
+.offer .h2 {
+  max-width: none;
+}
+.deck {
+  overflow-x: clip;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 24px 0 40px;
+}
+.pcard {
+  --dx: calc(var(--i) * -86%);
+  --dy: 0px;
+  --dr: calc(var(--i) * 2deg);
+  position: relative;
+  z-index: 1;
+  flex: 0 0 clamp(228px, 28vw, 340px);
+  min-height: clamp(420px, 56vh, 470px);
+  margin-inline: -16px;
+  padding: 48px 28px 32px;
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 30px 60px -24px rgba(0, 0, 0, 0.65);
+  transform: translate(var(--dx), var(--dy)) rotate(var(--dr));
+  transform-origin: 50% 110%;
+  transition:
+    transform 1.2s var(--ease) calc(1500ms + (var(--i) + 1) * 0.2s),
+    box-shadow 0.3s;
+}
+.deck.is-in .pcard-mensal {
+  --dx: 0px;
+  --dy: 28px;
+  --dr: -7deg;
+}
+.deck.is-in .pcard-anual {
+  --dx: 0px;
+  --dy: -6px;
+  --dr: 0deg;
+}
+.deck.is-in .pcard-sem {
+  --dx: 0px;
+  --dy: 28px;
+  --dr: 7deg;
+}
+.pcard-anual {
+  z-index: 2;
+}
+.deck.is-in .pcard:hover,
+.deck.is-in .pcard:focus-within {
+  --dy: -20px;
+  --dr: 0deg;
+  z-index: 3;
+  transition-delay: 0s;
+  box-shadow: 0 40px 80px -24px rgba(0, 0, 0, 0.75);
+}
+.pcard h3 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.pcard-pip {
+  position: absolute;
+  top: 14px;
+  left: 18px;
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1;
+}
+.pcard-pip-b {
+  top: auto;
+  left: auto;
+  bottom: 14px;
+  right: 18px;
+  transform: rotate(180deg);
+}
+.pcard-tag {
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  font-family: var(--text);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.pcard .plan-price small,
+.pcard .plan-price span {
+  color: inherit;
+  opacity: 0.7;
+}
+.pcard .plan-billing {
+  color: inherit;
+  opacity: 0.8;
+  border-top-color: currentColor;
+}
+.pcard .btn {
+  justify-self: stretch;
+  margin-top: auto;
+}
+.pcard-mensal {
+  background: #f4f8fe;
+  color: #0d1b34;
+}
+.pcard-mensal .pcard-pip,
+.pcard-mensal h3 {
+  color: #0b74e5;
+}
+.pcard-mensal .plan-billing {
+  border-top-color: #d7e2f1;
+}
+.pcard-anual {
+  background:
+    radial-gradient(120% 70% at 100% 0%, rgba(255, 255, 255, 0.22), transparent 60%),
+    linear-gradient(150deg, #0a6fe0, #00a3ec);
+  color: #fff;
+  box-shadow: 0 40px 80px -24px rgba(0, 120, 230, 0.75);
+}
+.pcard-anual .plan-billing {
+  border-top-color: rgba(255, 255, 255, 0.35);
+}
+.pcard-sem {
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.025) 0 10px, transparent 10px 20px), #0a1733;
+  color: #b8c4da;
+}
+.pcard-sem .pcard-pip,
+.pcard-sem h3 {
+  color: #ff7a7a;
+}
+.pcard-sem .plan-price {
+  position: relative;
+  width: fit-content;
+  color: #fff;
+}
+.pcard-sem .plan-price::after {
+  content: '';
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  top: 52%;
+  height: 4px;
+  border-radius: 4px;
+  background: #ff7a7a;
+  transform: rotate(-8deg);
+}
+.pcard-sem-line {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #fff;
+}
+.pcard-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 14px 0 0;
+  list-style: none;
+  border-top: 1px solid rgba(255, 122, 122, 0.3);
+  font-size: 14px;
+}
+.pcard-list li {
+  display: flex;
+  gap: 8px;
+}
+.pcard-list li::before {
+  content: '✕';
+  color: #ff7a7a;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.pcard-sem .btn {
+  margin-top: 8px;
+}
+@media (max-width: 760px) {
+  .deck {
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0 24px;
+  }
+  .pcard {
+    --dx: 0px;
+    --dy: calc(var(--i) * -40px);
+    flex: none;
+    width: min(100%, 380px);
+    min-height: 0;
+    margin: -14px 0 0;
+  }
+  .pcard-anual {
+    order: -1;
+    margin-top: 0;
+  }
+  .deck.is-in .pcard-mensal {
+    --dy: 0px;
+    --dr: -1.5deg;
+  }
+  .deck.is-in .pcard-anual {
+    --dy: 0px;
+  }
+  .deck.is-in .pcard-sem {
+    --dy: 0px;
+    --dr: 1.5deg;
+  }
+  .deck.is-in .pcard:hover,
+  .deck.is-in .pcard:focus-within {
+    --dy: 0px;
+  }
+  .pcard .plan-price {
+    font-size: 64px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pcard {
+    transition: none;
+  }
+}
+.ap .pcard .btn {
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: clamp(12px, 1.05vw, 14px);
+  padding-inline: 12px;
+}
+.pcard .plan-billing {
+  font-size: 13px;
+  line-height: 1.45;
+}
+@media (min-width: 761px) and (max-width: 1040px) {
+  .pcard {
+    padding-inline: 20px;
+  }
+  .ap .pcard .btn {
+    font-size: 11.5px;
+    letter-spacing: 0.02em;
+    padding-inline: 8px;
+  }
+  .pcard h3 {
+    font-size: 11.5px;
+  }
+}
+.ap .offer .h2 {
+  font-size: clamp(32px, 4.4vw, 64px);
+  font-weight: 400;
+}
+.ap .plan-price {
+  font-weight: 300;
+}
+.ap .offer-badge span {
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  font-size: 11px;
+}

@@ -1,0 +1,140 @@
+/* Quem já usa: números e depoimentos. */
+.proof {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(56px, 10vh, 120px) var(--gutter);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(28px, 4vh, 48px);
+}
+.proof-head {
+  text-align: center;
+}
+.proof-head .h2 {
+  margin: 0;
+  font-size: clamp(30px, 3.8vw, 56px);
+}
+.proof-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0;
+}
+.proof-stats > div {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 6px;
+  padding: 28px 12px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.03);
+  text-align: center;
+}
+.proof-stats dd {
+  margin: 0;
+  font-family: var(--display);
+  font-stretch: 100%;
+  font-weight: 500;
+  font-size: clamp(40px, 5vw, 72px);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-text);
+}
+.proof-stats dt {
+  color: var(--fg-2);
+}
+.proof-quotes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.proof-quote {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 14px;
+  margin: 0;
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.03);
+}
+.proof-mark {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 64px;
+  line-height: 0.6;
+  height: 28px;
+  color: var(--accent);
+}
+.proof-quote blockquote {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.55;
+}
+.proof-quote figcaption {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.proof-quote figcaption > span:last-child {
+  display: grid;
+}
+.proof-quote small {
+  color: var(--fg-3);
+  font-size: 13px;
+}
+.proof-photo {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--accent-grad);
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 16px;
+}
+.proof-note {
+  text-align: center;
+  font-size: 12px;
+  color: var(--fg-3);
+}
+@media (max-width: 960px) {
+  .proof-quotes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .proof-stats {
+    gap: 8px;
+  }
+}
+@media (max-width: 640px) {
+  .proof-stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.ap .proof-head .h2 {
+  font-size: clamp(30px, 3.6vw, 54px);
+}
+.ap .proof-stats dd {
+  font-weight: 300;
+  letter-spacing: -0.03em;
+}
+.ap .proof-mark {
+  font-weight: 400;
+  opacity: 0.7;
+}
+.ap .proof-quote,
+.ap .proof-stats > div {
+  border-color: var(--line);
+  background: rgba(255, 255, 255, 0.022);
+  border-radius: 20px;
+}
+.ap .proof {
+  padding-block: clamp(80px, 14vh, 168px);
+}
