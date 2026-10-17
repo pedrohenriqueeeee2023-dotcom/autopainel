@@ -68,7 +68,7 @@ export default function Faq() {
         </span>
         <h3 id="wa-title">Ficou alguma dúvida?</h3>
         <p>Fale com a equipe do AutoPainel pelo WhatsApp e veja o painel com os dados da sua loja.</p>
-        <a className="btn btn-wa btn-lg" href={ctaHref('contact')}>
+        <a className="btn btn-wa btn-lg" href={ctaHref('contact')} target="_blank" rel="noreferrer">
           Chamar no WhatsApp
         </a>
         <a className="btn btn-accent btn-lg" href={ctaHref('trial')}>

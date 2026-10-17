@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { CONFIG } from '../config';
 import { int, useCount, useStart } from './app/AppWindow';
 import './Proof.css';
@@ -19,6 +19,28 @@ const initials = (name) =>
     .map((w) => w[0])
     .slice(0, 2)
     .join('');
+
+/* Foto do depoimento; se não carregar, mostra as iniciais. */
+function Photo({ src, name }) {
+  const [failed, setFailed] = useState(false);
+  if (src && !failed)
+    return (
+      <img
+        src={src}
+        alt=""
+        className="proof-photo"
+        width="48"
+        height="48"
+        loading="lazy"
+        onError={() => setFailed(true)}
+      />
+    );
+  return (
+    <span className="proof-photo" aria-hidden="true">
+      {initials(name)}
+    </span>
+  );
+}
 
 /* Prova: números e depoimentos vêm de CONFIG.proof. */
 export default function Proof() {
@@ -47,13 +69,7 @@ export default function Proof() {
             </span>
             <blockquote>{t.text}</blockquote>
             <figcaption>
-              {t.photo ? (
-                <img src={t.photo} alt="" className="proof-photo" />
-              ) : (
-                <span className="proof-photo" aria-hidden="true">
-                  {initials(t.name)}
-                </span>
-              )}
+              <Photo src={t.photo} name={t.name} />
               <span>
                 <b>{t.name}</b>
                 <small>{t.role}</small>
