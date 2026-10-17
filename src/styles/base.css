@@ -25,7 +25,7 @@
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --gutter: clamp(16px, 4vw, 56px);
   /* Atraso base das entradas automáticas */
-  --rv: 650ms;
+  --rv: 325ms;
 }
 
 html {
@@ -290,9 +290,9 @@ body {
   transform: translateY(28px);
   filter: blur(8px);
   transition:
-    opacity 1.4s var(--ease) calc(var(--rv) + var(--rd, 0ms) * 2),
-    transform 1.6s var(--ease) calc(var(--rv) + var(--rd, 0ms) * 2),
-    filter 1.4s var(--ease) calc(var(--rv) + var(--rd, 0ms) * 2);
+    opacity 1.4s var(--ease) calc(var(--rv) + var(--rd, 0ms)),
+    transform 1.6s var(--ease) calc(var(--rv) + var(--rd, 0ms)),
+    filter 1.4s var(--ease) calc(var(--rv) + var(--rd, 0ms));
 }
 [data-reveal].is-in {
   opacity: 1;
@@ -304,9 +304,9 @@ body {
   transform: translateY(18px);
   filter: blur(6px);
   transition:
-    opacity 1.2s var(--ease) calc(var(--rv) + var(--rd, 0ms) * 2 + 350ms + var(--k, 0) * 200ms),
-    transform 1.4s var(--ease) calc(var(--rv) + var(--rd, 0ms) * 2 + 350ms + var(--k, 0) * 200ms),
-    filter 1.2s var(--ease) calc(var(--rv) + var(--rd, 0ms) * 2 + 350ms + var(--k, 0) * 200ms);
+    opacity 1.2s var(--ease) calc(var(--rv) + var(--rd, 0ms) + 175ms + var(--k, 0) * 100ms),
+    transform 1.4s var(--ease) calc(var(--rv) + var(--rd, 0ms) + 175ms + var(--k, 0) * 100ms),
+    filter 1.2s var(--ease) calc(var(--rv) + var(--rd, 0ms) + 175ms + var(--k, 0) * 100ms);
 }
 [data-build].is-in > * {
   opacity: 1;
@@ -315,7 +315,7 @@ body {
 }
 [data-reveal] .mask > span {
   transform: translateY(108%);
-  transition: transform 1.5s var(--ease) calc(var(--rv) + var(--rd, 0ms) * 2 + var(--i, 0) * 200ms);
+  transition: transform 1.5s var(--ease) calc(var(--rv) + var(--rd, 0ms) + var(--i, 0) * 100ms);
 }
 [data-reveal].is-in .mask > span {
   transform: none;

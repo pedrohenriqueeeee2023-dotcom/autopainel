@@ -24,7 +24,7 @@ const initials = (name) =>
 export default function Proof() {
   const { stats, testimonials, example } = CONFIG.proof;
   const ref = useRef(null);
-  const run = useStart(ref, 900);
+  const run = useStart(ref, 450);
   return (
     <section id="prova" className="proof" aria-labelledby="proof-title">
       <div className="proof-head" data-reveal>

@@ -16,9 +16,9 @@ export const CONFIG = {
 
   ctas: {
     // Ex.: 'https://autopainel.app.br/cadastro?plano=anual'
-    trial: { label: 'Testar 30 dias grátis', href: null },
+    trial: { label: 'Testar 30 dias grátis', href: 'https://autopainel.app.br/login' },
     // Ex.: 'https://wa.me/55XXXXXXXXXXX?text=Quero%20conhecer%20o%20AutoPainel'
-    contact: { label: 'Falar com a equipe', href: null },
+    contact: { label: 'Falar com a equipe', href: 'https://autopainel.app.br/login' },
   },
 
   offer: {

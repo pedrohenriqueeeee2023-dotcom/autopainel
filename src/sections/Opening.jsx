@@ -41,18 +41,18 @@ export default function Opening() {
             <span>{CONFIG.offer.badge}</span> {CONFIG.offer.text}
           </p>
           <h1 id="open-title" className="open-title">
-            <span className="mask load-mask" style={{ '--d': '80ms' }}>
+            <span className="mask load-mask" style={{ '--d': '40ms' }}>
               <span>Menos tempo no sistema.</span>
             </span>
-            <span className="mask load-mask dim" style={{ '--d': '220ms' }}>
+            <span className="mask load-mask dim" style={{ '--d': '110ms' }}>
               <span>Mais carro vendido.</span>
             </span>
           </h1>
-          <p className="open-sub load-in" style={{ '--d': '420ms' }}>
+          <p className="open-sub load-in" style={{ '--d': '210ms' }}>
             Anúncio em 8 canais, aviso para o vendedor quando chega o carro que o cliente pediu e o preço
             máximo de compra pela placa.
           </p>
-          <div className="hero-btns load-in" style={{ '--d': '600ms' }}>
+          <div className="hero-btns load-in" style={{ '--d': '300ms' }}>
             <a className="btn btn-accent btn-lg" href={ctaHref('trial')}>
               {CONFIG.ctas.trial.label} <span aria-hidden="true">→</span>
             </a>
@@ -60,11 +60,11 @@ export default function Opening() {
               Testar o painel aqui
             </a>
           </div>
-          <p className="hero-note load-in" style={{ '--d': '760ms' }}>
+          <p className="hero-note load-in" style={{ '--d': '380ms' }}>
             Plano mensal sem fidelidade · Plano anual a partir de R$ 87/mês
           </p>
         </div>
-        <div className="hero-visual load-in" style={{ '--d': '500ms' }}>
+        <div className="hero-visual load-in" style={{ '--d': '250ms' }}>
           <HeroShot />
         </div>
       </div>

@@ -101,7 +101,7 @@
   transform: translate(var(--dx), var(--dy)) rotate(var(--dr));
   transform-origin: 50% 110%;
   transition:
-    transform 1.2s var(--ease) calc(1500ms + (var(--i) + 1) * 0.2s),
+    transform 1.2s var(--ease) calc(750ms + (var(--i) + 1) * 0.1s),
     box-shadow 0.3s;
 }
 .deck.is-in .pcard-mensal {
