@@ -26,6 +26,10 @@ npm run lint
 - `src/pointerFx.js` cuida dos efeitos de mouse: brilho, inclinação dos cartões e botões magnéticos.
 - Com movimento reduzido ativado, todas as entradas aparecem prontas e os efeitos de mouse ficam desligados.
 
+## Métricas (GA4)
+
+Cole o ID de métrica em `CONFIG.analytics.ga4Id` (`src/config.js`). Com o ID preenchido, `src/analytics.js` carrega o GA4 e envia `clique_teste_gratis`, `clique_whatsapp` e `ver_secao`, todos com o parâmetro `secao`. Para ver `secao` nos relatórios, registre-o como dimensão personalizada no GA4 (Admin > Definições personalizadas).
+
 ## Publicação
 
 O `vercel.json` está configurado para Vite (`npm run build`, saída em `dist/`). Com o repositório ligado à Vercel, cada push gera um preview e o merge na `main` publica em produção.
