@@ -28,7 +28,7 @@ npm run lint
 
 ## Métricas (GA4)
 
-A tag do GA4 (`G-230FHQQSQH`) fica no `<head>` do `index.html`; para trocar de propriedade, mude o ID nas duas linhas dela. `src/analytics.js` envia `clique_teste_gratis`, `clique_whatsapp` e `ver_secao`, todos com o parâmetro `secao`. Para ver `secao` nos relatórios, registre-o como dimensão personalizada no GA4 (Admin > Definições personalizadas).
+A tag do GA4 (`G-R17LQ89M6L`) fica no `<head>` do `index.html`; para trocar de propriedade, mude o ID nas duas linhas dela. `src/analytics.js` envia `clique_teste_gratis`, `clique_whatsapp` e `ver_secao`, todos com o parâmetro `secao`. Para ver `secao` nos relatórios, registre-o como dimensão personalizada no GA4 (Admin > Definições personalizadas).
 
 ## Publicação
 
