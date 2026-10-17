@@ -1,27 +1,13 @@
-import { CONFIG } from './config';
-
 /**
- * Google Analytics 4. Só carrega quando CONFIG.analytics.ga4Id está
- * preenchido. Além das visitas, envia três eventos:
+ * Eventos do Google Analytics 4. A tag (gtag.js) fica no index.html, para o
+ * Google detectá-la direto no HTML. Além das visitas, envia três eventos:
  * - clique_teste_gratis: botões que levam ao login do app
  * - clique_whatsapp: botão do WhatsApp
  * - ver_secao: primeira vez que cada seção aparece na tela
  * Todos levam `secao` (id da seção onde o clique aconteceu ou que apareceu).
  */
 export function initAnalytics() {
-  const id = CONFIG.analytics.ga4Id;
-  if (!id) return () => {};
-
-  window.dataLayer = window.dataLayer || [];
-  window.gtag = function gtag() {
-    window.dataLayer.push(arguments);
-  };
-  window.gtag('js', new Date());
-  window.gtag('config', id);
-  const s = document.createElement('script');
-  s.async = true;
-  s.src = `https://www.googletagmanager.com/gtag/js?id=${id}`;
-  document.head.appendChild(s);
+  if (typeof window.gtag !== 'function') return () => {};
 
   const track = (name, params) => window.gtag('event', name, params);
   const sectionOf = (el) => el.closest('section[id]')?.id || 'cabecalho';
