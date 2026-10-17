@@ -28,7 +28,7 @@ npm run lint
 
 ## Métricas (GA4)
 
-Cole o ID de métrica em `CONFIG.analytics.ga4Id` (`src/config.js`). Com o ID preenchido, `src/analytics.js` carrega o GA4 e envia `clique_teste_gratis`, `clique_whatsapp` e `ver_secao`, todos com o parâmetro `secao`. Para ver `secao` nos relatórios, registre-o como dimensão personalizada no GA4 (Admin > Definições personalizadas).
+A tag do GA4 (`G-230FHQQSQH`) fica no `<head>` do `index.html`; para trocar de propriedade, mude o ID nas duas linhas dela. `src/analytics.js` envia `clique_teste_gratis`, `clique_whatsapp` e `ver_secao`, todos com o parâmetro `secao`. Para ver `secao` nos relatórios, registre-o como dimensão personalizada no GA4 (Admin > Definições personalizadas).
 
 ## Publicação
 
