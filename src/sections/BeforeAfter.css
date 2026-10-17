@@ -1,0 +1,79 @@
+/* Antes e Com o AutoPainel: três cartões. */
+.ba {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(56px, 10vh, 120px) var(--gutter);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(28px, 4vh, 48px);
+}
+.ba-head {
+  text-align: center;
+}
+.ba-head .h2 {
+  margin: 0;
+  font-size: clamp(30px, 3.8vw, 56px);
+}
+.ba-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.ba-card {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: clamp(22px, 2.4vw, 32px);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
+}
+.ba-tag {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.ba-tag-bad {
+  color: #ff7a7a;
+}
+.ba-tag-ok {
+  margin-top: 14px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  color: var(--ok);
+}
+.ba-card h3 {
+  font-family: var(--display);
+  font-stretch: 100%;
+  font-size: clamp(19px, 1.6vw, 23px);
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+.ba-after {
+  color: var(--fg-2);
+}
+@media (max-width: 960px) {
+  .ba-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.ap .ba-head .h2 {
+  font-size: clamp(30px, 3.6vw, 54px);
+}
+.ap .ba-card h3 {
+  font-weight: 500;
+}
+.ap .ba-tag {
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  font-size: 11px;
+}
+.ap .ba-card {
+  border-color: var(--line);
+  background: rgba(255, 255, 255, 0.022);
+  border-radius: 20px;
+}
+.ap .ba {
+  padding-block: clamp(80px, 14vh, 168px);
+}

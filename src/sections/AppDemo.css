@@ -1,0 +1,119 @@
+/* App interativo: abas, textos de apoio e a janela do painel. */
+.ap .tool-hint {
+  font-family: var(--mono, 'JetBrains Mono', monospace);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--accent-text);
+}
+@media (max-width: 640px) {
+  .tool-hint {
+    display: none;
+  }
+}
+.demo {
+  padding: clamp(56px, 10vh, 120px) var(--gutter);
+  background: radial-gradient(70% 50% at 50% 30%, rgba(0, 163, 236, 0.12), transparent 70%);
+}
+.demo-in {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(18px, 3vh, 28px);
+}
+.demo-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  align-items: end;
+  gap: 12px 56px;
+}
+.demo-head .h2 {
+  margin: 0;
+  font-size: clamp(32px, 4.2vw, 64px);
+}
+.demo-head .lead {
+  margin: 0;
+}
+.demo-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 16px 56px;
+}
+.demo-tabs {
+  display: flex;
+  justify-self: start;
+  max-width: 100%;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+}
+.demo-tabs button {
+  min-height: 42px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--fg-2);
+  font: 500 14px var(--text);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+}
+.demo-tabs button:hover {
+  color: var(--fg);
+}
+.demo-tabs button.on {
+  background: var(--accent-grad);
+  color: #fff;
+}
+.demo-copy {
+  display: grid;
+  gap: 4px;
+  max-width: 50ch;
+  min-width: 0;
+  color: var(--fg-2);
+  font-size: 15px;
+}
+.demo-pane {
+  animation: demo-in 0.45s var(--ease) both;
+}
+@keyframes demo-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@media (max-width: 960px) {
+  .demo-head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .demo-bar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .demo-tabs {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+}
+@media (max-width: 640px) {
+  .demo-tabs button {
+    padding: 0 14px;
+    font-size: 13px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .demo-pane {
+    animation: none;
+  }
+}
+.ap .demo-head .h2 {
+  font-size: clamp(30px, 3.6vw, 54px);
+}
+.ap .demo {
+  padding-block: clamp(80px, 14vh, 168px);
+}
