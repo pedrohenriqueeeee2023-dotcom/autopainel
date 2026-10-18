@@ -255,6 +255,14 @@
 .pcard-sem .btn {
   margin-top: 8px;
 }
+.pcard-list-ok {
+  border-top-color: rgba(255, 255, 255, 0.35);
+  font-size: 15px;
+}
+.pcard-list-ok li::before {
+  content: '✓';
+  color: #fff;
+}
 @media (max-width: 760px) {
   .deck {
     flex-direction: column;

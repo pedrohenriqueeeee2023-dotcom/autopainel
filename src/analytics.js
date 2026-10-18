@@ -1,8 +1,10 @@
+import { CONFIG } from './config';
+
 /**
  * Eventos do Google Analytics 4. A tag (gtag.js) fica no index.html, para o
  * Google detectá-la direto no HTML. Além das visitas, envia três eventos:
- * - clique_teste_gratis: botões que levam ao login do app
- * - clique_whatsapp: botão do WhatsApp
+ * - clique_oferta: botões da oferta de cliente projeto (abrem o WhatsApp)
+ * - clique_whatsapp: outros links do WhatsApp
  * - ver_secao: primeira vez que cada seção aparece na tela
  * Todos levam `secao` (id da seção onde o clique aconteceu ou que apareceu).
  */
@@ -17,8 +19,8 @@ export function initAnalytics() {
     if (!a) return;
     const href = a.getAttribute('href');
     const params = { secao: sectionOf(a), texto: a.textContent.trim().slice(0, 60) };
-    if (href.includes('wa.me')) track('clique_whatsapp', params);
-    else if (href.includes('autopainel.app.br')) track('clique_teste_gratis', params);
+    if (href === CONFIG.ctas.trial.href) track('clique_oferta', params);
+    else if (href.includes('wa.me')) track('clique_whatsapp', params);
   };
   document.addEventListener('click', onClick);
 

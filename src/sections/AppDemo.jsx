@@ -1,12 +1,12 @@
 import { lazy, Suspense, useMemo, useState } from 'react';
 import { AppNav } from './app/AppWindow';
-import DashTool from './app/DashTool';
+import EvalTool from './app/EvalTool';
 import './AppDemo.css';
 
-// Cada ferramenta só baixa quando a aba dela é aberta (o Dashboard já veio com a abertura).
+// Cada ferramenta só baixa quando a aba dela é aberta (a calculadora já veio com a abertura).
+const DashTool = lazy(() => import('./app/DashTool'));
 const PubTool = lazy(() => import('./app/PubTool'));
 const CrmTool = lazy(() => import('./app/CrmTool'));
-const EvalTool = lazy(() => import('./app/EvalTool'));
 const StockTool = lazy(() => import('./app/StockTool'));
 
 /* Mini versão do painel para o visitante mexer. Cada aba abre uma ferramenta. */
@@ -24,7 +24,7 @@ const TOOLS = {
     el: () => <CrmTool />,
   },
   eval: {
-    tab: 'Avaliação',
+    tab: 'Calculadora de compra',
     lead: 'Digite a placa: o painel compara a FIPE com anúncios parecidos, desconta custos e margem e mostra até quanto pagar.',
     hint: 'Teste outra placa nos atalhos ou mude a margem.',
     el: () => <EvalTool />,
@@ -47,17 +47,17 @@ const TOOLS = {
     el: () => <DashTool initialTab="fin" />,
   },
 };
-const TABS = ['pub', 'crm', 'eval', 'stock', 'dash'];
+const TABS = ['eval', 'pub', 'crm', 'stock', 'dash'];
 // Ao passar o mouse numa aba, a ferramenta já começa a baixar.
 const PRELOAD = {
   pub: () => import('./app/PubTool'),
   crm: () => import('./app/CrmTool'),
-  eval: () => import('./app/EvalTool'),
   stock: () => import('./app/StockTool'),
+  dash: () => import('./app/DashTool'),
 };
 
 export default function AppDemo() {
-  const [tool, setTool] = useState('pub');
+  const [tool, setTool] = useState('eval');
   const nav = useMemo(() => ({ go: setTool, has: (k) => k in TOOLS }), []);
   const t = TOOLS[tool];
   const tabOn = tool === 'fin' ? 'dash' : tool;
