@@ -15,8 +15,11 @@ export const CONFIG = {
   },
 
   ctas: {
-    // Ex.: 'https://autopainel.app.br/cadastro?plano=anual'
-    trial: { label: 'Testar 30 dias grátis', href: 'https://autopainel.app.br/login' },
+    // Oferta: o cliente chama no WhatsApp e a equipe monta o sistema para ele.
+    trial: {
+      label: 'Quero minha vaga',
+      href: 'https://wa.me/5531991858934?text=Quero%20ser%20cliente%20projeto%20do%20AutoPainel%20por%20R%24%2027%2C99/m%C3%AAs',
+    },
     // Ex.: 'https://wa.me/55XXXXXXXXXXX?text=Quero%20conhecer%20o%20AutoPainel'
     contact: {
       label: 'Falar com a equipe',
@@ -25,28 +28,24 @@ export const CONFIG = {
   },
 
   offer: {
-    badge: 'Lançamento',
-    text: '30 dias grátis para os 3 primeiros clientes.',
+    badge: 'Clientes projeto',
+    text: 'R$ 27,99/mês para os 100 primeiros. Sem cartão.',
   },
 
   plans: [
     {
-      id: 'anual',
-      name: 'Plano anual',
-      price: 87,
+      id: 'projeto',
+      name: 'Cliente projeto',
+      price: '27,99',
       period: '/mês',
       highlight: true,
-      // Confirme a condição comercial real antes de publicar.
-      billing:
-        'Valor equivalente a R$ 87/mês. Cobrança anual em pagamento único de R$ 1.044 por 12 meses de uso.',
-    },
-    {
-      id: 'mensal',
-      name: 'Plano mensal',
-      price: 137,
-      period: '/mês',
-      highlight: false,
-      billing: 'Cobrança mensal de R$ 137. Sem fidelidade.',
+      tag: '100 vagas',
+      items: [
+        'A equipe monta o sistema com os dados da sua loja',
+        'Calculadora de compra pela placa',
+        'Anúncio em 8 canais, CRM e estoque',
+        'Sem cartão: tudo combinado no WhatsApp',
+      ],
     },
   ],
 

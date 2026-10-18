@@ -1,14 +1,13 @@
 import { CONFIG, ctaHref } from '../config';
 import './Offer.css';
 
-const [anual, mensal] = CONFIG.plans;
+const [projeto] = CONFIG.plans;
 
-/* Planos como cartas de baralho: as três entram empilhadas e se abrem em leque.
-   A terceira carta mostra o custo de continuar sem sistema. */
+/* Oferta como cartas de baralho: as duas entram empilhadas e se abrem em leque.
+   A segunda carta mostra o custo de continuar sem sistema. */
 const CARDS = [
-  { ...mensal, mark: 'M' },
-  { ...anual, mark: 'A' },
-  { id: 'sem', name: 'Continuar sem', mark: '✕' },
+  { ...projeto, style: 'anual', mark: 'P' },
+  { id: 'sem', style: 'sem', name: 'Continuar sem', mark: '✕' },
 ];
 
 export default function Offer() {
@@ -17,7 +16,7 @@ export default function Offer() {
       <div className="offer-head" data-reveal>
         <h2 id="offer-title" className="h2">
           <span className="mask" style={{ '--i': 0 }}>
-            <span>Comece com 30 dias grátis.</span>
+            <span>100 vagas por R$ 27,99.</span>
           </span>
         </h2>
         <p className="offer-badge">
@@ -29,8 +28,8 @@ export default function Offer() {
         {CARDS.map((c, i) => (
           <article
             key={c.id}
-            className={`pcard pcard-${c.id} ${c.highlight ? 'is-hl' : ''}`}
-            style={{ '--i': i - 1 }}
+            className={`pcard pcard-${c.style} ${c.highlight ? 'is-hl' : ''}`}
+            style={{ '--i': i }}
             aria-labelledby={`plan-${c.id}`}
           >
             <span className="pcard-pip" aria-hidden="true">
@@ -41,7 +40,7 @@ export default function Offer() {
             </span>
             <h3 id={`plan-${c.id}`}>
               {c.name}
-              {c.highlight && <span className="pcard-tag">Melhor custo</span>}
+              {c.tag && <span className="pcard-tag">{c.tag}</span>}
             </h3>
 
             {c.id === 'sem' ? (
@@ -55,8 +54,8 @@ export default function Offer() {
                   <li>Saber tarde que chegou o carro que o cliente pediu</li>
                   <li>Comprar sem saber até quanto pagar</li>
                 </ul>
-                <a className="btn btn-ghost" href={ctaHref('trial')}>
-                  Prefiro testar grátis
+                <a className="btn btn-ghost" href={ctaHref('trial')} target="_blank" rel="noreferrer">
+                  Quero sair dessa
                 </a>
               </>
             ) : (
@@ -66,8 +65,17 @@ export default function Offer() {
                   {c.price}
                   <span>{c.period}</span>
                 </p>
-                <p className="plan-billing">{c.billing}</p>
-                <a className={`btn ${c.highlight ? 'btn-light' : 'btn-accent'}`} href={ctaHref('trial')}>
+                <ul className="pcard-list pcard-list-ok">
+                  {c.items.map((it) => (
+                    <li key={it}>{it}</li>
+                  ))}
+                </ul>
+                <a
+                  className={`btn ${c.highlight ? 'btn-light' : 'btn-accent'}`}
+                  href={ctaHref('trial')}
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   {CONFIG.ctas.trial.label}
                 </a>
               </>

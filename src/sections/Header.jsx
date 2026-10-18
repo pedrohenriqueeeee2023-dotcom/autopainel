@@ -10,8 +10,8 @@ export default function Header() {
         </a>
         <span className="ap-progress" aria-hidden="true" />
       </header>
-      <a className="btn btn-accent ap-fab" href={ctaHref('trial')}>
-        Testar grátis
+      <a className="btn btn-accent ap-fab" href={ctaHref('trial')} target="_blank" rel="noreferrer">
+        Quero minha vaga
       </a>
     </>
   );

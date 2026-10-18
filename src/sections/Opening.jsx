@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { CONFIG, ctaHref } from '../config';
-import DashTool from './app/DashTool';
+import EvalTool from './app/EvalTool';
 import './Opening.css';
 
 /* Largura em que o painel é desenhado antes de ser reduzido para caber na coluna
    (menor no celular, para o texto continuar legível). */
 const shotWidth = (w) => (w < 560 ? 620 : 1040);
 
-/** Print vivo do painel: o Dashboard roda com dados de demonstração, só para ver. */
+/** Print vivo da calculadora de compra, com dados de demonstração, só para ver. */
 function HeroShot() {
   const box = useRef(null);
   const inner = useRef(null);
@@ -26,7 +26,7 @@ function HeroShot() {
   return (
     <div className="hero-shot" ref={box} style={{ height: fit.h }} aria-hidden="true" inert="">
       <div className="hero-shot-in" ref={inner} style={{ width: fit.w, transform: `scale(${fit.k})` }}>
-        <DashTool />
+        <EvalTool />
       </div>
     </div>
   );
@@ -42,26 +42,26 @@ export default function Opening() {
           </p>
           <h1 id="open-title" className="open-title">
             <span className="mask load-mask" style={{ '--d': '20ms' }}>
-              <span>Menos tempo no sistema.</span>
+              <span>Saiba até quanto pagar</span>
             </span>
             <span className="mask load-mask dim" style={{ '--d': '55ms' }}>
-              <span>Mais carro vendido.</span>
+              <span>antes de comprar o carro.</span>
             </span>
           </h1>
           <p className="open-sub load-in" style={{ '--d': '105ms' }}>
-            Anúncio em 8 canais, aviso para o vendedor quando chega o carro que o cliente pediu e o preço
-            máximo de compra pela placa.
+            Digite a placa: a calculadora de compra compara a FIPE com anúncios parecidos, desconta custos e a
+            sua margem e mostra o preço máximo. Junto vêm anúncio em 8 canais, CRM e estoque.
           </p>
           <div className="hero-btns load-in" style={{ '--d': '150ms' }}>
-            <a className="btn btn-accent btn-lg" href={ctaHref('trial')}>
+            <a className="btn btn-accent btn-lg" href={ctaHref('trial')} target="_blank" rel="noreferrer">
               {CONFIG.ctas.trial.label} <span aria-hidden="true">→</span>
             </a>
             <a className="btn btn-ghost btn-lg" href="#app">
-              Testar o painel aqui
+              Testar a calculadora
             </a>
           </div>
           <p className="hero-note load-in" style={{ '--d': '190ms' }}>
-            Plano mensal sem fidelidade · Plano anual a partir de R$ 87/mês
+            R$ 27,99/mês para os 100 primeiros · Sem cartão · A equipe monta o sistema para você
           </p>
         </div>
         <div className="hero-visual load-in" style={{ '--d': '125ms' }}>

@@ -1,28 +1,20 @@
-import { CONFIG, ctaHref } from '../config';
+import { ctaHref } from '../config';
 import './Faq.css';
 
-const [anual, mensal] = CONFIG.plans;
-
 const ITEMS = [
+  ['Quanto custa?', 'R$ 27,99 por mês para os 100 primeiros clientes, os clientes projeto.'],
+  ['Preciso cadastrar cartão?', 'Não. Você chama a equipe no WhatsApp e combina tudo por lá.'],
   [
-    'Quanto custa?',
-    `R$ ${anual.price}/mês no plano anual, pago de uma vez (R$ 1.044 por 12 meses), ou R$ ${mensal.price}/mês no plano mensal.`,
+    'Como eu começo?',
+    'Chame no WhatsApp. A equipe cadastra a sua loja, os seus carros e os seus vendedores e entrega o sistema pronto para usar.',
   ],
   [
-    'Tem fidelidade?',
-    'O plano mensal não tem fidelidade. O anual cobre 12 meses de uso com um pagamento único.',
-  ],
-  [
-    'Como funciona o teste grátis?',
-    'Os 3 primeiros clientes usam o AutoPainel por 30 dias sem pagar. Você vê as condições de cobrança antes de confirmar qualquer plano.',
+    'Como funciona a calculadora de compra?',
+    'Você digita a placa e o painel mostra a FIPE e anúncios parecidos como referência. Desconta os custos e a margem que você definir e mostra até quanto pagar.',
   ],
   [
     'Em quais canais o anúncio é publicado?',
-    'OLX, Mercado Livre, o site da loja, Tray, Nuvemshop, Shopify, WooCommerce e Loja Integrada. Você configura a integração de cada canal uma vez.',
-  ],
-  [
-    'A avaliação de compra usa a tabela FIPE?',
-    'Sim. Você digita a placa e o painel mostra a FIPE e anúncios parecidos como referência. Margem e custos você define.',
+    'OLX, Mercado Livre, o site da loja, Tray, Nuvemshop, Shopify, WooCommerce e Loja Integrada. A equipe deixa a integração de cada canal configurada.',
   ],
   [
     'Quem da loja pode usar?',
@@ -67,12 +59,9 @@ export default function Faq() {
           </svg>
         </span>
         <h3 id="wa-title">Ficou alguma dúvida?</h3>
-        <p>Fale com a equipe do AutoPainel pelo WhatsApp e veja o painel com os dados da sua loja.</p>
-        <a className="btn btn-wa btn-lg" href={ctaHref('contact')} target="_blank" rel="noreferrer">
-          Chamar no WhatsApp
-        </a>
-        <a className="btn btn-accent btn-lg" href={ctaHref('trial')}>
-          {CONFIG.ctas.trial.label}
+        <p>Chame a equipe no WhatsApp. A gente tira a dúvida e monta o sistema com os dados da sua loja.</p>
+        <a className="btn btn-wa btn-lg" href={ctaHref('trial')} target="_blank" rel="noreferrer">
+          Quero minha vaga no WhatsApp
         </a>
       </aside>
     </section>
