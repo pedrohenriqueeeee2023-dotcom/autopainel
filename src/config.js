@@ -32,24 +32,6 @@ export const CONFIG = {
     text: 'Raio-X grátis e onboarding feito pela nossa equipe.',
   },
 
-  plans: [
-    {
-      id: 'projeto',
-      name: 'Cliente projeto',
-      price: '27,99',
-      period: '/mês',
-      highlight: true,
-      tag: '100 vagas',
-      items: [
-        '7 dias de teste',
-        'Raio-X grátis',
-        'Onboarding feito pela nossa equipe',
-        'Calculadora de compra pela placa',
-        'Anúncio em 8 canais, CRM e estoque',
-      ],
-    },
-  ],
-
   /**
    * Prova social. `example: true` marca dados de exemplo: a página mostra um
    * aviso discreto. Troque pelos números e depoimentos reais antes de publicar

@@ -1,88 +1,47 @@
 import { CONFIG, ctaHref } from '../config';
 import './Offer.css';
 
-const [projeto] = CONFIG.plans;
-
-/* Oferta como cartas de baralho: as duas entram empilhadas e se abrem em leque.
-   A segunda carta mostra o custo de continuar sem sistema. */
-const CARDS = [
-  { ...projeto, style: 'anual', mark: 'P' },
-  { id: 'sem', style: 'sem', name: 'Continuar sem', mark: '✕' },
+/* Sem planos por enquanto: a seção explica o teste de 7 dias em quatro passos. */
+const STEPS = [
+  ['Chame no WhatsApp', 'Conte como a sua loja funciona hoje.'],
+  ['Raio-X grátis', 'A equipe faz o Raio-X da sua loja, sem custo.'],
+  ['Onboarding pela equipe', 'A gente cadastra a loja, os carros e os vendedores.'],
+  ['7 dias de teste', 'Use a calculadora de compra e o painel no dia a dia.'],
 ];
 
 export default function Offer() {
   return (
     <section id="planos" className="offer" aria-labelledby="offer-title">
       <div className="offer-head" data-reveal>
-        <h2 id="offer-title" className="h2">
-          <span className="mask" style={{ '--i': 0 }}>
-            <span>Teste 7 dias. A gente configura.</span>
-          </span>
-        </h2>
         <p className="offer-badge">
           <span>{CONFIG.offer.badge}</span> {CONFIG.offer.text}
         </p>
+        <h2 id="offer-title" className="h2">
+          <span className="mask">
+            <span>Teste 7 dias.</span>
+          </span>
+          <span className="mask dim" style={{ '--i': 1 }}>
+            <span>A gente configura.</span>
+          </span>
+        </h2>
+        <a className="btn btn-accent btn-lg" href={ctaHref('trial')} target="_blank" rel="noreferrer">
+          {CONFIG.ctas.trial.label} <span aria-hidden="true">→</span>
+        </a>
       </div>
 
-      <div className="deck" data-reveal style={{ '--rd': '150ms' }}>
-        {CARDS.map((c, i) => (
-          <article
-            key={c.id}
-            className={`pcard pcard-${c.style} ${c.highlight ? 'is-hl' : ''}`}
-            style={{ '--i': i }}
-            aria-labelledby={`plan-${c.id}`}
-          >
-            <span className="pcard-pip" aria-hidden="true">
-              {c.mark}
+      <ol className="offer-steps" data-reveal data-build style={{ '--rd': '120ms' }}>
+        {STEPS.map(([title, text], i) => (
+          <li key={title} style={{ '--i': i }}>
+            <span className="offer-num" aria-hidden="true">
+              {String(i + 1).padStart(2, '0')}
             </span>
-            <span className="pcard-pip pcard-pip-b" aria-hidden="true">
-              {c.mark}
-            </span>
-            <h3 id={`plan-${c.id}`}>
-              {c.name}
-              {c.tag && <span className="pcard-tag">{c.tag}</span>}
-            </h3>
-
-            {c.id === 'sem' ? (
-              <>
-                <p className="plan-price">
-                  <small>R$</small>0<span>/mês</span>
-                </p>
-                <p className="pcard-sem-line">Você paga gastando tempo e perdendo venda.</p>
-                <ul className="pcard-list">
-                  <li>Cadastrar o mesmo carro em cada site</li>
-                  <li>Saber tarde que chegou o carro que o cliente pediu</li>
-                  <li>Comprar sem saber até quanto pagar</li>
-                </ul>
-                <a className="btn btn-ghost" href={ctaHref('trial')} target="_blank" rel="noreferrer">
-                  Quero sair dessa
-                </a>
-              </>
-            ) : (
-              <>
-                <p className="plan-price">
-                  <small>R$</small>
-                  {c.price}
-                  <span>{c.period}</span>
-                </p>
-                <ul className="pcard-list pcard-list-ok">
-                  {c.items.map((it) => (
-                    <li key={it}>{it}</li>
-                  ))}
-                </ul>
-                <a
-                  className={`btn ${c.highlight ? 'btn-light' : 'btn-accent'}`}
-                  href={ctaHref('trial')}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {CONFIG.ctas.trial.label}
-                </a>
-              </>
-            )}
-          </article>
+            <div>
+              <h3>{title}</h3>
+              <p>{text}</p>
+            </div>
+          </li>
         ))}
-      </div>
+      </ol>
     </section>
   );
 }

@@ -4,7 +4,7 @@ import './Faq.css';
 const ITEMS = [
   [
     'Quanto custa?',
-    'Os 7 primeiros dias são de teste. Depois, R$ 27,99 por mês para os 100 primeiros clientes.',
+    'Os 7 dias de teste e o Raio-X são grátis. Depois do teste, a equipe passa os valores pelo WhatsApp.',
   ],
   ['Preciso cadastrar cartão?', 'Não. Você chama a equipe no WhatsApp e combina tudo por lá.'],
   [
