@@ -2,11 +2,14 @@ import { ctaHref } from '../config';
 import './Faq.css';
 
 const ITEMS = [
-  ['Quanto custa?', 'R$ 27,99 por mês para os 100 primeiros clientes, os clientes projeto.'],
+  [
+    'Quanto custa?',
+    'Os 7 dias de teste e o Raio-X são grátis. Depois do teste, a equipe passa os valores pelo WhatsApp.',
+  ],
   ['Preciso cadastrar cartão?', 'Não. Você chama a equipe no WhatsApp e combina tudo por lá.'],
   [
-    'Como eu começo?',
-    'Chame no WhatsApp. A equipe cadastra a sua loja, os seus carros e os seus vendedores e entrega o sistema pronto para usar.',
+    'Como funciona o teste de 7 dias?',
+    'Você chama a equipe no WhatsApp e recebe o Raio-X grátis. No onboarding, a equipe cadastra a sua loja, os seus carros e os seus vendedores, e você usa o AutoPainel por 7 dias.',
   ],
   [
     'Como funciona a calculadora de compra?',
@@ -59,9 +62,12 @@ export default function Faq() {
           </svg>
         </span>
         <h3 id="wa-title">Ficou alguma dúvida?</h3>
-        <p>Chame a equipe no WhatsApp. A gente tira a dúvida e monta o sistema com os dados da sua loja.</p>
+        <p>
+          Chame a equipe no WhatsApp. A gente tira a dúvida e começa o seu teste de 7 dias com o Raio-X
+          grátis.
+        </p>
         <a className="btn btn-wa btn-lg" href={ctaHref('trial')} target="_blank" rel="noreferrer">
-          Quero minha vaga no WhatsApp
+          Quero testar 7 dias
         </a>
       </aside>
     </section>

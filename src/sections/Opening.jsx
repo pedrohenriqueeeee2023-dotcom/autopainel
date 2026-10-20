@@ -61,7 +61,7 @@ export default function Opening() {
             </a>
           </div>
           <p className="hero-note load-in" style={{ '--d': '190ms' }}>
-            R$ 27,99/mês para os 100 primeiros · Sem cartão · A equipe monta o sistema para você
+            7 dias de teste · Raio-X grátis · Onboarding feito pela nossa equipe
           </p>
         </div>
         <div className="hero-visual load-in" style={{ '--d': '125ms' }}>

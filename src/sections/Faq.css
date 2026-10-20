@@ -87,6 +87,10 @@
   min-width: 0;
 }
 .faq-wa {
+  /* Cartão escuro mesmo quando a seção é branca */
+  --fg: #f1f6fc;
+  --fg-2: #a9b9d3;
+  color: var(--fg);
   position: sticky;
   top: 96px;
   display: grid;
