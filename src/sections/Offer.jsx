@@ -16,7 +16,7 @@ export default function Offer() {
       <div className="offer-head" data-reveal>
         <h2 id="offer-title" className="h2">
           <span className="mask" style={{ '--i': 0 }}>
-            <span>100 vagas por R$ 27,99.</span>
+            <span>Teste 7 dias. A gente configura.</span>
           </span>
         </h2>
         <p className="offer-badge">

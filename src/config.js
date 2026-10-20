@@ -15,10 +15,10 @@ export const CONFIG = {
   },
 
   ctas: {
-    // Oferta: o cliente chama no WhatsApp e a equipe monta o sistema para ele.
+    // Oferta: 7 dias de teste com Raio-X grátis; a equipe faz o onboarding pelo WhatsApp.
     trial: {
-      label: 'Quero minha vaga',
-      href: 'https://wa.me/5531991858934?text=Quero%20ser%20cliente%20projeto%20do%20AutoPainel%20por%20R%24%2027%2C99/m%C3%AAs',
+      label: 'Quero testar 7 dias',
+      href: 'https://wa.me/5531991858934?text=Quero%20testar%20o%20AutoPainel%20por%207%20dias%20com%20o%20Raio-X%20gr%C3%A1tis',
     },
     // Ex.: 'https://wa.me/55XXXXXXXXXXX?text=Quero%20conhecer%20o%20AutoPainel'
     contact: {
@@ -28,8 +28,8 @@ export const CONFIG = {
   },
 
   offer: {
-    badge: 'Clientes projeto',
-    text: 'R$ 27,99/mês para os 100 primeiros. Sem cartão.',
+    badge: 'Teste de 7 dias',
+    text: 'Raio-X grátis e onboarding feito pela nossa equipe.',
   },
 
   plans: [
@@ -41,10 +41,11 @@ export const CONFIG = {
       highlight: true,
       tag: '100 vagas',
       items: [
-        'A equipe monta o sistema com os dados da sua loja',
+        '7 dias de teste',
+        'Raio-X grátis',
+        'Onboarding feito pela nossa equipe',
         'Calculadora de compra pela placa',
         'Anúncio em 8 canais, CRM e estoque',
-        'Sem cartão: tudo combinado no WhatsApp',
       ],
     },
   ],
