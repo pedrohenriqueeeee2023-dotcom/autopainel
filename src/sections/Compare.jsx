@@ -17,7 +17,9 @@ export default function Compare() {
             <span>Planilha e WhatsApp</span>
           </span>
           <span className="mask dim" style={{ '--i': 1 }}>
-            <span>ou AutoPainel?</span>
+            <span>
+              ou <em className="kw">AutoPainel?</em>
+            </span>
           </span>
         </h2>
       </div>

@@ -18,7 +18,9 @@ export default function Offer() {
         </p>
         <h2 id="offer-title" className="h2">
           <span className="mask">
-            <span>Teste 7 dias.</span>
+            <span>
+              Teste <em className="kw">7 dias.</em>
+            </span>
           </span>
           <span className="mask dim" style={{ '--i': 1 }}>
             <span>A gente configura.</span>

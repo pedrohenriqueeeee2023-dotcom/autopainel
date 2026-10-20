@@ -45,7 +45,9 @@ export default function App() {
                 <span>Feito para quem vive</span>
               </span>
               <span className="mask" style={{ '--i': 1 }}>
-                <span>de comprar e vender carro.</span>
+                <span>
+                  de <em className="kw">comprar e vender</em> carro.
+                </span>
               </span>
             </h2>
             <p>Calculadora de compra, anúncio em 8 canais, CRM e estoque no mesmo painel.</p>

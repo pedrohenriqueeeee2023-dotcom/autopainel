@@ -50,7 +50,9 @@ export default function Solved() {
       <div className="solved-head" data-reveal>
         <h2 id="solved-title" className="h2">
           <span className="mask">
-            <span>O que resolvemos?</span>
+            <span>
+              O que <em className="kw">resolvemos?</em>
+            </span>
           </span>
         </h2>
       </div>

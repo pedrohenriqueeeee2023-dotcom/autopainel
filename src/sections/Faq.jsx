@@ -32,7 +32,9 @@ export default function Faq() {
         <div className="faq-head" data-reveal>
           <h2 id="faq-title" className="h2">
             <span className="mask">
-              <span>Perguntas frequentes</span>
+              <span>
+                Perguntas <em className="kw">frequentes</em>
+              </span>
             </span>
           </h2>
         </div>
