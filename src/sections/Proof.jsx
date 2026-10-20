@@ -52,7 +52,9 @@ export default function Proof() {
       <div className="proof-head" data-reveal>
         <h2 id="proof-title" className="h2">
           <span className="mask">
-            <span>Quem já usa</span>
+            <span>
+              Quem <em className="kw">já usa</em>
+            </span>
           </span>
         </h2>
       </div>

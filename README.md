@@ -28,7 +28,24 @@ npm run lint
 
 ## Métricas (GA4)
 
-A tag do GA4 (`G-R17LQ89M6L`) fica no `<head>` do `index.html`; para trocar de propriedade, mude o ID nas duas linhas dela. `src/analytics.js` envia `clique_teste_gratis`, `clique_whatsapp` e `ver_secao`, todos com o parâmetro `secao`. Para ver `secao` nos relatórios, registre-o como dimensão personalizada no GA4 (Admin > Definições personalizadas).
+A tag do GA4 (`G-R17LQ89M6L`) fica no `<head>` do `index.html`; para trocar de propriedade, mude o ID nas duas linhas dela. `src/analytics.js` envia os eventos abaixo (a lista completa com os parâmetros está no topo do arquivo):
+
+| Evento | Quando | Parâmetros |
+| --- | --- | --- |
+| `clique_oferta` | Botões do teste de 7 dias (WhatsApp) | `secao`, `texto` |
+| `clique_whatsapp` | Outros links do WhatsApp | `secao`, `texto` |
+| `clique_navegacao` | Links internos (#app, #planos...) | `secao`, `texto`, `destino` |
+| `ver_secao` | Primeira vez que a seção aparece | `secao` |
+| `tempo_secao` | Ao sair: segundos de cada seção na tela | `secao`, `segundos` |
+| `rolagem` | 25, 50, 75 e 100% da página | `percentual` |
+| `abrir_faq` | Pergunta aberta no FAQ | `pergunta` |
+| `abrir_aba_demo` | Aba do painel de teste | `aba` |
+| `usar_calculadora` | Placa consultada na calculadora | `placa`, `origem` |
+| `ajustar_custos` | Campo de custo/margem alterado | `campo` |
+| `salvar_avaliacao` | Salvar avaliação na calculadora | `aba` |
+| `interacao_demo` | Outros botões do painel de teste | `aba`, `acao` |
+
+Para ver os parâmetros nos relatórios, registre cada um como dimensão personalizada no GA4 (Admin > Definições personalizadas; `segundos` e `percentual` como métricas). Marque `clique_oferta` como evento principal (conversão).
 
 ## Publicação
 

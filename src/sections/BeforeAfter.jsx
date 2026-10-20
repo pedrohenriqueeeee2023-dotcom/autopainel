@@ -12,7 +12,9 @@ export default function BeforeAfter() {
       <div className="ba-head" data-reveal>
         <h2 id="ba-title" className="h2">
           <span className="mask">
-            <span>O que trava a sua revenda hoje</span>
+            <span>
+              O que <em className="kw">trava</em> a sua revenda hoje
+            </span>
           </span>
         </h2>
       </div>

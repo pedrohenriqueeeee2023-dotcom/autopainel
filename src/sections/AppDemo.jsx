@@ -71,7 +71,9 @@ export default function AppDemo() {
               <span>Teste o painel</span>
             </span>
             <span className="mask dim" style={{ '--i': 1 }}>
-              <span>aqui mesmo.</span>
+              <span>
+                <em className="kw">aqui mesmo.</em>
+              </span>
             </span>
           </h2>
           <p className="lead">

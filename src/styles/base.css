@@ -22,6 +22,7 @@
   --display: 'Archivo', 'Arial Narrow', sans-serif;
   --text: 'Manrope', 'Segoe UI', sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --serif: 'Instrument Serif', 'Times New Roman', serif;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --gutter: clamp(16px, 4vw, 56px);
   /* Atraso base das entradas automáticas */
@@ -101,6 +102,17 @@ body {
 .dim,
 .ap .h2 .dim {
   color: var(--fg-3);
+}
+
+/* Palavras-chave dos títulos: serifada itálica, um pouco maior para casar
+   com a altura da Archivo. */
+.ap .kw {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.12em;
+  line-height: 0.9;
+  letter-spacing: -0.01em;
 }
 
 /* Máscara: o texto sobe de dentro da própria linha. */

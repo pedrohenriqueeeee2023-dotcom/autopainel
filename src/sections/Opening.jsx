@@ -42,7 +42,9 @@ export default function Opening() {
           </p>
           <h1 id="open-title" className="open-title">
             <span className="mask load-mask" style={{ '--d': '20ms' }}>
-              <span>Saiba até quanto pagar</span>
+              <span>
+                Saiba até <em className="kw">quanto pagar</em>
+              </span>
             </span>
             <span className="mask load-mask dim" style={{ '--d': '55ms' }}>
               <span>antes de comprar o carro.</span>
