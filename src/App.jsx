@@ -4,6 +4,7 @@ import { initSmoothScroll } from './smoothScroll';
 import { initPointerFx } from './pointerFx';
 import { initAnalytics } from './analytics';
 import Defer from './Defer';
+import PhotoBand from './PhotoBand';
 import Header from './sections/Header';
 import Opening from './sections/Opening';
 
@@ -32,27 +33,48 @@ export default function App() {
       <Header />
       <main>
         <Opening />
-        <Defer id="resolvemos" height="130vh">
-          <Solved />
-        </Defer>
+        <div className="band-light">
+          <Defer id="resolvemos" height="130vh">
+            <Solved />
+          </Defer>
+        </div>
+        <PhotoBand>
+          <div className="band-quote" data-reveal>
+            <h2 className="h2">
+              <span className="mask">
+                <span>Feito para quem vive</span>
+              </span>
+              <span className="mask" style={{ '--i': 1 }}>
+                <span>de comprar e vender carro.</span>
+              </span>
+            </h2>
+            <p>Calculadora de compra, anúncio em 8 canais, CRM e estoque no mesmo painel.</p>
+          </div>
+        </PhotoBand>
         <Defer id="como" height="80vh">
           <BeforeAfter />
         </Defer>
         <Defer id="app" height="120vh">
           <AppDemo />
         </Defer>
-        <Defer id="comparativo" height="90vh">
-          <Compare />
-        </Defer>
+        <div className="band-light">
+          <Defer id="comparativo" height="90vh">
+            <Compare />
+          </Defer>
+        </div>
         <Defer id="prova" height="110vh">
           <Proof />
         </Defer>
-        <Defer id="planos" height="110vh">
-          <Offer />
-        </Defer>
-        <Defer id="duvidas" height="90vh">
-          <Faq />
-        </Defer>
+        <PhotoBand>
+          <Defer id="planos" height="110vh">
+            <Offer />
+          </Defer>
+        </PhotoBand>
+        <div className="band-light">
+          <Defer id="duvidas" height="90vh">
+            <Faq />
+          </Defer>
+        </div>
       </main>
     </div>
   );

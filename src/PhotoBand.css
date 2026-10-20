@@ -1,0 +1,89 @@
+/* Faixas que quebram o fundo azul: branca (.band-light) e com fotos (.band-photo). */
+.band-light {
+  --bg: #f4f7fc;
+  --bg-2: #ffffff;
+  --line: rgba(2, 31, 81, 0.1);
+  --line-2: rgba(2, 31, 81, 0.16);
+  --fg: #0b1e40;
+  --fg-2: #4a5b7a;
+  --fg-3: #8193b0;
+  --accent-text: #0076e5;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.band-photo {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: #01112e;
+}
+.band-reel {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  display: grid;
+  align-content: center;
+  gap: 14px;
+  transform: rotate(-4deg) scale(1.12);
+}
+.band-reel::after {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background:
+    linear-gradient(180deg, rgba(1, 17, 46, 0.55), rgba(1, 17, 46, 0.82)),
+    radial-gradient(60% 70% at 50% 50%, rgba(2, 31, 81, 0.35), rgba(1, 17, 46, 0.9));
+}
+.band-row {
+  display: flex;
+  gap: 14px;
+  width: max-content;
+  animation: band-run 70s linear infinite;
+}
+.band-row.is-rev {
+  animation-direction: reverse;
+  animation-duration: 80s;
+}
+.band-row img {
+  flex: none;
+  width: clamp(220px, 24vw, 340px);
+  aspect-ratio: 32 / 21;
+  object-fit: cover;
+  border-radius: 14px;
+  background: #0a2a5e;
+}
+@keyframes band-run {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.band-in {
+  position: relative;
+}
+
+/* Frase sozinha sobre as fotos */
+.band-quote {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: clamp(96px, 18vh, 180px) var(--gutter);
+  text-align: center;
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+}
+.ap .band-quote .h2 {
+  font-size: clamp(34px, 5.4vw, 84px);
+  max-width: 14ch;
+}
+.band-quote p {
+  max-width: 36em;
+  color: #c9d6ea;
+  font-size: clamp(16px, 1.3vw, 19px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .band-row {
+    animation: none;
+  }
+}
