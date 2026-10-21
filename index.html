@@ -21,8 +21,7 @@
     <!-- Meta Pixel: o ID vem da variável VITE_META_PIXEL_ID (Vercel > Settings > Environment Variables).
          Sem a variável, o Pixel não carrega. O evento Lead fica em src/analytics.js. -->
     <script>
-      (function (id) {
-        if (!/^\d+$/.test(id)) return;
+      if (/^\d+$/.test('%VITE_META_PIXEL_ID%')) {
         !(function (f, b, e, v, n, t, s) {
           if (f.fbq) return;
           n = f.fbq = function () {
@@ -39,9 +38,9 @@
           s = b.getElementsByTagName(e)[0];
           s.parentNode.insertBefore(t, s);
         })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
-        fbq('init', id);
+        fbq('init', '%VITE_META_PIXEL_ID%');
         fbq('track', 'PageView');
-      })('%VITE_META_PIXEL_ID%');
+      }
     </script>
     <meta name="theme-color" content="#021f51" />
     <meta name="color-scheme" content="dark" />
@@ -60,6 +59,14 @@
     </style>
   </head>
   <body>
+    <noscript
+      ><img
+        height="1"
+        width="1"
+        style="display: none"
+        alt=""
+        src="https://www.facebook.com/tr?id=%VITE_META_PIXEL_ID%&ev=PageView&noscript=1"
+    /></noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
