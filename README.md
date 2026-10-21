@@ -47,6 +47,10 @@ A tag do GA4 (`G-R17LQ89M6L`) fica no `<head>` do `index.html`; para trocar de p
 
 Para ver os parâmetros nos relatórios, registre cada um como dimensão personalizada no GA4 (Admin > Definições personalizadas; `segundos` e `percentual` como métricas). Marque `clique_oferta` como evento principal (conversão).
 
+## Meta Pixel
+
+A tag do Pixel fica no `<head>` do `index.html` e lê o ID da variável `VITE_META_PIXEL_ID` (Vercel > Settings > Environment Variables, depois um novo deploy). Sem a variável, o Pixel não carrega. Eventos: `PageView` ao abrir a página e `Lead` junto com `clique_oferta`.
+
 ## Publicação
 
 O `vercel.json` está configurado para Vite (`npm run build`, saída em `dist/`). Com o repositório ligado à Vercel, cada push gera um preview e o merge na `main` publica em produção.
