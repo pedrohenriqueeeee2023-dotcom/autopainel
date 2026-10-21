@@ -23,13 +23,14 @@ import { CONFIG } from './config';
  * - salvar_avaliacao: clique em Salvar avaliação
  * - interacao_demo: qualquer outro botão do painel · aba, acao
  *
+ * Meta Pixel (tag no index.html): PageView ao abrir a página e Lead junto com
+ * clique_oferta.
+ *
  * Para ver os parâmetros nos relatórios, registre cada um como dimensão
  * personalizada no GA4 (Admin > Definições personalizadas).
  */
 export function initAnalytics() {
-  if (typeof window.gtag !== 'function') return () => {};
-
-  const track = (name, params = {}) => window.gtag('event', name, params);
+  const track = (name, params = {}) => window.gtag?.('event', name, params);
   const sectionOf = (el) => el.closest('section[id]')?.id || 'cabecalho';
   const text = (el) =>
     (el.textContent || el.getAttribute('aria-label') || '').trim().replace(/\s+/g, ' ').slice(0, 80);
@@ -42,8 +43,10 @@ export function initAnalytics() {
     if (a) {
       const href = a.getAttribute('href');
       const params = { secao: sectionOf(a), texto: text(a) };
-      if (href === CONFIG.ctas.trial.href) track('clique_oferta', params);
-      else if (href.includes('wa.me')) track('clique_whatsapp', params);
+      if (href === CONFIG.ctas.trial.href) {
+        track('clique_oferta', params);
+        window.fbq?.('track', 'Lead');
+      } else if (href.includes('wa.me')) track('clique_whatsapp', params);
       else if (href.startsWith('#'))
         track('clique_navegacao', { ...params, destino: href.slice(1) || 'topo' });
       return;
