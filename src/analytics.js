@@ -6,7 +6,7 @@ import { CONFIG } from './config';
  * fazem sentido, o id da seção onde a ação aconteceu):
  *
  * Conversão
- * - clique_oferta: botões do teste de 7 dias (abrem o WhatsApp) · texto
+ * - clique_oferta: botões do teste de 7 dias (abrem a criação de conta) · texto
  * - clique_whatsapp: outros links do WhatsApp · texto
  *
  * Navegação e leitura
@@ -22,6 +22,8 @@ import { CONFIG } from './config';
  * - ajustar_custos: campo de custo ou margem alterado (uma vez por campo) · campo
  * - salvar_avaliacao: clique em Salvar avaliação
  * - interacao_demo: qualquer outro botão do painel · aba, acao
+ *
+ * Só mede quem aceitou os cookies (src/consent.js).
  *
  * Meta Pixel (tag no index.html): PageView ao abrir a página e Lead junto com
  * clique_oferta.
