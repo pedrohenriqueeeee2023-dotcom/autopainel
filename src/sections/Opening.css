@@ -6,29 +6,8 @@
   overflow: hidden;
   display: grid;
   place-items: center;
-  min-height: min(100svh, 980px);
+  min-height: min(100svh, 900px);
   padding: 110px var(--gutter) clamp(56px, 10vh, 110px);
-  text-align: center;
-}
-.open-bg {
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 50% 60%;
-  opacity: 0.4;
-  animation: bg-in 2.4s var(--ease) both;
-}
-.ap .open::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background:
-    radial-gradient(60% 55% at 50% 45%, rgba(2, 31, 81, 0.35), rgba(2, 31, 81, 0.92) 100%),
-    linear-gradient(180deg, rgba(2, 31, 81, 0.6) 0%, transparent 30%, var(--bg) 100%);
 }
 /* Grade que some nas bordas */
 .open-grid {
@@ -83,7 +62,7 @@
 .ap .open-eyebrow {
   display: inline-flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 0 0.35em;
   padding: 8px 18px;
   border: 1px solid var(--line-2);
@@ -110,22 +89,11 @@
     transform: translateY(100%);
   }
 }
-.ap .open-sub {
-  max-width: 36em;
-  margin-top: calc(clamp(32px, 5.5vh, 56px) * -0.55);
-  color: var(--fg-2);
-  font-size: clamp(16px, 1.4vw, 20px);
-  line-height: 1.5;
-  text-wrap: balance;
-}
-
-/* Fileira de cartões das outras ferramentas, entre a placa e o botão */
+/* Cartões das outras ferramentas, em 2x2 dentro da tela do app */
 .open-chips {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px;
-  margin-top: calc(clamp(32px, 5.5vh, 56px) * -0.3);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 .open-chip {
   display: flex;
@@ -134,16 +102,11 @@
   padding: 8px 16px 8px 8px;
   border: 1px solid var(--line-2);
   border-radius: 14px;
-  background: rgba(8, 41, 95, 0.7);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.7);
+  background: rgba(2, 31, 81, 0.55);
   color: var(--fg-2);
-  font-size: 14px;
-  white-space: nowrap;
+  font-size: 13.5px;
   opacity: 0;
-  animation:
-    chip-in 0.7s var(--ease) var(--cd) forwards,
-    float 3.5s ease-in-out calc(var(--cd) + 0.7s) infinite alternate;
+  animation: chip-in 0.7s var(--ease) var(--cd) forwards;
 }
 .open-chip b {
   color: var(--fg);
@@ -185,29 +148,42 @@
     transform: none;
   }
 }
-@keyframes float {
-  to {
-    translate: 0 -5px;
-  }
+.open-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  align-items: center;
+  gap: clamp(40px, 6vw, 96px);
+  width: 100%;
+  max-width: 1200px;
+}
+.open-copy {
+  display: grid;
+  justify-items: start;
+  gap: clamp(24px, 4vh, 36px);
+  text-align: left;
 }
 
-@keyframes bg-in {
-  from {
-    opacity: 0;
-    transform: scale(1.08);
-  }
-}
-.open-in {
+/* Tela do app: placa → preço e, embaixo, os cartões das outras ferramentas */
+.ap .open-app {
   display: grid;
-  justify-items: center;
-  gap: clamp(32px, 5.5vh, 56px);
-  width: 100%;
-  max-width: 1000px;
+  gap: 20px;
+  padding: clamp(24px, 3vw, 36px);
+  border: 1px solid var(--line-2);
+  border-radius: 28px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.02));
+  backdrop-filter: blur(14px);
+  box-shadow: 0 50px 100px -40px rgba(0, 0, 0, 0.8);
+}
+.open-app .open-demo {
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--line);
 }
 .ap .open-title {
   font-family: var(--display);
   font-weight: 500;
-  font-size: clamp(40px, 6.6vw, 100px);
+  font-size: clamp(42px, 5.8vw, 88px);
   line-height: 0.98;
   letter-spacing: -0.045em;
 }
@@ -221,13 +197,13 @@
 }
 .plate {
   display: grid;
-  width: clamp(230px, 24vw, 320px);
+  width: clamp(230px, 22vw, 280px);
+  text-align: center;
   border: 3px solid #1b1b1b;
   border-radius: 12px;
   overflow: hidden;
   background: #fff;
   box-shadow: 0 30px 60px -24px rgba(0, 0, 0, 0.8);
-  rotate: -3deg;
 }
 .plate-band {
   position: relative;
@@ -265,7 +241,7 @@
   color: #111;
   font-family: var(--display);
   font-weight: 600;
-  font-size: clamp(44px, 4.6vw, 62px);
+  font-size: clamp(40px, 4vw, 52px);
   line-height: 1.2;
   letter-spacing: 0.04em;
 }
@@ -289,7 +265,7 @@
     opacity 0.4s,
     color 0.4s,
     translate 0.5s var(--ease);
-  translate: -8px 0;
+  translate: 0 -6px;
 }
 .open-arrow.is-on {
   opacity: 1;
@@ -307,7 +283,6 @@
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.2) inset,
     0 30px 70px -20px rgba(63, 212, 134, 0.6);
-  rotate: 2deg;
   opacity: 0;
   transform: translateX(-12px) scale(0.92);
   transition:
@@ -339,19 +314,39 @@
   transform: scale(1.04);
 }
 
+@media (max-width: 960px) {
+  .ap .open {
+    min-height: 0;
+  }
+  .open-split {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 560px;
+  }
+}
 @media (max-width: 640px) {
   .ap .open {
-    min-height: 92svh;
     padding-top: 96px;
   }
-  .ap .open-in {
-    gap: 28px;
+  .ap .open-cta {
+    width: 100%;
   }
-  .open-demo {
+  .ap .open-app {
+    gap: 14px;
+    padding: 16px;
+    border-radius: 22px;
+  }
+  /* No celular, placa e preço lado a lado */
+  .open-app .open-demo {
+    flex-direction: row;
     gap: 8px;
+    padding-bottom: 16px;
+  }
+  .open-arrow {
+    rotate: -90deg;
+    font-size: 20px;
   }
   .plate {
-    width: 150px;
+    width: 140px;
     border-width: 2px;
     border-radius: 8px;
   }
@@ -365,11 +360,8 @@
     margin-top: -4px;
   }
   .plate-num {
-    font-size: 29px;
+    font-size: 27px;
     padding: 0 6px 2px;
-  }
-  .open-arrow {
-    font-size: 20px;
   }
   .ap .open-price {
     padding: 8px 12px 10px;
@@ -379,23 +371,16 @@
     font-size: 11px;
   }
   .open-price strong {
-    font-size: 26px;
-  }
-  .ap .open-cta {
-    width: 100%;
+    font-size: 24px;
   }
   .open-chips {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
     gap: 8px;
-    width: 100%;
   }
   .open-chip {
-    gap: 8px;
-    padding: 6px 10px 6px 6px;
-    font-size: 12.5px;
-    white-space: normal;
-    text-align: left;
+    gap: 7px;
+    padding: 6px 8px 6px 6px;
+    font-size: 11.5px;
+    white-space: nowrap;
   }
   .open-chip-ico {
     flex: none;
@@ -404,7 +389,6 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .open-bg,
   .plate-caret,
   .open-grid,
   .open-glow,

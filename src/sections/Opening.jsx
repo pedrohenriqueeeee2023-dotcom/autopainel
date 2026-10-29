@@ -2,12 +2,10 @@ import { useEffect, useState } from 'react';
 import { ctaHref } from '../config';
 import './Opening.css';
 
-/* Abertura centralizada sobre a foto de um pátio de revenda, com grade, brilhos
-   e uma fileira de cartões das outras ferramentas. O visual central conta o produto
-   num relance: a placa é digitada e vira o preço máximo de compra. */
+/* Abertura em dois lados. Esquerda: chamada, título e botão. Direita: uma tela
+   do app em que a placa é digitada e vira o preço máximo, com os cartões das
+   outras ferramentas embaixo. */
 
-// Foto gratuita do Unsplash (licença Unsplash).
-const PHOTO = 'https://images.unsplash.com/photo-1574023240744-64c47c8c0676?auto=format&fit=crop&q=60';
 const PLATE = 'ABC1D23';
 const PRICE = 79323;
 const KINDS = ['carros', 'motos', 'ônibus', 'caminhões'];
@@ -84,89 +82,82 @@ export default function Opening() {
 
   return (
     <section id="topo" className="open" aria-labelledby="open-title">
-      <img
-        className="open-bg"
-        src={`${PHOTO}&w=1600`}
-        srcSet={`${PHOTO}&w=800 800w, ${PHOTO}&w=1600 1600w, ${PHOTO}&w=2400 2400w`}
-        sizes="100vw"
-        alt=""
-        fetchPriority="high"
-      />
-
       <span className="open-grid" aria-hidden="true" />
       <span className="open-glow open-glow-a" aria-hidden="true" />
       <span className="open-glow open-glow-b" aria-hidden="true" />
 
-      <div className="open-in">
-        <p className="open-eyebrow load-in" style={{ '--d': '0ms' }}>
-          Transforme a gestão da sua loja de{' '}
-          <span className="open-kind" aria-live="polite">
-            <span key={kind}>{kind}</span>
-          </span>
-        </p>
-        <h1 id="open-title" className="open-title">
-          <span className="mask load-mask" style={{ '--d': '40ms' }}>
-            <span>Lojista, pare de pagar</span>
-          </span>
-          <span className="mask load-mask" style={{ '--d': '110ms' }}>
-            <span>
-              <em className="kw">caro</em> na compra!
+      <div className="open-split">
+        <div className="open-copy">
+          <p className="open-eyebrow load-in" style={{ '--d': '0ms' }}>
+            Transforme a gestão da sua loja de{' '}
+            <span className="open-kind" aria-live="polite">
+              <span key={kind}>{kind}</span>
             </span>
-          </span>
-        </h1>
-        <p className="open-sub load-in" style={{ '--d': '160ms' }}>
-          Preço máximo pela placa, anúncio em 8 canais, CRM, estoque e financeiro. Tudo num só painel.
-        </p>
-
-        <div
-          className="open-demo load-in"
-          style={{ '--d': '200ms' }}
-          role="img"
-          aria-label={`Exemplo: placa ${PLATE}, pague no máximo ${brl(PRICE)}`}
-        >
-          <div className="plate" aria-hidden="true">
-            <span className="plate-band">
-              BRASIL
-              <i />
+          </p>
+          <h1 id="open-title" className="open-title">
+            <span className="mask load-mask" style={{ '--d': '40ms' }}>
+              <span>Lojista, pare</span>
             </span>
-            <span className="plate-num">
-              {plate}
-              {!done && <b className="plate-caret" />}
+            <span className="mask load-mask" style={{ '--d': '90ms' }}>
+              <span>
+                de pagar <em className="kw">caro</em>
+              </span>
             </span>
-          </div>
-          <span className={`open-arrow ${done ? 'is-on' : ''}`} aria-hidden="true">
-            →
-          </span>
-          <div className={`open-price ${done ? 'is-on' : ''}`} aria-hidden="true">
-            <span>Pague no máximo</span>
-            <strong>{brl(price)}</strong>
-          </div>
+            <span className="mask load-mask" style={{ '--d': '140ms' }}>
+              <span>na compra!</span>
+            </span>
+          </h1>
+          <a
+            className="btn btn-accent btn-lg open-cta load-in"
+            style={{ '--d': '240ms' }}
+            href={ctaHref('trial')}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Testar 7 dias grátis <span aria-hidden="true">→</span>
+          </a>
         </div>
 
-        <div className="open-chips">
-          <Chip ico="pub" className="c1" d="1.6s">
-            Publicado em <b>8 canais</b>
-          </Chip>
-          <Chip ico="crm" className="c2" d="1.75s">
-            Novo lead: <b>Corolla 2022</b>
-          </Chip>
-          <Chip ico="stock" className="c3" d="1.9s">
-            <b>32</b> no estoque
-          </Chip>
-          <Chip ico="fin" className="c4" d="2.05s">
-            Comissões <b>em dia</b>
-          </Chip>
-        </div>
+        <div className="open-app load-in" style={{ '--d': '160ms' }}>
+          <div
+            className="open-demo"
+            role="img"
+            aria-label={`Exemplo: placa ${PLATE}, pague no máximo ${brl(PRICE)}`}
+          >
+            <div className="plate" aria-hidden="true">
+              <span className="plate-band">
+                BRASIL
+                <i />
+              </span>
+              <span className="plate-num">
+                {plate}
+                {!done && <b className="plate-caret" />}
+              </span>
+            </div>
+            <span className={`open-arrow ${done ? 'is-on' : ''}`} aria-hidden="true">
+              ↓
+            </span>
+            <div className={`open-price ${done ? 'is-on' : ''}`} aria-hidden="true">
+              <span>Pague no máximo</span>
+              <strong>{brl(price)}</strong>
+            </div>
+          </div>
 
-        <a
-          className="btn btn-accent btn-lg open-cta load-in"
-          style={{ '--d': '320ms' }}
-          href={ctaHref('trial')}
-          target="_blank"
-          rel="noreferrer"
-        >
-          Testar 7 dias grátis <span aria-hidden="true">→</span>
-        </a>
+          <div className="open-chips">
+            <Chip ico="pub" className="c1" d="1.6s">
+              Publicado em <b>8 canais</b>
+            </Chip>
+            <Chip ico="crm" className="c2" d="1.75s">
+              Novo lead: <b>Corolla</b>
+            </Chip>
+            <Chip ico="stock" className="c3" d="1.9s">
+              <b>32</b> no estoque
+            </Chip>
+            <Chip ico="fin" className="c4" d="2.05s">
+              Comissões <b>em dia</b>
+            </Chip>
+          </div>
+        </div>
       </div>
     </section>
   );
