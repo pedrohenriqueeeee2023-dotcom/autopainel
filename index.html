@@ -15,6 +15,18 @@
       function gtag() {
         dataLayer.push(arguments);
       }
+      // LGPD: nada é medido até o visitante aceitar no aviso de cookies (src/consent.js).
+      var apConsent = null;
+      try {
+        apConsent = localStorage.getItem('ap-cookies');
+      } catch (e) {}
+      var apGranted = apConsent === 'all' ? 'granted' : 'denied';
+      gtag('consent', 'default', {
+        analytics_storage: apGranted,
+        ad_storage: apGranted,
+        ad_user_data: apGranted,
+        ad_personalization: apGranted,
+      });
       gtag('js', new Date());
       gtag('config', 'G-R17LQ89M6L');
     </script>
@@ -38,6 +50,7 @@
           s = b.getElementsByTagName(e)[0];
           s.parentNode.insertBefore(t, s);
         })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+        if (apConsent !== 'all') fbq('consent', 'revoke');
         fbq('init', '%VITE_META_PIXEL_ID%');
         fbq('track', 'PageView');
       }

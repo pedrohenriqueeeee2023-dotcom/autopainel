@@ -1,0 +1,86 @@
+.ap .ft {
+  padding: clamp(48px, 8vh, 80px) var(--gutter) calc(96px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--line);
+  background: #011638;
+  font-size: 14px;
+  color: var(--fg-2);
+}
+.ft-in {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 32px;
+}
+.ap .ft-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--fg);
+}
+.ap .ft-muted {
+  margin-top: 6px;
+}
+.ap .ft-secure {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 6px 12px;
+  border: 1px solid rgba(63, 212, 134, 0.35);
+  border-radius: 999px;
+  background: rgba(63, 212, 134, 0.08);
+  color: var(--ok);
+  font-size: 13px;
+  font-weight: 600;
+}
+.ft-secure svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.ft-company,
+.ft-links {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  font-style: normal;
+}
+.ft a,
+.ft-links button {
+  color: var(--fg-2);
+  text-decoration: none;
+}
+.ft-links button {
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+.ft a:hover,
+.ft-links button:hover {
+  color: var(--fg);
+  text-decoration: underline;
+}
+.ap .ft-copy {
+  max-width: 1100px;
+  margin: 32px auto 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  color: var(--fg-3);
+  font-size: 13px;
+}
+@media (max-width: 760px) {
+  .ft-in {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+}

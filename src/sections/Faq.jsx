@@ -68,8 +68,8 @@ export default function Faq() {
           Chame a equipe no WhatsApp. A gente tira a dúvida e começa o seu teste de 7 dias com o Raio-X
           grátis.
         </p>
-        <a className="btn btn-wa btn-lg" href={ctaHref('trial')} target="_blank" rel="noreferrer">
-          Quero testar 7 dias
+        <a className="btn btn-wa btn-lg" href={ctaHref('contact')} target="_blank" rel="noreferrer">
+          Chamar no WhatsApp
         </a>
       </aside>
     </section>
