@@ -14,6 +14,19 @@ export const CONFIG = {
     site: 'https://autopainel.app.br/',
   },
 
+  /**
+   * Dados da empresa (rodapé e Política de Privacidade). Campos vazios ('')
+   * não aparecem na página. Preencha com os dados reais.
+   */
+  company: {
+    legalName: '', // Razão social, ex.: 'AutoPainel Tecnologia Ltda.'
+    cnpj: '', // ex.: '00.000.000/0001-00'
+    address: '', // ex.: 'Rua X, 100, Sala 2, Belo Horizonte (MG), CEP 00000-000'
+    email: '', // e-mail de contato e de privacidade, ex.: 'contato@autopainel.app.br'
+    phone: '(31) 99185-8934',
+    dpo: '', // Encarregado de dados (LGPD, art. 41), ex.: 'Nome Sobrenome'
+  },
+
   ctas: {
     // Oferta: 7 dias de teste. O botão leva direto para criar a conta.
     trial: {

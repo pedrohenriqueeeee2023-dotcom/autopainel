@@ -7,6 +7,8 @@ import Defer from './Defer';
 import PhotoBand from './PhotoBand';
 import Header from './sections/Header';
 import Opening from './sections/Opening';
+import Footer from './sections/Footer';
+import CookieBanner from './CookieBanner';
 
 // Cada seção abaixo da abertura é um pedaço separado: código e CSS só baixam
 // quando a seção chega perto da tela.
@@ -59,6 +61,8 @@ export default function App() {
           </Defer>
         </div>
       </main>
+      <Footer />
+      <CookieBanner />
     </div>
   );
 }
