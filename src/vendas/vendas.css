@@ -327,27 +327,27 @@ body:has(.v) {
   box-shadow: 0 0 20px var(--accent);
 }
 
-/* Texto que anda com a rolagem */
+/* Texto gigante em faixa contínua: o texto vem repetido 2x (ou 4x) e a
+   faixa anda metade da largura, então a volta não tem emenda. */
 .v-slide {
   overflow: hidden;
   padding: clamp(30px, 6vw, 70px) 0;
 }
 .v-slide p {
   width: max-content;
-  white-space: nowrap;
+  white-space: pre;
   font-family: var(--display);
   font-size: clamp(60px, 13vw, 190px);
   letter-spacing: -0.05em;
   line-height: 1;
-  background: linear-gradient(90deg, #7fd6ff, var(--accent) 50%, #7fd6ff);
+  background: linear-gradient(90deg, #7fd6ff, var(--accent) 25%, #7fd6ff 50%, var(--accent) 75%, #7fd6ff);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  transform: translateX(calc(5% - var(--p, 0.5) * 35%));
-  will-change: transform;
+  animation: v-marquee 36s linear infinite;
 }
 .v-slide.rev p {
-  transform: translateX(calc(-40% + var(--p, 0.5) * 35%));
+  animation-direction: reverse;
 }
 
 /* Sua loja, seu lucro */
@@ -919,17 +919,17 @@ body:has(.v) {
 }
 .v-talk-big p {
   width: max-content;
-  white-space: nowrap;
+  white-space: pre;
   font-family: var(--display);
   font-weight: 600;
   font-size: clamp(80px, 17vw, 260px);
   letter-spacing: -0.06em;
   line-height: 1;
-  background: linear-gradient(90deg, #f1f6fc, #7fd6ff 50%, var(--accent));
+  background: linear-gradient(90deg, #f1f6fc, #7fd6ff 25%, #f1f6fc 50%, #7fd6ff 75%, #f1f6fc);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  transform: translateX(calc(5% - var(--p, 0.5) * 30%));
+  animation: v-marquee 40s linear infinite;
 }
 .v-talk-glass {
   position: relative;

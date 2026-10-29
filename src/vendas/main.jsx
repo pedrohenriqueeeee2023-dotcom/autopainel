@@ -268,7 +268,7 @@ function Stats() {
 
 function Slide({ children, reverse }) {
   return (
-    <div className={`v-slide${reverse ? ' rev' : ''}`} data-scroll aria-hidden="true">
+    <div className={`v-slide${reverse ? ' rev' : ''}`} aria-hidden="true">
       <p>{children}</p>
     </div>
   );
@@ -534,8 +534,8 @@ function Voices() {
 function Talk() {
   return (
     <section className="v-talk" aria-labelledby="talk-title">
-      <div className="v-talk-big" data-scroll aria-hidden="true">
-        <p>Vamos conversar · Vamos conversar · Vamos conversar ·</p>
+      <div className="v-talk-big" aria-hidden="true">
+        <p>{'Vamos conversar · '.repeat(4)}</p>
       </div>
       <div className="v-talk-glass" aria-hidden="true">
         <i />
@@ -569,10 +569,10 @@ function Vendas() {
       <main id="conteudo">
         <Hero />
         <Stats />
-        <Slide>Pare de pagar caro na troca · Pare de pagar caro na troca ·</Slide>
+        <Slide>{'Pare de pagar caro na troca · '.repeat(2)}</Slide>
         <Capital />
         <How />
-        <Slide reverse>Raio-X grátis · Onboarding pela equipe · Raio-X grátis ·</Slide>
+        <Slide reverse>{'Raio-X grátis · Onboarding pela equipe · '.repeat(2)}</Slide>
         <Roles />
         <Planet />
         <Why />
