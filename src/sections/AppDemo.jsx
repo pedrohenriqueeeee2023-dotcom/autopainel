@@ -3,7 +3,7 @@ import { AppNav } from './app/AppWindow';
 import EvalTool from './app/EvalTool';
 import './AppDemo.css';
 
-// Cada ferramenta só baixa quando a aba dela é aberta (a calculadora já veio com a abertura).
+// Cada ferramenta só baixa quando a aba dela é aberta (a calculadora vem junto com a seção).
 const DashTool = lazy(() => import('./app/DashTool'));
 const PubTool = lazy(() => import('./app/PubTool'));
 const CrmTool = lazy(() => import('./app/CrmTool'));
