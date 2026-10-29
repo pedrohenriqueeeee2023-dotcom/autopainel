@@ -14,7 +14,8 @@ npm run lint
 - `src/config.js`: textos da oferta, preços, **destinos dos botões** (`ctas.trial.href`, `ctas.contact.href`) e a seção de prova (`proof`). Enquanto um destino for `null`, o botão leva à seção de planos. `proof.example: true` mostra o aviso de dados de exemplo; troque números e depoimentos pelos reais e mude para `false`.
 - `src/sections/`: uma seção por arquivo, cada uma com o seu CSS ao lado (`Solved.jsx` + `Solved.css`).
 - `src/sections/app/`: a mini versão do painel usada na abertura e na seção "Teste o painel aqui mesmo". Cada ferramenta (`PubTool`, `CrmTool`, `EvalTool`, `StockTool`) tem o próprio CSS.
-- `vendas.html` + `src/vendas/`: a página de vendas (`/vendas`), com a mesma marca e os mesmos textos de `src/config.js`. Tudo dela fica em `main.jsx` (seções) e `vendas.css`. As perguntas do FAQ (`FAQ_ITEMS`) ficam em `src/config.js` e servem às duas páginas.
+- `vendas.html` + `src/vendas/`: a página de vendas (`/vendas`), com a mesma marca e os mesmos textos de `src/config.js`. As seções ficam em `main.jsx`, as peças reutilizáveis (título letra por letra, grade com linhas de luz, faixas de texto gigante) em `parts.jsx`, a lógica dos efeitos (rolagem suave, seções presas, faixas, FAQ deslizante) em `fx.js` e o visual em `vendas.css`. As perguntas do FAQ (`FAQ_ITEMS`) ficam em `src/config.js` e servem às duas páginas.
+- Contagem regressiva da página de vendas: só aparece com uma data real em `CONFIG.countdown.until` ou na variável `VITE_COUNTDOWN_UNTIL` da Vercel (ex.: `2026-11-30T23:59:00-03:00`). A nota média dos depoimentos fica em `proof.rating`.
 - `src/styles/base.css`: cores, fontes, botões, cabeçalho e as regras de entrada (`data-reveal`, `data-build`).
 
 ## Como a página carrega

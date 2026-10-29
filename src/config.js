@@ -46,6 +46,18 @@ export const CONFIG = {
   },
 
   /**
+   * Contagem regressiva da página de vendas (seção do planeta). Só aparece com
+   * uma data real e futura, como o fim de uma condição especial: um prazo
+   * inventado engana o cliente. A data pode vir da variável VITE_COUNTDOWN_UNTIL
+   * (Vercel > Settings > Environment Variables), no formato
+   * 2026-11-30T23:59:00-03:00.
+   */
+  countdown: {
+    label: 'A condição especial termina em',
+    until: import.meta.env.VITE_COUNTDOWN_UNTIL || null,
+  },
+
+  /**
    * Prova social. `example: true` marca dados de exemplo: a página mostra um
    * aviso discreto. Troque pelos números e depoimentos reais antes de publicar
    * e mude para `false`.
@@ -57,6 +69,8 @@ export const CONFIG = {
       { label: 'carros anunciados', value: 2480 },
       { label: 'leads atendidos no CRM', value: 9600 },
     ],
+    // Nota média e total de avaliações (página de vendas). `null` esconde.
+    rating: { value: '4,9', count: 37 },
     testimonials: [
       {
         text: 'Eu cadastrava o mesmo carro em quatro sites. Hoje publico uma vez e o anúncio já está na OLX e no Mercado Livre.',
