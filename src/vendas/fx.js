@@ -1,12 +1,40 @@
 import { useEffect, useState } from 'react';
 
 /* Efeitos da página de vendas (/vendas). Com "reduzir movimento" ligado no
-   aparelho, só ficam os efeitos que não deslocam nada: aparecer, acender e
-   contar. */
+   aparelho, só ficam os efeitos que não deslocam nada: aparecer, acender,
+   contar e trocar de conteúdo.
+
+   Tudo o que depende da rolagem lê a posição do elemento na tela a cada
+   quadro, enquanto ele está visível. Assim funciona em qualquer lugar onde a
+   página for aberta (navegador, app, prévia dentro de outra página). */
 
 export const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const finePointer = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 export const clamp = (v, min = 0, max = 1) => Math.min(max, Math.max(min, v));
+
+/** Chama fn a cada quadro enquanto el está na tela (ou perto dela). */
+function whileVisible(el, fn) {
+  let raf = 0;
+  let visible = false;
+  const loop = () => {
+    fn();
+    raf = visible ? requestAnimationFrame(loop) : 0;
+  };
+  const io = new IntersectionObserver(
+    ([e]) => {
+      visible = e.isIntersecting;
+      if (visible && !raf) raf = requestAnimationFrame(loop);
+    },
+    { rootMargin: '25% 0px' },
+  );
+  io.observe(el);
+  fn();
+  return () => {
+    visible = false;
+    cancelAnimationFrame(raf);
+    io.disconnect();
+  };
+}
 
 /** Entradas ao rolar: [data-in] ganha .in na primeira vez que aparece. */
 export function initReveal(root) {
@@ -31,25 +59,33 @@ export function initReveal(root) {
 /** --p (0 → 1) em [data-scroll] enquanto o elemento atravessa a tela. */
 export function initScrollVars(root) {
   if (reduceMotion()) return () => {};
-  const els = [...root.querySelectorAll('[data-scroll]')];
-  let raf = 0;
-  const run = () => {
-    raf = 0;
-    const vh = window.innerHeight;
-    for (const n of els) {
+  const stops = [...root.querySelectorAll('[data-scroll]')].map((n) =>
+    whileVisible(n, () => {
       const r = n.getBoundingClientRect();
-      if (r.bottom < -vh || r.top > 2 * vh) continue;
+      const vh = window.innerHeight;
       n.style.setProperty('--p', clamp((vh - r.top) / (vh + r.height)).toFixed(4));
-    }
-  };
-  const on = () => raf || (raf = requestAnimationFrame(run));
-  run();
-  window.addEventListener('scroll', on, { passive: true });
-  window.addEventListener('resize', on);
+    }),
+  );
+  return () => stops.forEach((s) => s());
+}
+
+/**
+ * Cortina: a primeira seção de .v-curtain gruda quando o pé dela chega ao pé
+ * da tela (--stick), e a seguinte sobe por cima.
+ */
+export function initCurtains(root) {
+  const els = [...root.querySelectorAll('.v-curtain > :first-child')];
+  const set = () =>
+    els.forEach((el) =>
+      el.style.setProperty('--stick', `${Math.min(0, window.innerHeight - el.offsetHeight)}px`),
+    );
+  const ro = new ResizeObserver(set);
+  els.forEach((el) => ro.observe(el));
+  window.addEventListener('resize', set);
+  set();
   return () => {
-    cancelAnimationFrame(raf);
-    window.removeEventListener('scroll', on);
-    window.removeEventListener('resize', on);
+    ro.disconnect();
+    window.removeEventListener('resize', set);
   };
 }
 
@@ -118,31 +154,36 @@ export function initSmoothWheel() {
   };
 }
 
+/* Velocidade (px/s) com que a faixa segue sozinha depois que a rolagem para. */
+const CRUISE = 55;
+
 /**
  * Textos gigantes em faixa: [data-mq] guarda .v-mq-track com o texto repetido
- * 2x. A faixa anda sozinha (data-mq é a velocidade) e acelera com a rolagem.
- * Com data-curve, as letras entram subindo por uma curva no lado direito.
+ * 2x (data-mq é a velocidade). A faixa fica parada até a primeira rolagem,
+ * anda junto com a rolagem e, quando ela para, continua sozinha no mesmo
+ * sentido. Com data-curve, as letras entram subindo por uma curva à direita.
  */
 export function initMarquees(root) {
   if (reduceMotion()) return () => {};
-  const items = [...root.querySelectorAll('[data-mq]')].map((el) => ({
-    el,
-    track: el.querySelector('.v-mq-track'),
-    curve: el.hasAttribute('data-curve'),
-    speed: Number(el.dataset.mq) || 1,
-    x: 0,
-    half: 0,
-    width: 0,
-    size: 0,
-    chars: [],
-    visible: false,
-  }));
-  if (!items.length) return () => {};
-
-  const measure = () => {
-    for (const it of items) {
+  const stops = [...root.querySelectorAll('[data-mq]')].map((el) => {
+    const it = {
+      track: el.querySelector('.v-mq-track'),
+      curve: el.hasAttribute('data-curve'),
+      speed: Number(el.dataset.mq) || 1,
+      x: 0,
+      v: 0,
+      dir: 1,
+      started: false,
+      last: 0,
+      lastTop: 0,
+      half: 0,
+      width: 0,
+      size: 0,
+      chars: [],
+    };
+    const measure = () => {
       it.half = it.track.scrollWidth / 2;
-      it.width = it.el.clientWidth;
+      it.width = el.clientWidth;
       it.size = parseFloat(getComputedStyle(it.track).fontSize);
       it.chars = it.curve
         ? [...it.track.querySelectorAll('.ch')].map((c) => ({
@@ -151,61 +192,59 @@ export function initMarquees(root) {
             bent: true,
           }))
         : [];
-    }
-  };
-  const bend = (it) => {
-    const start = it.width * 0.6;
-    const span = it.width * 0.45;
-    for (const ch of it.chars) {
-      const u = (ch.mid - it.x - start) / span;
-      if (u <= 0) {
-        if (ch.bent) {
-          ch.c.style.transform = '';
-          ch.c.style.opacity = '';
-          ch.bent = false;
+    };
+    const bend = () => {
+      const start = it.width * 0.6;
+      const span = it.width * 0.45;
+      for (const ch of it.chars) {
+        const u = (ch.mid - it.x - start) / span;
+        if (u <= 0) {
+          if (ch.bent) {
+            ch.c.style.transform = '';
+            ch.c.style.opacity = '';
+            ch.bent = false;
+          }
+          continue;
         }
-        continue;
+        const k = Math.min(u, 1.4);
+        ch.c.style.transform = `translateY(${(k * k * 0.5 * it.size).toFixed(1)}px) rotate(${(k * 16).toFixed(1)}deg)`;
+        ch.c.style.opacity = (1 - Math.min(k, 1) * 0.7).toFixed(2);
+        ch.bent = true;
       }
-      const k = Math.min(u, 1.4);
-      ch.c.style.transform = `translateY(${(k * k * 0.7 * it.size).toFixed(1)}px) rotate(${(k * 18).toFixed(1)}deg)`;
-      ch.c.style.opacity = (1 - Math.min(k, 1) * 0.7).toFixed(2);
-      ch.bent = true;
-    }
-  };
-
-  let last = performance.now();
-  let lastY = window.scrollY;
-  let raf = 0;
-  const frame = (t) => {
-    const dt = Math.min(0.05, (t - last) / 1000);
-    last = t;
-    const boost = Math.min(Math.abs(window.scrollY - lastY), 80) * 0.6;
-    lastY = window.scrollY;
-    for (const it of items) {
-      if (!it.visible || !it.half) continue;
-      it.x = (it.x + (70 * dt + boost) * it.speed) % it.half;
+    };
+    const frame = () => {
+      const now = performance.now();
+      const top = el.getBoundingClientRect().top;
+      const gap = now - it.last;
+      // Voltou a aparecer depois de um tempo fora da tela: recomeça a medida.
+      const moved = gap > 120 ? 0 : it.lastTop - top;
+      const dt = gap > 120 ? 0 : gap / 1000;
+      it.last = now;
+      it.lastTop = top;
+      if (Math.abs(moved) > 0.3) {
+        it.started = true;
+        it.dir = Math.sign(moved);
+        it.x += moved * 0.9 * it.speed;
+        if (dt) it.v = Math.min(Math.abs(moved) / dt, 1500);
+      } else if (it.started && dt) {
+        it.v += (CRUISE - it.v) * Math.min(1, dt * 2);
+        it.x += it.dir * it.v * dt * it.speed;
+      }
+      if (!it.half) return;
+      it.x = ((it.x % it.half) + it.half) % it.half;
       it.track.style.transform = `translate3d(${(-it.x).toFixed(1)}px, 0, 0)`;
-      if (it.curve) bend(it);
-    }
-    raf = requestAnimationFrame(frame);
-  };
-
-  const io = new IntersectionObserver((entries) =>
-    entries.forEach((e) => {
-      const it = items.find((i) => i.el === e.target);
-      if (it) it.visible = e.isIntersecting;
-    }),
-  );
-  items.forEach((it) => io.observe(it.el));
-  measure();
-  document.fonts?.ready.then(measure);
-  window.addEventListener('resize', measure);
-  raf = requestAnimationFrame(frame);
-  return () => {
-    cancelAnimationFrame(raf);
-    io.disconnect();
-    window.removeEventListener('resize', measure);
-  };
+      if (it.curve) bend();
+    };
+    measure();
+    document.fonts?.ready.then(measure);
+    window.addEventListener('resize', measure);
+    const stop = whileVisible(el, frame);
+    return () => {
+      stop();
+      window.removeEventListener('resize', measure);
+    };
+  });
+  return () => stops.forEach((s) => s());
 }
 
 /** Brilho que segue o cursor dentro de [data-spot] (--mx, --my). */
@@ -257,14 +296,15 @@ export function initAccordion(root) {
 }
 
 /**
- * Seções presas na tela (passos e perfis) só quando a própria página rola.
- * Numa prévia que mostra a página inteira de uma vez, elas trocam sozinhas.
+ * Seções presas na tela (passos e perfis) só quando a própria página rola e
+ * a tela tem altura para mostrar tudo. Senão, elas trocam sozinhas.
  */
 export function usePinMode() {
   const [pin, setPin] = useState(false);
   useEffect(() => {
     if (reduceMotion()) return;
-    const check = () => setPin(document.documentElement.scrollHeight > window.innerHeight * 1.6);
+    const check = () =>
+      setPin(window.innerHeight >= 540 && document.documentElement.scrollHeight > window.innerHeight * 1.6);
     check();
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
@@ -281,24 +321,13 @@ export function useScrollProgress(ref, active, onProgress, mode = 'pin') {
   useEffect(() => {
     if (!active) return;
     const el = ref.current;
-    let raf = 0;
-    const run = () => {
-      raf = 0;
+    return whileVisible(el, () => {
       const r = el.getBoundingClientRect();
       const vh = window.innerHeight;
       onProgress(
         mode === 'pin' ? clamp(-r.top / Math.max(1, r.height - vh)) : clamp((vh - r.top) / (vh + r.height)),
       );
-    };
-    const on = () => raf || (raf = requestAnimationFrame(run));
-    run();
-    window.addEventListener('scroll', on, { passive: true });
-    window.addEventListener('resize', on);
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener('scroll', on);
-      window.removeEventListener('resize', on);
-    };
+    });
   }, [ref, active, onProgress, mode]);
 }
 
@@ -309,10 +338,10 @@ export function scrollToProgress(el, p) {
   window.scrollTo({ top, behavior: reduceMotion() ? 'auto' : 'smooth' });
 }
 
-/** Troca automática a cada `ms` quando a seção não está presa. */
+/** Troca automática a cada `ms` (passos, perfis) quando a seção não está presa. */
 export function useAutoStep(active, count, ms, setIndex) {
   useEffect(() => {
-    if (!active || reduceMotion()) return;
+    if (!active) return;
     const t = setInterval(() => setIndex((i) => (i + 1) % count), ms);
     return () => clearInterval(t);
   }, [active, count, ms, setIndex]);

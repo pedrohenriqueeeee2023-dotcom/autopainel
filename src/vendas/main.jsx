@@ -6,14 +6,17 @@ import { CONFIG, FAQ_ITEMS, ctaHref } from '../config';
 import { initAnalytics } from '../analytics';
 import { initPointerFx } from '../pointerFx';
 import Footer from '../sections/Footer';
+import PhotoBand from '../PhotoBand';
 import CookieBanner from '../CookieBanner';
 import {
   initAccordion,
+  initCurtains,
   initMarquees,
   initReveal,
   initScrollVars,
   initSmoothWheel,
   initSpotlight,
+  reduceMotion,
   scrollToProgress,
   useAutoStep,
   usePinMode,
@@ -351,6 +354,7 @@ function Waves() {
 
 function How({ pin }) {
   const ref = useRef(null);
+  const stageRef = useRef(null);
   const [step, setStep] = useState(0);
   const [auto, setAuto] = useState(true);
   const onProgress = useCallback((p) => {
@@ -360,6 +364,30 @@ function How({ pin }) {
   }, []);
   useScrollProgress(ref, pin, onProgress);
   useAutoStep(!pin && auto, STEPS.length, 5000, setStep);
+
+  // O cartão de cada passo diminui o que for preciso para caber inteiro na
+  // área (telas baixas, prévia dentro de outra página).
+  useEffect(() => {
+    const stage = stageRef.current;
+    const fit = () => {
+      let w = 0;
+      let h = 0;
+      stage.querySelectorAll('.v-stage-card > *').forEach((c) => {
+        w = Math.max(w, c.offsetWidth);
+        h = Math.max(h, c.offsetHeight);
+      });
+      if (!w || !h) return;
+      const k = Math.min(1, (stage.clientWidth - 32) / w, (stage.clientHeight - 56) / h);
+      stage.style.setProperty('--fit', Math.max(0.45, k).toFixed(3));
+    };
+    // Mede de novo quando a área muda ou quando um cartão muda de tamanho
+    // (as fontes terminam de carregar, por exemplo).
+    const ro = new ResizeObserver(fit);
+    ro.observe(stage);
+    stage.querySelectorAll('.v-stage-card > *').forEach((c) => ro.observe(c));
+    fit();
+    return () => ro.disconnect();
+  }, []);
 
   const choose = (i) => {
     if (pin) return scrollToProgress(ref.current, (i + 0.5) / STEPS.length);
@@ -386,7 +414,7 @@ function How({ pin }) {
             <Words>Da troca ao carro vendido, em três passos.</Words>
           </p>
         </div>
-        <div className="v-stage" data-in>
+        <div className="v-stage" ref={stageRef} data-in>
           <Corners />
           <Waves />
           {STEPS.map((s, i) => (
@@ -427,9 +455,10 @@ function How({ pin }) {
 function XRay({ pin }) {
   const ref = useRef(null);
   const [phase, setPhase] = useState(0);
+  const [auto, setAuto] = useState(true);
   const onProgress = useCallback((p) => setPhase(p < 0.5 ? 0 : 1), []);
   useScrollProgress(ref, pin, onProgress, 'view');
-  useAutoStep(!pin, 2, 4500, setPhase);
+  useAutoStep(!pin && auto, 2, 4500, setPhase);
 
   return (
     <section ref={ref} className="v-xray v-iso" data-scroll aria-labelledby="xray-title">
@@ -443,7 +472,10 @@ function XRay({ pin }) {
             type="button"
             className={`v-xray-word ${i ? 'b' : 'a'}${phase === i ? ' on' : ''}`}
             aria-pressed={phase === i}
-            onClick={() => setPhase(i)}
+            onClick={() => {
+              setPhase(i);
+              setAuto(false);
+            }}
           >
             {word}
           </button>
@@ -541,7 +573,7 @@ function Roles({ pin }) {
     [place],
   );
   useScrollProgress(ref, pin, onProgress);
-  useAutoStep(!pin, ROLES.length, 3500, setActive);
+  useAutoStep(!pin && !reduceMotion(), ROLES.length, 3500, setActive);
   useEffect(() => {
     if (pin) return;
     const onResize = () => place(active);
@@ -634,32 +666,37 @@ function Planet() {
     <section className="v-planet v-iso" aria-labelledby="planet-title">
       <Sparks n={34} seed={11} className="v-planet-sparks" />
       <Meteors n={5} seed={3} />
-      <span className="v-tag" data-in>
-        Feito para revendas de seminovos
-      </span>
-      <h2 id="planet-title" data-in="own">
-        <Split>
-          Revendas de <G>todo o Brasil</G> já compram, anunciam e vendem com o AutoPainel
-        </Split>
-      </h2>
-      {left && (
-        <div className="v-count" data-in style={{ '--d': '600ms' }}>
-          <p>{CONFIG.countdown.label}</p>
-          <div className="v-count-digits" role="timer">
-            {['dias', 'horas', 'min', 'seg'].map((u, i) => (
-              <span key={u}>
-                <b>{String(left[i]).padStart(2, '0')}</b>
-                <small>{u}</small>
-              </span>
-            ))}
+      <div className="v-planet-in">
+        <span className="v-tag" data-in>
+          Feito para revendas de seminovos
+        </span>
+        <h2 id="planet-title" data-in="own">
+          <Split>
+            Revendas de <G>todo o Brasil</G> já compram, anunciam e vendem com o AutoPainel
+          </Split>
+        </h2>
+        {left && (
+          <div className="v-count" data-in style={{ '--d': '600ms' }}>
+            <p>{CONFIG.countdown.label}</p>
+            <div className="v-count-digits" role="timer">
+              {['dias', 'horas', 'min', 'seg'].map((u, i) => (
+                <span key={u}>
+                  <b>{String(left[i]).padStart(2, '0')}</b>
+                  <small>{u}</small>
+                </span>
+              ))}
+            </div>
           </div>
+        )}
+        <div className="v-hero-ctas" data-in style={{ '--d': '800ms' }}>
+          <Cta />
+          <Cta kind="contact" />
         </div>
-      )}
-      <div className="v-hero-ctas" data-in style={{ '--d': '800ms' }}>
-        <Cta />
-        <Cta kind="contact" />
       </div>
-      <div className="v-orb" data-scroll aria-hidden="true" />
+      {/* O planeta fica abaixo do texto: o brilho da borda nunca passa por trás dele. */}
+      <div className="v-planet-ground" aria-hidden="true">
+        <div className="v-orb" data-scroll />
+      </div>
     </section>
   );
 }
@@ -846,6 +883,7 @@ function Vendas() {
   useEffect(() => initSpotlight(ref.current), []);
   useEffect(() => initAccordion(ref.current), []);
   useEffect(() => initPointerFx(ref.current), []);
+  useEffect(() => initCurtains(ref.current), []);
   useEffect(() => initSmoothWheel(), []);
   useEffect(() => initAnalytics(), []);
   return (
@@ -859,7 +897,9 @@ function Vendas() {
           <Hero />
           <Stats />
         </div>
-        <Marquee text="Pare de pagar caro na troca · " curve className="v-mq-big" />
+        <PhotoBand className="v-photo-mq">
+          <Marquee text="Pare de pagar caro na troca · " curve className="v-mq-big" />
+        </PhotoBand>
         <Capital />
         <How pin={pin} />
         <XRay pin={pin} />
@@ -875,6 +915,29 @@ function Vendas() {
       </main>
       <Footer />
       <CookieBanner />
+      {import.meta.env.VITE_PREVIEW && <MotionNote />}
+    </div>
+  );
+}
+
+/**
+ * Só na prévia (VITE_PREVIEW): avisa quando o aparelho está com "reduzir
+ * movimento" ligado, que desliga de propósito os movimentos grandes.
+ */
+function MotionNote() {
+  const [open, setOpen] = useState(reduceMotion);
+  if (!open) return null;
+  return (
+    <div className="v-motion-note" role="status">
+      <p>
+        <strong>Seu aparelho está com “Reduzir movimento” ligado.</strong> Por acessibilidade, a página
+        desliga os movimentos grandes. Para ver todos os efeitos, desligue a opção: iPhone em Ajustes ›
+        Acessibilidade › Movimento; Android em Acessibilidade › Remover animações; Windows em Configurações ›
+        Acessibilidade › Efeitos visuais.
+      </p>
+      <button type="button" onClick={() => setOpen(false)} aria-label="Fechar aviso">
+        ×
+      </button>
     </div>
   );
 }
