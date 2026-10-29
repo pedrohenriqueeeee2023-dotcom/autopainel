@@ -46,14 +46,17 @@ export const CONFIG = {
   },
 
   /**
-   * Contagem regressiva da página de vendas (seção do planeta). Só aparece com
-   * uma data real e futura, como o fim de uma condição especial: um prazo
-   * inventado engana o cliente. A data pode vir da variável VITE_COUNTDOWN_UNTIL
-   * (Vercel > Settings > Environment Variables), no formato
-   * 2026-11-30T23:59:00-03:00.
+   * Contagem regressiva da página de vendas (seção do planeta). Conta
+   * `minutes` a partir da primeira visita de cada pessoa (o horário fica no
+   * navegador dela). A condição precisa acabar mesmo depois desse prazo para
+   * quem viu a contagem: prazo que não acaba engana o cliente. Para uma data
+   * fixa igual para todos, use `until` ou a variável VITE_COUNTDOWN_UNTIL
+   * (formato 2026-11-30T23:59:00-03:00); ela tem prioridade. `minutes: null`
+   * desliga.
    */
   countdown: {
     label: 'A condição especial termina em',
+    minutes: 90,
     until: import.meta.env.VITE_COUNTDOWN_UNTIL || null,
   },
 

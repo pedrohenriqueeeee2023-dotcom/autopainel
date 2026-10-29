@@ -20,10 +20,16 @@ import {
   reduceMotion,
   scrollToProgress,
   useAutoStep,
+  useInView,
   usePinMode,
   useScrollProgress,
 } from './fx';
 import { Corners, Counter, Cta, G, GridFx, Marquee, Meteors, Sparks, Split, Words } from './parts';
+import { CrmDemo, EvalDemo, PubDemo } from './demos';
+import printSocio from '../assets/prints/socio.jpg';
+import printGerente from '../assets/prints/gerente.jpg';
+import printVendedor from '../assets/prints/vendedor.jpg';
+import printFinanceiro from '../assets/prints/financeiro.jpg';
 
 /* Página de vendas no formato "vitrine escura": fundo profundo, brilho azul,
    grade fina com linhas de luz, títulos que entram letra por letra, seções
@@ -58,38 +64,69 @@ const STEPS = [
   {
     title: 'Digite a placa',
     text: 'O painel mostra a FIPE e anúncios parecidos, desconta seus custos e a sua margem e diz até quanto pagar.',
-    card: 'eval',
+    Demo: EvalDemo,
   },
   {
     title: 'Anuncie uma vez',
     text: 'Cadastre o carro uma vez só. O anúncio sai na OLX, no Mercado Livre, no site da loja e em mais 5 canais.',
-    card: 'pub',
+    Demo: PubDemo,
   },
   {
     title: 'Atenda no CRM',
     text: 'Cada contato vira um lead com histórico. O painel avisa quando entra um carro compatível com o que o cliente procura.',
-    card: 'crm',
+    Demo: CrmDemo,
   },
 ];
 
-/* [perfil, texto, cor do fundo quando o cartão está na frente] */
+/* Perfis: a tela que cada um usa no dia a dia (prints da versão de
+   demonstração do painel, em src/assets/prints; troque por prints do sistema
+   com os mesmos nomes) e a cor do fundo quando o perfil está na frente. */
 const ROLES = [
-  [
-    'Sócio',
-    'Margem por carro, giro do estoque e o resultado da loja num olhar.',
-    'rgba(127, 214, 255, 0.22)',
-  ],
-  ['Gerente', 'Estoque parado, metas da equipe e avaliações de compra pendentes.', 'rgba(0, 118, 229, 0.3)'],
-  [
-    'Vendedor',
-    'Leads do dia, retornos agendados e carros compatíveis com cada cliente.',
-    'rgba(63, 212, 134, 0.2)',
-  ],
-  [
-    'Financeiro',
-    'Custos de preparação, comissões e o que entrou e saiu em cada venda.',
-    'rgba(198, 212, 234, 0.2)',
-  ],
+  {
+    name: 'Sócio',
+    screen: 'Dashboard',
+    text: 'Vê a loja inteira num painel só, com todas as áreas no menu lateral.',
+    points: ['Faturamento e lucro do mês', 'Valor do estoque', 'Meta de cada vendedor'],
+    print: printSocio,
+    // No celular mostra um recorte ampliado (o do sócio com o menu lateral).
+    pos: '0% 0',
+    h: 634,
+    alt: 'Tela do Dashboard do AutoPainel com menu lateral, faturamento do mês, veículos disponíveis, valor em estoque, lucro médio por veículo e metas por vendedor.',
+    tint: 'rgba(127, 214, 255, 0.22)',
+  },
+  {
+    name: 'Gerente',
+    screen: 'Estoque',
+    text: 'Cuida do pátio: preço, status, dias parado e anúncios de cada carro.',
+    points: ['Busca por marca, modelo ou placa', 'Carros parados há mais tempo', 'Anúncios ativos por carro'],
+    print: printGerente,
+    pos: '38% 0',
+    h: 581,
+    alt: 'Tela de Estoque do AutoPainel com busca, filtros por status e a lista de carros com placa, quilometragem, preço, status, dias de pátio e anúncios.',
+    tint: 'rgba(0, 118, 229, 0.3)',
+  },
+  {
+    name: 'Vendedor',
+    screen: 'Calculadora de compra',
+    text: 'Digita a placa do carro da troca e já sabe até quanto pagar.',
+    points: ['FIPE e anúncios parecidos', 'Custos e margem descontados', 'Preço máximo de compra'],
+    print: printVendedor,
+    pos: '67% 0',
+    h: 809,
+    alt: 'Tela da Calculadora de compra do AutoPainel com a placa do veículo, dados do carro, referências de mercado, custos e margem e o preço máximo recomendado de compra.',
+    tint: 'rgba(63, 212, 134, 0.2)',
+  },
+  {
+    name: 'Financeiro',
+    screen: 'Financeiro',
+    text: 'Acompanha o que entra e sai em cada venda, sem planilha.',
+    points: ['Saldo, a receber e a pagar', 'Comissões do mês', 'Lançamentos por venda'],
+    print: printFinanceiro,
+    pos: '48% 0',
+    h: 700,
+    alt: 'Tela Financeiro do AutoPainel com saldo em caixa, valores a receber e a pagar, comissões do mês e a lista de lançamentos.',
+    tint: 'rgba(198, 212, 234, 0.2)',
+  },
 ];
 
 const WHY = [
@@ -200,27 +237,29 @@ function Hero() {
           </span>
         ))}
       </div>
-      <p className="v-chip v-rise" style={{ '--d': '150ms' }}>
-        <span>{CONFIG.offer.badge}</span> {CONFIG.offer.text}
-      </p>
-      <h1 id="hero-title" className="v-hero-title" data-in="own">
-        <span className="v-line">
-          <Split step={26}>Sem achismo na compra.</Split>
-        </span>
-        <span className="v-line">
-          <Split step={26} start={20}>
-            <G>Domine o seu estoque.</G>
-          </Split>
-        </span>
-      </h1>
-      <ul className="v-hero-pills v-rise" style={{ '--d': '1100ms' }}>
-        <li>Calculadora pela placa</li>
-        <li>Anúncio em 8 canais</li>
-        <li>CRM de leads</li>
-      </ul>
-      <div className="v-hero-ctas v-rise" style={{ '--d': '1250ms' }}>
-        <Cta />
-        <Cta kind="contact" />
+      <div className="v-hero-main">
+        <p className="v-chip v-rise" style={{ '--d': '150ms' }}>
+          <span>{CONFIG.offer.badge}</span> {CONFIG.offer.text}
+        </p>
+        <h1 id="hero-title" className="v-hero-title" data-in="own">
+          <span className="v-line">
+            <Split step={26}>Sem achismo na compra.</Split>
+          </span>
+          <span className="v-line">
+            <Split step={26} start={20}>
+              <G>Domine o seu estoque.</G>
+            </Split>
+          </span>
+        </h1>
+        <ul className="v-hero-pills v-rise" style={{ '--d': '1100ms' }}>
+          <li>Calculadora pela placa</li>
+          <li>Anúncio em 8 canais</li>
+          <li>CRM de leads</li>
+        </ul>
+        <div className="v-hero-ctas v-rise" style={{ '--d': '1250ms' }}>
+          <Cta />
+          <Cta kind="contact" />
+        </div>
       </div>
       <a className="v-hint" href="#numeros">
         <span className="v-hint-mouse" aria-hidden="true">
@@ -303,71 +342,6 @@ function Capital() {
   );
 }
 
-function StepCard({ type }) {
-  if (type === 'eval')
-    return (
-      <div className="v-fan">
-        <div className="v-card v-card-eval">
-          <p className="v-card-k">Avaliação de compra</p>
-          <p className="v-plate">RIO2A18</p>
-          <p className="v-card-sub">Jeep Compass Longitude 2021</p>
-          <dl>
-            <div>
-              <dt>FIPE</dt>
-              <dd>R$ 128.400</dd>
-            </div>
-            <div>
-              <dt>Custos + margem</dt>
-              <dd>− R$ 17.900</dd>
-            </div>
-          </dl>
-          <p className="v-card-big">
-            Pague até <strong>R$ 110.500</strong>
-          </p>
-        </div>
-      </div>
-    );
-  if (type === 'pub')
-    return (
-      <div className="v-card v-card-pub v-window">
-        <p className="v-window-bar">
-          <i />
-          <i />
-          <i />
-          <span>Publicação · Toyota Corolla XEi 2022</span>
-        </p>
-        <ul>
-          {CHANNELS.map((c, i) => (
-            <li key={c} style={{ '--i': i }}>
-              {c} <span>no ar</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    );
-  return (
-    <div className="v-phone">
-      <div className="v-card v-card-crm">
-        <p className="v-card-k">Leads de hoje</p>
-        {[
-          ['Marina S.', 'Procura SUV até R$ 120 mil', 'Compatível: Compass 2021'],
-          ['Carlos T.', 'Pediu fotos do HR-V', 'Retornar 15h'],
-          ['Paula R.', 'Troca + financiamento', 'Avaliação agendada'],
-        ].map(([n, a, b], i) => (
-          <div key={n} className="v-lead" style={{ '--i': i }}>
-            <span className="v-avatar">{n[0]}</span>
-            <div>
-              <strong>{n}</strong>
-              <span>{a}</span>
-            </div>
-            <em>{b}</em>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 /** Onda do fundo: um período de 800 desenhado duas vezes, para andar sem emenda. */
 function wave(base, amp, phase) {
   let d = '';
@@ -413,28 +387,31 @@ function How({ pin }) {
   const stageRef = useRef(null);
   const [step, setStep] = useState(0);
   const [auto, setAuto] = useState(true);
+  const seen = useInView(stageRef);
   const onProgress = useCallback((p) => {
     setStep(Math.round(p * (STEPS.length - 1)));
   }, []);
   useScrollProgress(ref, pin, onProgress);
-  useAutoStep(!pin && auto, STEPS.length, 5000, setStep);
+  // Sem a seção presa, troca sozinho depois de a demonstração terminar.
+  useAutoStep(!pin && auto && seen, STEPS.length, 9000, setStep);
 
-  // O cartão de cada passo diminui o que for preciso para caber inteiro na
-  // área (telas baixas, prévia dentro de outra página).
+  // A demonstração de cada passo diminui o que for preciso para caber inteira
+  // na área (telas baixas, prévia dentro de outra página).
   useEffect(() => {
     const stage = stageRef.current;
-    const fit = () => {
-      let w = 0;
-      let h = 0;
-      stage.querySelectorAll('.v-stage-card > *').forEach((c) => {
-        w = Math.max(w, c.offsetWidth);
-        h = Math.max(h, c.offsetHeight);
+    // Cada janela tem a própria medida: a mais alta não diminui as outras.
+    const fit = () =>
+      stage.querySelectorAll('.v-stage-card').forEach((card) => {
+        const c = card.firstElementChild;
+        if (!c?.offsetWidth || !c.offsetHeight) return;
+        const k = Math.min(
+          1,
+          (stage.clientWidth - 32) / c.offsetWidth,
+          (stage.clientHeight - 48) / c.offsetHeight,
+        );
+        card.style.setProperty('--fit', Math.max(0.45, k).toFixed(3));
       });
-      if (!w || !h) return;
-      const k = Math.min(1, (stage.clientWidth - 32) / w, (stage.clientHeight - 56) / h);
-      stage.style.setProperty('--fit', Math.max(0.45, k).toFixed(3));
-    };
-    // Mede de novo quando a área muda ou quando um cartão muda de tamanho
+    // Mede de novo quando a área muda ou quando uma janela muda de tamanho
     // (as fontes terminam de carregar, por exemplo).
     const ro = new ResizeObserver(fit);
     ro.observe(stage);
@@ -460,7 +437,7 @@ function How({ pin }) {
     >
       <GridFx seed={3} runners={3} />
       <div className="v-how-in">
-        <div className="v-head">
+        <div className="v-head v-how-head">
           <h2 id="how-title" data-in="own">
             <Split>
               Como <G>funciona?</G>
@@ -470,38 +447,39 @@ function How({ pin }) {
             <Words>Da troca ao carro vendido, em três passos.</Words>
           </p>
         </div>
-        <div className="v-stage" ref={stageRef} data-in>
-          <Corners />
-          <Waves />
-          {STEPS.map((s, i) => (
-            <div key={s.card} className={`v-stage-card${i === step ? ' on' : ''}`} aria-hidden={i !== step}>
-              <StepCard type={s.card} />
-            </div>
-          ))}
-        </div>
-        <div className="v-steps" role="tablist" aria-label="Passos" style={{ '--step': step }}>
-          <span className="v-steps-glow" aria-hidden="true" />
-          {STEPS.map((s, i) => (
-            <button
-              key={s.title}
-              role="tab"
-              aria-selected={i === step}
-              className={i === step ? 'on' : i < step ? 'done' : ''}
-              onClick={() => choose(i)}
-            >
-              <span className="v-steps-bar">
-                <i key={i === step ? step : 'x'} />
-              </span>
-              <span className="v-steps-n">Passo {i + 1}</span>
-              <strong>{s.title}</strong>
-              <span className="v-steps-t">{s.text}</span>
-            </button>
-          ))}
-          {/* No celular os botões viram só barras; o texto do passo atual fica aqui. */}
-          <p className="v-steps-detail" aria-hidden="true">
-            <strong>{STEPS[step].title}</strong>
-            {STEPS[step].text}
-          </p>
+        <div className="v-how-grid">
+          <div className="v-steps" role="tablist" aria-label="Passos">
+            {STEPS.map((s, i) => (
+              <button
+                key={s.title}
+                role="tab"
+                aria-selected={i === step}
+                className={i === step ? 'on' : i < step ? 'done' : ''}
+                onClick={() => choose(i)}
+              >
+                <span className="v-steps-n">{String(i + 1).padStart(2, '0')}</span>
+                <strong>{s.title}</strong>
+                <span className="v-steps-t">{s.text}</span>
+                <span className="v-steps-bar" aria-hidden="true">
+                  <i key={i === step ? step : 'x'} />
+                </span>
+              </button>
+            ))}
+            {/* No celular os botões viram só barras; o texto do passo atual fica aqui. */}
+            <p className="v-steps-detail" aria-hidden="true">
+              <strong>{STEPS[step].title}</strong>
+              {STEPS[step].text}
+            </p>
+          </div>
+          <div className="v-stage" ref={stageRef} data-in>
+            <Corners />
+            <Waves />
+            {STEPS.map(({ title, Demo }, i) => (
+              <div key={title} className={`v-stage-card${i === step ? ' on' : ''}`} aria-hidden="true">
+                <Demo active={seen && i === step} />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -609,21 +587,10 @@ function XRay({ pin }) {
   );
 }
 
-function Circuit() {
-  return (
-    <svg className="v-circuit" viewBox="0 0 200 120" preserveAspectRatio="none" aria-hidden="true">
-      {['M0 30H60L80 50H200', 'M0 92H40L60 72H124L144 92H200', 'M120 0V28L138 46V120'].map((d, k) => (
-        <g key={d}>
-          <path d={d} />
-          <path className="flow" d={d} pathLength="244" style={{ '--k': k }} />
-        </g>
-      ))}
-    </svg>
-  );
-}
-
 function Roles({ pin }) {
   const ref = useRef(null);
+  // Perto da seção, as imagens deixam de esperar e carregam todas.
+  const near = useInView(ref, '150% 0px');
   const viewRef = useRef(null);
   const trackRef = useRef(null);
   const [active, setActive] = useState(0);
@@ -665,7 +632,7 @@ function Roles({ pin }) {
       data-snap=""
       data-lock={pin ? ROLES.length : undefined}
       className={`v-roles v-iso${pin ? ' is-pin' : ''}`}
-      style={{ '--tint': ROLES[active][2] }}
+      style={{ '--tint': ROLES[active].tint }}
       aria-labelledby="roles-title"
     >
       <div className="v-roles-in">
@@ -681,28 +648,48 @@ function Roles({ pin }) {
         </div>
         <div className="v-roles-view" ref={viewRef}>
           <ul className="v-roles-track" ref={trackRef}>
-            {ROLES.map(([t, d], i) => (
+            {ROLES.map((r, i) => (
               <li
-                key={t}
+                key={r.name}
                 className={`v-role${i === active ? ' on' : ''}`}
                 data-spot=""
                 onClick={() => i !== active && choose(i)}
               >
-                <div className={`v-role-art r${i + 1}`} aria-hidden="true">
-                  <Circuit />
-                  <i />
+                <div className="v-role-copy">
+                  <span className="v-role-k">Tela: {r.screen}</span>
+                  <h3>{r.name}</h3>
+                  <p>{r.text}</p>
+                  <ul className="v-role-points">
+                    {r.points.map((pt) => (
+                      <li key={pt}>{pt}</li>
+                    ))}
+                  </ul>
+                  <a
+                    href={ctaHref('trial')}
+                    target="_blank"
+                    rel="noreferrer"
+                    tabIndex={i === active ? 0 : -1}
+                  >
+                    Ver no teste <span aria-hidden="true">→</span>
+                  </a>
                 </div>
-                <h3>{t}</h3>
-                <p>{d}</p>
-                <a href={ctaHref('trial')} target="_blank" rel="noreferrer" tabIndex={i === active ? 0 : -1}>
-                  Ver no teste <span aria-hidden="true">→</span>
-                </a>
+                <figure className="v-role-print">
+                  <img
+                    src={r.print}
+                    alt={r.alt}
+                    width="1400"
+                    height={r.h}
+                    loading={near ? 'eager' : 'lazy'}
+                    decoding="async"
+                    style={{ '--pos': r.pos }}
+                  />
+                </figure>
               </li>
             ))}
           </ul>
         </div>
         <div className="v-roles-dots" role="group" aria-label="Escolher perfil">
-          {ROLES.map(([t], i) => (
+          {ROLES.map(({ name: t }, i) => (
             <button
               key={t}
               type="button"
@@ -719,9 +706,28 @@ function Roles({ pin }) {
   );
 }
 
-/** Tempo até `until` (data ISO), atualizado a cada segundo. Sem data válida e futura: null. */
-function useCountdown(until) {
-  const end = until ? new Date(until).getTime() : NaN;
+/**
+ * Fim da condição especial: a data fixa de CONFIG.countdown.until ou, sem
+ * ela, `minutes` depois da primeira visita da pessoa (guardada no navegador).
+ */
+function offerEnd({ until, minutes }) {
+  if (until) return new Date(until).getTime();
+  if (!minutes) return NaN;
+  const now = Date.now();
+  let start = now;
+  try {
+    const saved = Number(localStorage.getItem('ap-oferta-inicio'));
+    if (saved > 0 && saved <= now) start = saved;
+    else localStorage.setItem('ap-oferta-inicio', String(now));
+  } catch {
+    // Sem acesso ao armazenamento: conta a partir desta visita.
+  }
+  return start + minutes * 60000;
+}
+
+/** Tempo que falta, a cada segundo: [[valor, unidade], ...]. Acabou: null. */
+function useCountdown(cfg) {
+  const [end] = useState(() => offerEnd(cfg));
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     if (!(end > Date.now())) return;
@@ -730,11 +736,17 @@ function useCountdown(until) {
   }, [end]);
   if (!(end > now)) return null;
   const s = Math.floor((end - now) / 1000);
-  return [Math.floor(s / 86400), Math.floor(s / 3600) % 24, Math.floor(s / 60) % 60, s % 60];
+  const d = Math.floor(s / 86400);
+  const parts = [
+    [Math.floor(s / 3600) % 24, 'horas'],
+    [Math.floor(s / 60) % 60, 'min'],
+    [s % 60, 'seg'],
+  ];
+  return d ? [[d, 'dias'], ...parts] : parts;
 }
 
 function Planet() {
-  const left = useCountdown(CONFIG.countdown.until);
+  const left = useCountdown(CONFIG.countdown);
   return (
     <section id="brasil" className="v-planet v-iso" data-snap="" aria-labelledby="planet-title">
       <Sparks n={34} seed={11} className="v-planet-sparks" />
@@ -752,9 +764,9 @@ function Planet() {
           <div className="v-count" data-in style={{ '--d': '600ms' }}>
             <p>{CONFIG.countdown.label}</p>
             <div className="v-count-digits" role="timer">
-              {['dias', 'horas', 'min', 'seg'].map((u, i) => (
+              {left.map(([v, u]) => (
                 <span key={u}>
-                  <b>{String(left[i]).padStart(2, '0')}</b>
+                  <b>{String(v).padStart(2, '0')}</b>
                   <small>{u}</small>
                 </span>
               ))}

@@ -116,7 +116,10 @@ function Privacy() {
               <tr>
                 <td>Necessários</td>
                 <td>AutoPainel</td>
-                <td>Guardar a sua escolha de cookies e manter o site funcionando.</td>
+                <td>
+                  Guardar a sua escolha de cookies, o horário da primeira visita (para contar o prazo da
+                  condição especial) e manter o site funcionando.
+                </td>
                 <td>Não</td>
               </tr>
               <tr>

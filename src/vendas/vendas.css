@@ -569,20 +569,23 @@ body:has(.v) {
 }
 
 /* Dica de rolagem no pé da abertura; some depois do primeiro movimento. */
+.v-hero-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-block: auto;
+}
 .v-hint {
-  position: absolute;
-  bottom: max(22px, env(safe-area-inset-bottom, 0px));
-  left: 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
+  margin-top: clamp(24px, 5vh, 56px);
   font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--fg-3);
   text-decoration: none;
-  translate: -50% 0;
   transition: opacity 0.4s;
   animation: v-rise 1s var(--ease) 1.8s both;
 }
@@ -957,10 +960,11 @@ body:has(.v) {
   }
 }
 
-/* ---------- Como funciona (presa na tela enquanto os passos trocam) ---------- */
+/* ---------- Como funciona (presa na tela enquanto os passos trocam) ----------
+   Passos à esquerda e, à direita, a demonstração do passo (demos.jsx). */
 .v-how-in {
   position: relative;
-  max-width: var(--v-max);
+  max-width: calc(var(--v-max) + 120px);
   margin: 0 auto;
 }
 .v-how.is-pin {
@@ -975,36 +979,46 @@ body:has(.v) {
   justify-content: center;
   height: 100vh;
   height: 100svh;
-  max-width: calc(var(--v-max) + 2 * var(--gutter));
-  padding: 88px var(--gutter) 28px;
+  max-width: calc(var(--v-max) + 120px + 2 * var(--gutter));
+  padding: 84px var(--gutter) 24px;
 }
-.v-how.is-pin .v-head {
-  margin-bottom: clamp(16px, 3vh, 36px);
+.v-how-head {
+  margin-bottom: clamp(18px, 3vh, 36px);
 }
-.v-how.is-pin .v-head h2 {
-  font-size: clamp(30px, 4.6vw, 56px);
+.v-how.is-pin .v-how-head h2 {
+  font-size: clamp(30px, 4.4vw, 54px);
+}
+.v-how-grid {
+  display: grid;
+  grid-template-columns: minmax(250px, 0.72fr) minmax(0, 1.9fr);
+  gap: clamp(20px, 3vw, 44px);
+  align-items: center;
+}
+.v-how.is-pin .v-how-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+  align-items: stretch;
 }
 .v-stage {
   position: relative;
   display: grid;
-  place-content: center;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   place-items: center;
-  min-height: 420px;
+  min-height: 480px;
   border: 1px solid var(--line);
   border-radius: 28px;
   overflow: hidden;
   background: linear-gradient(180deg, rgba(8, 41, 95, 0.35), rgba(1, 11, 31, 0.6));
 }
 .v-how.is-pin .v-stage {
-  flex: 1 1 auto;
   min-height: 0;
-  max-height: 480px;
 }
 .v-waves {
   position: absolute;
   inset: auto 0 0;
   width: 100%;
-  height: 75%;
+  height: 60%;
 }
 .v-waves g {
   animation: v-wave-x var(--t) linear infinite;
@@ -1024,11 +1038,14 @@ body:has(.v) {
     transform: translateX(-800px);
   }
 }
-/* --fit vem de main.jsx: o cartão diminui para caber inteiro na área. */
+/* --fit vem de main.jsx: a demonstração diminui para caber inteira na área. */
 .v-stage-card {
   position: relative;
   grid-area: 1 / 1;
-  padding: 28px 16px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 24px 16px;
   opacity: 0;
   scale: var(--fit, 1);
   transform: translateY(18px) scale(0.97);
@@ -1042,229 +1059,84 @@ body:has(.v) {
   transform: none;
   pointer-events: auto;
 }
-.v-card {
-  width: min(400px, 82vw);
-  padding: 22px;
-  border: 1px solid var(--line-2);
-  border-radius: 20px;
-  background: rgba(2, 31, 81, 0.94);
-  box-shadow:
-    0 30px 80px -20px rgba(0, 0, 0, 0.7),
-    0 0 60px -20px var(--v-glow);
-}
-.v-card-k {
-  margin-bottom: 12px !important;
-  font-size: 12px;
-  color: var(--fg-3);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-.v-plate {
-  display: inline-block;
-  padding: 6px 14px;
-  border-radius: 6px;
-  border-top: 6px solid #0f4dbb;
-  background: #f1f6fc;
-  color: #021f51;
-  font-family: var(--mono);
-  font-size: 22px;
-  letter-spacing: 0.12em;
-}
-.v-card-sub {
-  margin: 8px 0 16px !important;
-  color: var(--fg-2);
-  font-size: 14px;
-}
-.v-card dl div {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--line);
-  font-size: 14px;
-}
-.v-card dt {
-  color: var(--fg-2);
-}
-.v-card-big {
-  margin-top: 16px !important;
-  font-size: 15px;
-}
-.v-card-big strong {
-  display: block;
-  font-family: var(--display);
-  font-size: 34px;
-  font-weight: 600;
-  color: var(--accent);
-}
-/* Passo 1: cartões em leque */
-.v-fan {
-  position: relative;
-}
-.v-fan::before,
-.v-fan::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border: 1px solid var(--line-2);
-  border-radius: 20px;
-  background: rgba(2, 31, 81, 0.55);
-}
-.v-fan::before {
-  transform: rotate(-7deg) translate(-26px, 10px);
-}
-.v-fan::after {
-  transform: rotate(6deg) translate(24px, 8px);
-}
-.v-fan .v-card {
-  position: relative;
-  z-index: 1;
-}
-/* Passo 2: janela do painel */
-.v-window-bar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: -6px 0 14px !important;
-  font-size: 12px;
-  color: var(--fg-3);
-}
-.v-window-bar i {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.16);
-}
-.v-window-bar span {
-  margin-left: 8px;
-}
-.v-card-pub ul {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-.v-card-pub li {
-  display: flex;
-  justify-content: space-between;
-  gap: 6px;
-  padding: 9px 10px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  font-size: 13px;
-}
-.on .v-card-pub li {
-  animation: v-rise 0.6s var(--ease) calc(var(--i) * 80ms) both;
-}
-.v-card-pub li span {
-  color: var(--ok);
-  font-size: 11px;
-}
-/* Passo 3: celular */
-.v-phone {
-  position: relative;
-  padding: 18px 10px 12px;
-  border: 1px solid var(--line-2);
-  border-radius: 40px;
-  background: #020e26;
-  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.8);
-}
-.v-phone::before {
-  content: '';
-  position: absolute;
-  top: 8px;
-  left: 50%;
-  width: 70px;
-  height: 5px;
-  margin-left: -35px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.14);
-}
-.v-phone .v-card {
-  width: min(300px, 72vw);
-  border-radius: 28px;
-}
-.v-lead {
-  display: grid;
-  grid-template-columns: 34px 1fr;
-  gap: 4px 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--line);
-}
-.on .v-lead {
-  animation: v-rise 0.6s var(--ease) calc(var(--i) * 120ms) both;
-}
-.v-lead strong,
-.v-lead span {
-  display: block;
-  font-size: 14px;
-}
-.v-lead div span {
-  color: var(--fg-2);
-  font-size: 13px;
-}
-.v-lead em {
-  grid-column: 2;
-  justify-self: start;
-  padding: 2px 8px;
-  border-radius: 99px;
-  font-style: normal;
-  font-size: 12px;
-  color: var(--accent);
-  background: rgba(0, 163, 236, 0.12);
-}
-.v-avatar {
-  display: grid !important;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: var(--accent-grad);
-  font-weight: 700;
-}
 .v-steps {
-  position: relative;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  max-width: var(--v-max);
-  margin: 20px auto 0;
-}
-.v-steps-glow {
-  position: absolute;
-  z-index: -1;
-  top: -70px;
-  left: calc(var(--step) * (100% + 16px) / 3);
-  width: calc((100% - 32px) / 3);
-  height: 200px;
-  background: radial-gradient(closest-side, rgba(0, 163, 236, 0.3), transparent);
-  pointer-events: none;
-  transition: left 0.7s var(--ease);
+  align-content: center;
+  gap: 10px;
 }
 .v-steps button {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 0;
-  border: 0;
-  background: none;
+  position: relative;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 4px 14px;
+  padding: 16px 18px 18px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(8, 41, 95, 0.16);
   color: var(--fg-3);
   font: inherit;
   text-align: left;
   cursor: pointer;
-  transition: color 0.3s;
+  transition:
+    background 0.4s,
+    border-color 0.4s,
+    color 0.3s;
+}
+.v-steps button:hover {
+  border-color: var(--line-2);
 }
 .v-steps button.on {
+  border-color: rgba(127, 214, 255, 0.35);
+  background: rgba(8, 41, 95, 0.55);
   color: var(--fg);
 }
+.v-steps-n {
+  grid-row: span 2;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--line-2);
+  border-radius: 50%;
+  font-family: var(--mono);
+  font-size: 13px;
+  transition:
+    background 0.4s,
+    box-shadow 0.4s;
+}
+.v-steps .on .v-steps-n {
+  border-color: transparent;
+  background: var(--accent-grad);
+  color: #fff;
+  box-shadow: 0 0 20px var(--v-glow);
+}
+.v-steps strong {
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+.v-steps-t {
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--fg-2);
+}
+.v-steps button:not(.on) .v-steps-t {
+  color: var(--fg-3);
+}
 .v-steps-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   height: 2px;
-  margin-bottom: 10px;
-  background: var(--line-2);
   overflow: hidden;
 }
 .v-steps-bar i {
   display: block;
-  height: 100%;
   width: 0;
+  height: 100%;
   background: var(--accent);
   box-shadow: 0 0 10px var(--accent);
 }
@@ -1272,30 +1144,14 @@ body:has(.v) {
   width: 100%;
   transition: width 0.7s var(--ease);
 }
-.v-steps .done .v-steps-bar i {
-  width: 100%;
-}
 .v-how.is-auto .v-steps .on .v-steps-bar i {
   width: 100%;
-  animation: v-fill 5s linear;
+  animation: v-fill 9s linear;
 }
 @keyframes v-fill {
   from {
     width: 0;
   }
-}
-.v-steps-n {
-  font-size: 12px;
-  font-family: var(--mono);
-}
-.v-steps strong {
-  font-family: var(--display);
-  font-size: 20px;
-  font-weight: 500;
-}
-.v-steps-t {
-  font-size: 14px;
-  line-height: 1.5;
 }
 .v-steps-detail {
   display: none;
@@ -1503,7 +1359,7 @@ body:has(.v) {
   transform: none;
 }
 
-/* ---------- Perfis: carrossel preso à rolagem, fundo muda de cor ---------- */
+/* ---------- Perfis: carrossel preso à rolagem com a tela de cada função ---------- */
 .v .v-roles {
   padding-inline: 0;
   transition: --tint 1s;
@@ -1530,19 +1386,20 @@ body:has(.v) {
   flex-direction: column;
   justify-content: center;
   height: 100vh;
-  padding: 84px 0 28px;
+  height: 100svh;
+  padding: 80px 0 24px;
   overflow: hidden;
 }
 .v-roles.is-pin .v-head {
-  margin-bottom: clamp(16px, 3vh, 40px);
+  margin-bottom: clamp(14px, 2.5vh, 32px);
 }
 .v-roles-view {
   overflow: hidden;
-  padding-block: 14px;
+  padding-block: 10px;
 }
 .v-roles-track {
   display: flex;
-  gap: 20px;
+  gap: 24px;
   width: max-content;
   transition: transform 0.9s var(--ease);
 }
@@ -1552,13 +1409,17 @@ body:has(.v) {
 .v-role {
   position: relative;
   flex: none;
-  width: min(340px, 76vw);
-  padding: 16px;
+  display: grid;
+  grid-template-columns: minmax(210px, 0.62fr) minmax(0, 1.6fr);
+  align-items: center;
+  gap: clamp(18px, 2.4vw, 32px);
+  width: min(1180px, 88vw);
+  padding: clamp(16px, 2vw, 24px);
   border: 1px solid var(--line);
-  border-radius: 22px;
+  border-radius: 26px;
   background: var(--v-card);
-  opacity: 0.32;
-  transform: scale(0.9);
+  opacity: 0.3;
+  transform: scale(0.94);
   filter: saturate(0.3);
   cursor: pointer;
   transition:
@@ -1569,101 +1430,81 @@ body:has(.v) {
     box-shadow 0.6s;
 }
 .v-role.on {
+  border-color: rgba(127, 214, 255, 0.3);
+  box-shadow: 0 40px 100px -50px var(--tint);
   opacity: 1;
   transform: none;
   filter: none;
   cursor: auto;
-  border-color: rgba(127, 214, 255, 0.3);
-  box-shadow: 0 30px 80px -40px var(--tint);
 }
 .v-role > * {
   position: relative;
   z-index: 1;
 }
-.v-role-art {
-  position: relative;
-  height: 160px;
-  margin-bottom: 18px;
-  border-radius: 14px;
-  overflow: hidden;
-  background: #021433;
+.v-role-copy {
+  display: grid;
+  align-content: center;
+  gap: 10px;
 }
-.v-role-art::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 22px),
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 22px);
-}
-.v-role-art > i {
-  position: absolute;
-  inset: 25% 32%;
-  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
-  transition:
-    transform 0.8s var(--ease),
-    filter 0.8s;
-}
-.v-role.on .v-role-art > i {
-  transform: rotate(45deg) scale(1.08);
-  filter: brightness(1.2);
-}
-.r1 > i {
-  background: linear-gradient(135deg, #c6ecff, #0076e5);
-}
-.r2 > i {
-  background: linear-gradient(135deg, #7fd6ff, #021f51);
-}
-.r3 > i {
-  background: linear-gradient(135deg, #00a3ec, #3fd486);
-}
-.r4 > i {
-  background: linear-gradient(135deg, #f1f6fc, #6f84a8);
-}
-.v-circuit {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-.v-circuit path {
-  fill: none;
-  stroke: rgba(127, 214, 255, 0.16);
-  stroke-width: 1.2;
-  vector-effect: non-scaling-stroke;
-}
-.v-circuit .flow {
-  stroke: #c6ecff;
-  stroke-width: 2;
-  stroke-dasharray: 26 218;
-  stroke-dashoffset: 244;
-  opacity: 0;
-  transition: opacity 0.6s;
-}
-.v-role.on .v-circuit .flow {
-  opacity: 0.9;
-  animation: v-flow 2.6s linear calc(var(--k) * -0.8s) infinite;
-}
-@keyframes v-flow {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-.v-role h3 {
-  font-size: 24px;
-}
-.v-role p {
-  margin: 8px 0 16px;
-  font-size: 14px;
-  color: var(--fg-2);
-}
-.v-role a {
-  display: inline-block;
-  padding: 7px 14px;
+.v-role-k {
+  justify-self: start;
+  padding: 4px 10px;
   border: 1px solid var(--line-2);
   border-radius: 99px;
-  font-size: 13px;
+  font-size: 12px;
+  color: var(--fg-2);
+}
+.v-role h3 {
+  font-size: clamp(28px, 3vw, 40px);
+}
+.v-role-copy > p {
+  font-size: 16px;
+  color: var(--fg-2);
+}
+.v-role-points {
+  display: grid;
+  gap: 6px;
+  margin: 4px 0 6px;
+}
+.v-role-points li {
+  position: relative;
+  padding-left: 20px;
+  font-size: 14.5px;
+}
+.v-role-points li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0.55em;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+.v-role-copy a {
+  justify-self: start;
+  padding: 8px 16px;
+  border: 1px solid var(--line-2);
+  border-radius: 99px;
+  font-size: 14px;
   text-decoration: none;
+}
+.v-role-print {
+  margin: 0;
+  overflow: hidden;
+  border-radius: 16px;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 30px 70px -30px rgba(0, 0, 0, 0.8);
+}
+.v-role-print img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: calc(100svh - 300px);
+  object-fit: cover;
+  object-position: left top;
 }
 .v-roles-dots {
   display: flex;
@@ -2284,8 +2125,37 @@ body:has(.v) {
   .v-capital-in {
     grid-template-columns: 1fr;
   }
+  .v-how-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .v-how.is-pin .v-how-grid {
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+  .v-stage {
+    min-height: 380px;
+  }
   .v-steps {
-    gap: 10px;
+    order: 2;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .v-steps button {
+    grid-template-columns: 1fr;
+    padding: 9px 12px 11px;
+    border-radius: 12px;
+  }
+  .v-steps-n {
+    grid-row: auto;
+    justify-self: start;
+    width: auto;
+    height: auto;
+    border: 0;
+    font-size: 12px;
+  }
+  .v-steps .on .v-steps-n {
+    background: none;
+    box-shadow: none;
+    color: var(--accent);
   }
   .v-steps button strong,
   .v-steps button .v-steps-t {
@@ -2304,8 +2174,23 @@ body:has(.v) {
     font-size: 19px;
     color: var(--fg);
   }
-  .v-steps-glow {
+  .v-role {
+    grid-template-columns: minmax(0, 1fr);
+    width: 86vw;
+  }
+  .v-role-print {
+    order: -1;
+  }
+  .v-role-print img {
+    height: 230px;
+    max-height: none;
+    object-position: var(--pos, 40% 0);
+  }
+  .v-role-points {
     display: none;
+  }
+  .v-role h3 {
+    font-size: 26px;
   }
   .v-voice {
     width: 290px;
@@ -2371,14 +2256,19 @@ body:has(.v) {
   .v-how.is-pin .v-how-in {
     padding-top: 76px;
   }
+  .v-how.is-pin .v-how-head {
+    margin-bottom: 12px;
+  }
+  .v-how.is-pin .v-how-head p {
+    display: none;
+  }
 }
 /* Telas baixas: o "Como funciona" preso fica mais enxuto para caber. */
 @media (max-height: 760px) {
   .v-how.is-pin .v-how-in {
     padding-top: 80px;
   }
-  .v-how.is-pin .v-head p,
-  .v-how.is-pin .v-steps-t {
+  .v-how.is-pin .v-head p {
     display: none;
   }
   .v-how.is-pin .v-head h2 {
@@ -2386,6 +2276,11 @@ body:has(.v) {
   }
   .v-how.is-pin .v-steps-detail {
     min-height: 0;
+  }
+}
+@media (max-height: 640px) {
+  .v-how.is-pin .v-steps-t {
+    display: none;
   }
 }
 

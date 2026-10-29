@@ -635,6 +635,20 @@ export function scrollToProgress(el, p) {
   window.scrollTo({ top, behavior: reduceMotion() ? 'auto' : 'smooth' });
 }
 
+/** true enquanto o elemento está na tela (rootMargin amplia a área). */
+export function useInView(ref, rootMargin = '0px') {
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), {
+      rootMargin,
+      threshold: 0.3,
+    });
+    io.observe(ref.current);
+    return () => io.disconnect();
+  }, [ref, rootMargin]);
+  return inView;
+}
+
 /** Troca automática a cada `ms` (passos, perfis) quando a seção não está presa. */
 export function useAutoStep(active, count, ms, setIndex) {
   useEffect(() => {
