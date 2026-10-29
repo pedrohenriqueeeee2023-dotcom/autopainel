@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>AutoPainel | Venda mais seminovos</title>
+    <meta
+      name="description"
+      content="AutoPainel: saiba até quanto pagar em cada carro pela placa, anuncie em 8 canais e acompanhe os leads. Teste 7 dias com Raio-X grátis e onboarding feito pela nossa equipe."
+    />
+    <!-- Google tag (gtag.js): ID de métrica do GA4. Os eventos ficam em src/analytics.js. -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R17LQ89M6L"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      // LGPD: nada é medido até o visitante aceitar no aviso de cookies (src/consent.js).
+      var apConsent = null;
+      try {
+        apConsent = localStorage.getItem('ap-cookies');
+      } catch (e) {}
+      var apGranted = apConsent === 'all' ? 'granted' : 'denied';
+      gtag('consent', 'default', {
+        analytics_storage: apGranted,
+        ad_storage: apGranted,
+        ad_user_data: apGranted,
+        ad_personalization: apGranted,
+      });
+      gtag('js', new Date());
+      gtag('config', 'G-R17LQ89M6L');
+    </script>
+    <!-- Meta Pixel: o ID vem da variável VITE_META_PIXEL_ID (Vercel > Settings > Environment Variables).
+         Sem a variável, o Pixel não carrega. O evento Lead fica em src/analytics.js. -->
+    <script>
+      if (/^\d+$/.test('%VITE_META_PIXEL_ID%')) {
+        !(function (f, b, e, v, n, t, s) {
+          if (f.fbq) return;
+          n = f.fbq = function () {
+            n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+          };
+          if (!f._fbq) f._fbq = n;
+          n.push = n;
+          n.loaded = !0;
+          n.version = '2.0';
+          n.queue = [];
+          t = b.createElement(e);
+          t.async = !0;
+          t.src = v;
+          s = b.getElementsByTagName(e)[0];
+          s.parentNode.insertBefore(t, s);
+        })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+        if (apConsent !== 'all') fbq('consent', 'revoke');
+        fbq('init', '%VITE_META_PIXEL_ID%');
+        fbq('track', 'PageView');
+      }
+    </script>
+    <meta name="theme-color" content="#021f51" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@300..800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Instrument+Serif:ital@0;1&display=swap"
+    />
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: #021f51;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/vendas/main.jsx"></script>
+  </body>
+</html>

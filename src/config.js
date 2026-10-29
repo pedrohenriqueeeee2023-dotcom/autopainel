@@ -83,6 +83,31 @@ export const CONFIG = {
   },
 };
 
+/** Perguntas frequentes: usadas no site e na página de vendas. */
+export const FAQ_ITEMS = [
+  [
+    'Quanto custa?',
+    'Os 7 dias de teste e o Raio-X são grátis. Depois do teste, a equipe passa os valores pelo WhatsApp.',
+  ],
+  ['Preciso cadastrar cartão?', 'Não. Você chama a equipe no WhatsApp e combina tudo por lá.'],
+  [
+    'Como funciona o teste de 7 dias?',
+    'Você chama a equipe no WhatsApp e recebe o Raio-X grátis. No onboarding, a equipe cadastra a sua loja, os seus carros e os seus vendedores, e você usa o AutoPainel por 7 dias.',
+  ],
+  [
+    'Como funciona a calculadora de compra?',
+    'Você digita a placa e o painel mostra a FIPE e anúncios parecidos como referência. Desconta os custos e a margem que você definir e mostra até quanto pagar.',
+  ],
+  [
+    'Em quais canais o anúncio é publicado?',
+    'OLX, Mercado Livre, o site da loja, Tray, Nuvemshop, Shopify, WooCommerce e Loja Integrada. A equipe deixa a integração de cada canal configurada.',
+  ],
+  [
+    'Quem da loja pode usar?',
+    'Sócio, gerente, vendedor e financeiro. Cada perfil tem um painel com o que importa para a função.',
+  ],
+];
+
 /** Resolve o destino de um CTA, com fallback explícito para a seção de planos. */
 export function ctaHref(key) {
   const cta = CONFIG.ctas[key];
