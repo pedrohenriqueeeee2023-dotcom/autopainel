@@ -14,7 +14,8 @@ import {
   initMarquees,
   initReveal,
   initScrollVars,
-  initSmoothWheel,
+  initScrollGuide,
+  initSectionTracker,
   initSpotlight,
   reduceMotion,
   scrollToProgress,
@@ -106,6 +107,55 @@ const XRAY = [
   ['Onboarding', 'Onboarding: a gente cadastra a loja, os carros e os vendedores para você.'],
 ];
 
+/* Indicador lateral: [id da seção, nome]. Nas seções presas mostra os passos. */
+const RAIL = [
+  ['topo', 'Início'],
+  ['numeros', 'Números'],
+  ['loja', 'Sua loja'],
+  ['como', 'Como funciona'],
+  ['raio-x', 'Raio-X'],
+  ['perfis', 'Perfis'],
+  ['brasil', 'Revendas'],
+  ['por-que', 'Por que'],
+  ['depoimentos', 'Depoimentos'],
+  ['duvidas', 'Dúvidas'],
+  ['contato', 'Contato'],
+];
+
+function Rail() {
+  const [cur, setCur] = useState({ id: 'topo', step: 0, n: 0 });
+  useEffect(() => {
+    const on = (e) => setCur(e.detail);
+    document.addEventListener('v-guide', on);
+    return () => document.removeEventListener('v-guide', on);
+  }, []);
+  return (
+    <nav className="v-rail" aria-label="Seções da página">
+      {RAIL.map(([id, label]) => {
+        const on = cur.id === id;
+        return (
+          <a key={id} href={`#${id}`} className={on ? 'on' : ''} aria-current={on ? 'true' : undefined}>
+            <span className="v-rail-label">
+              {label}
+              {on && cur.n > 0 && (
+                <em>
+                  {' '}
+                  {cur.step + 1}/{cur.n}
+                </em>
+              )}
+            </span>
+            <span className="v-rail-dot" aria-hidden="true">
+              {on &&
+                cur.n > 0 &&
+                Array.from({ length: cur.n }, (_, k) => <b key={k} className={k <= cur.step ? 'on' : ''} />)}
+            </span>
+          </a>
+        );
+      })}
+    </nav>
+  );
+}
+
 /* ---------------------------------------------------------------- seções */
 
 function Nav() {
@@ -140,7 +190,7 @@ function Nav() {
 
 function Hero() {
   return (
-    <section id="topo" className="v-hero v-iso" aria-labelledby="hero-title">
+    <section id="topo" className="v-hero v-iso" data-snap="" aria-labelledby="hero-title">
       <div className="v-beam" aria-hidden="true" />
       <Sparks n={28} seed={5} className="v-hero-sparks" />
       <div className="v-floaters" aria-hidden="true">
@@ -172,6 +222,12 @@ function Hero() {
         <Cta />
         <Cta kind="contact" />
       </div>
+      <a className="v-hint" href="#numeros">
+        <span className="v-hint-mouse" aria-hidden="true">
+          <i />
+        </span>
+        Role para ver
+      </a>
     </section>
   );
 }
@@ -182,7 +238,7 @@ function Stats() {
     { label: 'canais de anúncio integrados', value: 8, suffix: '' },
   ];
   return (
-    <section className="v-stats v-iso" aria-label="Números do AutoPainel">
+    <section id="numeros" className="v-stats v-iso" data-snap="" aria-label="Números do AutoPainel">
       <div className="v-stats-field" data-scroll>
         <span className="v-cross" data-in="own" aria-hidden="true">
           <i className="v-cross-v" />
@@ -205,7 +261,7 @@ function Stats() {
 
 function Capital() {
   return (
-    <section className="v-capital" aria-labelledby="capital-title">
+    <section id="loja" className="v-capital" data-snap="" aria-labelledby="capital-title">
       <div className="v-capital-in">
         <h2 id="capital-title" className="v-capital-title" data-in="own">
           <span className="v-line">
@@ -358,9 +414,7 @@ function How({ pin }) {
   const [step, setStep] = useState(0);
   const [auto, setAuto] = useState(true);
   const onProgress = useCallback((p) => {
-    const s = Math.min(STEPS.length - 1, Math.floor(p * STEPS.length));
-    setStep(s);
-    ref.current.style.setProperty('--sp', Math.min(1, p * STEPS.length - s).toFixed(3));
+    setStep(Math.round(p * (STEPS.length - 1)));
   }, []);
   useScrollProgress(ref, pin, onProgress);
   useAutoStep(!pin && auto, STEPS.length, 5000, setStep);
@@ -390,7 +444,7 @@ function How({ pin }) {
   }, []);
 
   const choose = (i) => {
-    if (pin) return scrollToProgress(ref.current, (i + 0.5) / STEPS.length);
+    if (pin) return scrollToProgress(ref.current, i / (STEPS.length - 1));
     setStep(i);
     setAuto(false);
   };
@@ -399,6 +453,8 @@ function How({ pin }) {
     <section
       id="como"
       ref={ref}
+      data-snap=""
+      data-lock={pin ? STEPS.length : undefined}
       className={`v-how v-iso${pin ? ' is-pin' : ''}${auto && !pin ? ' is-auto' : ''}`}
       aria-labelledby="how-title"
     >
@@ -456,83 +512,98 @@ function XRay({ pin }) {
   const ref = useRef(null);
   const [phase, setPhase] = useState(0);
   const [auto, setAuto] = useState(true);
-  const onProgress = useCallback((p) => setPhase(p < 0.5 ? 0 : 1), []);
-  useScrollProgress(ref, pin, onProgress, 'view');
+  const onProgress = useCallback((p) => {
+    setPhase(Math.round(p));
+    ref.current.style.setProperty('--xp', p.toFixed(3));
+  }, []);
+  useScrollProgress(ref, pin, onProgress);
   useAutoStep(!pin && auto, 2, 4500, setPhase);
+  const choose = (i) => {
+    if (pin) return scrollToProgress(ref.current, i);
+    setPhase(i);
+    setAuto(false);
+  };
 
   return (
-    <section ref={ref} className="v-xray v-iso" data-scroll aria-labelledby="xray-title">
+    <section
+      id="raio-x"
+      ref={ref}
+      className={`v-xray v-iso${pin ? ' is-pin' : ''}`}
+      style={pin ? undefined : { '--xp': phase }}
+      data-snap=""
+      data-lock={pin ? 2 : undefined}
+      aria-labelledby="xray-title"
+    >
       <h2 id="xray-title" className="v-sr">
         Raio-X grátis e onboarding feito pela equipe
       </h2>
-      <div className={`v-xray-stage ph${phase}`}>
-        {XRAY.map(([word], i) => (
-          <button
-            key={word}
-            type="button"
-            className={`v-xray-word ${i ? 'b' : 'a'}${phase === i ? ' on' : ''}`}
-            aria-pressed={phase === i}
-            onClick={() => {
-              setPhase(i);
-              setAuto(false);
-            }}
-          >
-            {word}
-          </button>
-        ))}
-        <div className="v-xray-card-wrap" aria-hidden="true">
-          <Sparks n={16} seed={9} className="v-xray-sparks" />
-          <div className="v-xray-card">
-            <div className={`v-face${phase === 0 ? ' on' : ''}`}>
-              <p className="v-face-head">
-                <span className="ap-logo-mark" /> Raio-X da sua loja <em>Grátis</em>
-              </p>
-              <dl>
-                <div>
-                  <dt>Carros parados há mais de 60 dias</dt>
-                  <dd>9</dd>
-                </div>
-                <div>
-                  <dt>Leads sem resposta</dt>
-                  <dd>23</dd>
-                </div>
-                <div>
-                  <dt>Margem média por carro</dt>
-                  <dd>R$ 7.900</dd>
-                </div>
-              </dl>
-              <p className="v-face-foot">Feito pela equipe AutoPainel</p>
-            </div>
-            <div className={`v-face${phase === 1 ? ' on' : ''}`}>
-              <p className="v-face-head">
-                <span className="ap-logo-mark" /> Onboarding <em>Pela equipe</em>
-              </p>
-              <ul className="v-face-list">
-                {[
-                  'Loja cadastrada',
-                  '42 carros importados',
-                  '4 vendedores com acesso',
-                  '8 canais conectados',
-                ].map((t, i) => (
-                  <li key={t} style={{ '--i': i }}>
-                    <svg viewBox="0 0 24 24">
-                      <path d="M5 12.5l4.5 4.5L19 7.5" pathLength="1" />
-                    </svg>
-                    {t}
-                  </li>
-                ))}
-              </ul>
-              <p className="v-face-foot">Sua loja pronta para o teste de 7 dias</p>
+      <div className="v-xray-in">
+        <div className={`v-xray-stage ph${phase}`}>
+          {XRAY.map(([word], i) => (
+            <button
+              key={word}
+              type="button"
+              className={`v-xray-word ${i ? 'b' : 'a'}${phase === i ? ' on' : ''}`}
+              aria-pressed={phase === i}
+              onClick={() => choose(i)}
+            >
+              {word}
+            </button>
+          ))}
+          <div className="v-xray-card-wrap" aria-hidden="true">
+            <Sparks n={16} seed={9} className="v-xray-sparks" />
+            <div className="v-xray-card">
+              <div className={`v-face${phase === 0 ? ' on' : ''}`}>
+                <p className="v-face-head">
+                  <span className="ap-logo-mark" /> Raio-X da sua loja <em>Grátis</em>
+                </p>
+                <dl>
+                  <div>
+                    <dt>Carros parados há mais de 60 dias</dt>
+                    <dd>9</dd>
+                  </div>
+                  <div>
+                    <dt>Leads sem resposta</dt>
+                    <dd>23</dd>
+                  </div>
+                  <div>
+                    <dt>Margem média por carro</dt>
+                    <dd>R$ 7.900</dd>
+                  </div>
+                </dl>
+                <p className="v-face-foot">Feito pela equipe AutoPainel</p>
+              </div>
+              <div className={`v-face${phase === 1 ? ' on' : ''}`}>
+                <p className="v-face-head">
+                  <span className="ap-logo-mark" /> Onboarding <em>Pela equipe</em>
+                </p>
+                <ul className="v-face-list">
+                  {[
+                    'Loja cadastrada',
+                    '42 carros importados',
+                    '4 vendedores com acesso',
+                    '8 canais conectados',
+                  ].map((t, i) => (
+                    <li key={t} style={{ '--i': i }}>
+                      <svg viewBox="0 0 24 24">
+                        <path d="M5 12.5l4.5 4.5L19 7.5" pathLength="1" />
+                      </svg>
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+                <p className="v-face-foot">Sua loja pronta para o teste de 7 dias</p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div className="v-xray-caps">
-        {XRAY.map(([word, cap], i) => (
-          <p key={word} className={phase === i ? 'on' : ''}>
-            {cap}
-          </p>
-        ))}
+        <div className="v-xray-caps">
+          {XRAY.map(([word, cap], i) => (
+            <p key={word} className={phase === i ? 'on' : ''}>
+              {cap}
+            </p>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -591,6 +662,8 @@ function Roles({ pin }) {
     <section
       id="perfis"
       ref={ref}
+      data-snap=""
+      data-lock={pin ? ROLES.length : undefined}
       className={`v-roles v-iso${pin ? ' is-pin' : ''}`}
       style={{ '--tint': ROLES[active][2] }}
       aria-labelledby="roles-title"
@@ -663,7 +736,7 @@ function useCountdown(until) {
 function Planet() {
   const left = useCountdown(CONFIG.countdown.until);
   return (
-    <section className="v-planet v-iso" aria-labelledby="planet-title">
+    <section id="brasil" className="v-planet v-iso" data-snap="" aria-labelledby="planet-title">
       <Sparks n={34} seed={11} className="v-planet-sparks" />
       <Meteors n={5} seed={3} />
       <div className="v-planet-in">
@@ -751,7 +824,7 @@ function WhyArt({ type }) {
 
 function Why() {
   return (
-    <section className="v-why v-iso" aria-labelledby="why-title">
+    <section id="por-que" className="v-why v-iso" data-snap="" aria-labelledby="why-title">
       <GridFx seed={7} runners={4} />
       <div className="v-head">
         <h2 id="why-title" data-in="own">
@@ -800,7 +873,7 @@ function Voices() {
     return [...half, ...half].map((x, i) => <Voice key={i} x={x} hidden={!readable || i >= list.length} />);
   };
   return (
-    <section id="depoimentos" className="v-voices" aria-labelledby="voices-title">
+    <section id="depoimentos" className="v-voices" data-snap="" aria-labelledby="voices-title">
       <div className="v-head">
         <h2 id="voices-title" data-in="own">
           <Split>
@@ -829,7 +902,7 @@ function Voices() {
 
 function Faq() {
   return (
-    <section id="duvidas" className="v-faq v-iso" aria-labelledby="faq-title">
+    <section id="duvidas" className="v-faq v-iso" data-snap="" aria-labelledby="faq-title">
       <GridFx seed={13} runners={4} />
       <div className="v-head">
         <h2 id="faq-title" data-in="own">
@@ -857,7 +930,7 @@ function Faq() {
 
 function Talk() {
   return (
-    <section className="v-talk v-iso" aria-labelledby="talk-title">
+    <section id="contato" className="v-talk v-iso" data-snap="" aria-labelledby="talk-title">
       <GridFx seed={21} runners={3} />
       <Marquee text="Vamos conversar · " speed={0.8} className="v-talk-mq" />
       <h2 id="talk-title" data-in="own">
@@ -884,7 +957,8 @@ function Vendas() {
   useEffect(() => initAccordion(ref.current), []);
   useEffect(() => initPointerFx(ref.current), []);
   useEffect(() => initCurtains(ref.current), []);
-  useEffect(() => initSmoothWheel(), []);
+  useEffect(() => initScrollGuide(ref.current), []);
+  useEffect(() => initSectionTracker(ref.current), []);
   useEffect(() => initAnalytics(), []);
   return (
     <div className={`ap v${pin ? ' v-pin-on' : ''}`} ref={ref}>
@@ -892,6 +966,7 @@ function Vendas() {
         Pular para o conteúdo
       </a>
       <Nav />
+      <Rail />
       <main id="conteudo">
         <div className="v-curtain">
           <Hero />
