@@ -116,19 +116,20 @@ function lockZones(root) {
 }
 const snapPoints = (root) => [...root.querySelectorAll('[data-snap]')].map(absTop);
 
-/* Tempo mínimo em cada passo de uma seção presa antes de aceitar o próximo
-   gesto: dá tempo de a troca de passo aparecer inteira. */
-const DWELL = 600;
+/* Velocidade da roda (px/s) a partir da qual os encaixes deixam de segurar:
+   rolar rápido passa direto pelos passos das seções presas. */
+const FAST = 3000;
 
 /**
- * Guia de rolagem (só com movimento liberado):
- *  - direciona: parou perto do começo da próxima seção, a página desliza até ela;
- *  - trava: nas seções presas, cada gesto (roda, toque ou teclado) mostra um
- *    passo; rolar rápido não pula passos;
- *  - passa na hora certa: depois do último passo, o próximo gesto leva à
- *    seção seguinte, e só depois de o passo atual ter aparecido.
- * Fora das seções presas, a roda do mouse rola com embalo. Links internos
- *  (#como, #perfis...) deslizam até a seção.
+ * Guia de rolagem (só com movimento liberado), dinâmico:
+ *  - direciona: parou perto do começo de uma seção, a página desliza até ela;
+ *  - encaixa: nas seções presas, rolar com calma para em cada passo; o
+ *    próximo gesto já segue, e rolar rápido passa direto;
+ *  - completa: parou no meio de uma seção presa, a página termina o
+ *    movimento até o passo seguinte, no sentido em que a pessoa vinha.
+ * A roda do mouse rola com embalo; toque e teclado seguem o navegador (o
+ * teclado anda de passo em passo nas seções presas). Links internos
+ * (#como, #perfis...) deslizam até a seção.
  */
 export function initScrollGuide(root) {
   if (reduceMotion()) return () => {};
@@ -138,24 +139,25 @@ export function initScrollGuide(root) {
   let current = target;
   let lerp = 0; // rolagem com embalo (roda do mouse)
   let anim = 0; // deslize até um ponto
-  let animKind = '';
-  let busyUntil = 0;
+  let glideTo = null;
   let lastWheel = 0;
-  let gestureUsed = false;
+  let recent = []; // [tempo, px] da roda nos últimos 150 ms
+  let hold = null; // encaixe segurando a rolagem: { p, push }
   let lastY = window.scrollY;
   let lastDir = 1;
   let lastInput = '';
-  let touchY = null;
-  let touchLock = false;
-  let lastTouch = 0;
+  let touching = false;
   let settle = 0;
+  let expect = null; // posição que o próprio guia acabou de pedir
 
   const maxY = () => doc.scrollHeight - window.innerHeight;
-  // Inclui o trecho em que a seção presa sai da tela: ali também cada gesto
-  // vai direto ao último passo (subindo) ou à seção seguinte (descendo).
+  // Inclui o trecho em que a seção presa sai da tela (até o começo da seguinte).
   const zoneAt = (y) => lockZones(root).find((z) => y >= z.top - 2 && y < z.bottom - 2);
-  const stops = () =>
-    [...snapPoints(root), ...lockZones(root).flatMap((z) => z.points)].sort((a, b) => a - b);
+  /** Encaixes: cada passo das seções presas e o começo da seção seguinte. */
+  const detents = () =>
+    lockZones(root)
+      .flatMap((z) => [...z.points, z.bottom])
+      .sort((a, b) => a - b);
 
   const release = () => {
     if (!lerp && !anim) doc.style.scrollBehavior = '';
@@ -168,11 +170,11 @@ export function initScrollGuide(root) {
   const stopGlide = () => {
     cancelAnimationFrame(anim);
     anim = 0;
-    animKind = '';
+    glideTo = null;
     release();
   };
 
-  /** Desliza até y. kind 'lock' segura o próximo gesto por DWELL. */
+  /** Desliza até y. Os links usam uma curva mais suave nas duas pontas. */
   const glide = (to, kind) => {
     stopLerp();
     stopGlide();
@@ -180,21 +182,22 @@ export function initScrollGuide(root) {
     const from = window.scrollY;
     const d = to - from;
     if (Math.abs(d) < 1) return;
-    const dur = clamp(420 + Math.abs(d) * 0.35, 520, 1100);
+    const dur = clamp(380 + Math.abs(d) * 0.3, 450, kind === 'nav' ? 1100 : 900);
     const t0 = performance.now();
-    animKind = kind;
+    glideTo = to;
     doc.style.scrollBehavior = 'auto';
     const frame = (t) => {
       const k = Math.min(1, (t - t0) / dur);
-      const e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
-      window.scrollTo(0, from + d * e);
+      const e =
+        kind === 'nav' ? (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2) : 1 - Math.pow(1 - k, 3);
+      expect = from + d * e;
+      window.scrollTo(0, expect);
       if (k < 1) {
         anim = requestAnimationFrame(frame);
         return;
       }
-      if (kind === 'lock') busyUntil = performance.now() + DWELL;
       anim = 0;
-      animKind = '';
+      glideTo = null;
       target = current = lastY = to;
       release();
     };
@@ -202,43 +205,47 @@ export function initScrollGuide(root) {
   };
 
   /** Próximo (dir 1) ou anterior (dir -1) ponto de parada a partir de y. */
-  const stepFrom = (y, dir) => {
-    const list = stops();
-    const to = dir > 0 ? list.find((p) => p > y + 4) : [...list].reverse().find((p) => p < y - 4);
-    if (to === undefined) return false;
-    glide(to, 'lock');
-    return true;
+  const nextStop = (y, dir) => {
+    const list = [...snapPoints(root), ...detents()].sort((a, b) => a - b);
+    return dir > 0 ? list.find((p) => p > y + 4) : [...list].reverse().find((p) => p < y - 4);
   };
 
-  /** Rolagem parou: alinha no passo (seção presa) ou puxa para a seção perto. */
+  /** A rolagem parou: completa o passo (seção presa) ou puxa para a seção perto. */
   const onSettle = () => {
-    if (anim || lerp || touchY !== null) return;
+    if (anim || lerp || touching) return;
     if (lastInput !== 'wheel' && lastInput !== 'touch') return;
     const y = window.scrollY;
     const z = zoneAt(y);
     if (z) {
-      const near = [...z.points, z.bottom].reduce((a, p) => (Math.abs(p - y) < Math.abs(a - y) ? p : a));
-      if (Math.abs(near - y) > 2) glide(near, 'lock');
+      const pts = [...z.points, z.bottom];
+      const a = [...pts].reverse().find((p) => p <= y);
+      const b = pts.find((p) => p > y);
+      if (a === undefined || b === undefined || y - a < 2) return;
+      if (b - y < 2) return glide(b);
+      // Basta um pouco de movimento num sentido para o passo seguinte vir.
+      const frac = (y - a) / (b - a);
+      glide(lastDir > 0 ? (frac > 0.1 ? b : a) : frac < 0.9 ? a : b);
       return;
     }
     // Ímã: começo das seções e primeiro/último passo das seções presas.
-    const list = [...snapPoints(root), ...lockZones(root).flatMap((z) => [z.top, z.end])].sort(
+    const list = [...snapPoints(root), ...lockZones(root).flatMap((s) => [s.top, s.end])].sort(
       (a, b) => a - b,
     );
     const vh = window.innerHeight;
     const ahead = lastDir > 0 ? list.find((s) => s > y + 2) : [...list].reverse().find((s) => s < y - 2);
     const behind = lastDir > 0 ? [...list].reverse().find((s) => s <= y - 2) : list.find((s) => s >= y + 2);
-    if (ahead !== undefined && Math.abs(ahead - y) < vh * 0.35) glide(ahead, 'snap');
-    else if (behind !== undefined && Math.abs(behind - y) < vh * 0.08) glide(behind, 'snap');
+    if (ahead !== undefined && Math.abs(ahead - y) < vh * 0.35) glide(ahead);
+    else if (behind !== undefined && Math.abs(behind - y) < vh * 0.08) glide(behind);
   };
   const scheduleSettle = () => {
     clearTimeout(settle);
-    settle = setTimeout(onSettle, 170);
+    settle = setTimeout(onSettle, 160);
   };
 
   const tickLerp = () => {
-    current += (target - current) * 0.11;
+    current += (target - current) * 0.12;
     if (Math.abs(target - current) < 0.5) current = target;
+    expect = current;
     window.scrollTo(0, current);
     if (current === target) {
       lerp = 0;
@@ -259,45 +266,44 @@ export function initScrollGuide(root) {
   };
 
   const onWheel = (e) => {
-    if (e.ctrlKey || e.defaultPrevented || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    if (!fine || e.ctrlKey || e.defaultPrevented || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
     if (maxY() <= 0 || !(e.target instanceof Element) || innerScroller(e.target, e.deltaY)) return;
     const dir = Math.sign(e.deltaY);
     if (!dir) return;
     const now = performance.now();
-    const newGesture = now - lastWheel > 220;
+    const delta = e.deltaY * (e.deltaMode === 1 ? 40 : e.deltaMode === 2 ? window.innerHeight : 1);
+    const newGesture = now - lastWheel > 160;
     lastWheel = now;
     lastInput = 'wheel';
+    if (dir !== lastDir) hold = null;
     lastDir = dir;
-    // Um deslize de link ou do ímã para quando a pessoa volta a rolar.
-    if (anim && animKind !== 'lock') stopGlide();
-    // Trava: durante a troca de passo e logo depois dela, segura a rolagem.
-    if (anim || now < busyUntil || (gestureUsed && !newGesture)) {
-      e.preventDefault();
-      if (anim || now < busyUntil) gestureUsed = true;
-      return;
+    recent = recent.filter(([t]) => now - t < 150);
+    recent.push([now, Math.abs(delta)]);
+    const speed = recent.reduce((sum, [, d]) => sum + d, 0) / 0.15;
+    // Voltou a rolar: o deslize em andamento para e a pessoa assume.
+    if (anim) stopGlide();
+    if (!lerp) target = current = window.scrollY;
+    let next = clamp(target + delta, 0, maxY());
+    // Encaixe: segura até um gesto novo (ou um empurrão longo no mesmo gesto).
+    if (hold) {
+      hold.push += Math.abs(delta);
+      if (newGesture || hold.push > window.innerHeight * 0.5) hold = null;
+      else next = hold.p;
     }
-    gestureUsed = false;
-    const y = window.scrollY;
-    if (zoneAt(y)) {
-      e.preventDefault();
-      gestureUsed = true;
-      stepFrom(y, dir);
-      return;
-    }
-    if (!fine) return;
-    if (!lerp) target = current = y;
-    const unit = e.deltaMode === 1 ? 40 : e.deltaMode === 2 ? window.innerHeight : 1;
-    let next = clamp(target + e.deltaY * unit, 0, maxY());
-    // Chegando numa seção presa: segura no primeiro passo (ou no último, subindo).
-    for (const z of lockZones(root)) {
-      if (dir > 0 && y < z.top - 2 && next >= z.top) next = z.top;
-      else if (dir < 0 && y >= z.bottom - 2 && next < z.bottom - 2) next = z.end;
-      else continue;
-      gestureUsed = true;
-      break;
+    if (!hold && speed < FAST) {
+      const list = detents();
+      const p =
+        dir > 0
+          ? list.find((s) => s > target + 1 && s <= next)
+          : [...list].reverse().find((s) => s < target - 1 && s >= next);
+      if (p !== undefined) {
+        next = p;
+        hold = { p, push: 0 };
+      }
     }
     if (next === target) {
-      if (lerp || gestureUsed) e.preventDefault();
+      // Na ponta da página, deixa a rolagem passar adiante (página dentro de outra).
+      if (lerp || hold) e.preventDefault();
       return;
     }
     e.preventDefault();
@@ -313,30 +319,21 @@ export function initScrollGuide(root) {
     const dy = y - lastY;
     lastY = y;
     if (dy) lastDir = Math.sign(dy);
+    // A página foi rolada por outro meio (barra, script) durante um deslize: o guia cede.
+    if ((anim || lerp) && expect !== null && Math.abs(y - Math.min(expect, maxY())) > 3) {
+      stopGlide();
+      stopLerp();
+      hold = null;
+    }
     if (anim || lerp) return;
     target = current = y;
-    // Embalo do toque passando por uma seção presa: segura na entrada.
-    if (touchY !== null || performance.now() - lastTouch < 1500) {
-      for (const z of lockZones(root)) {
-        const to =
-          dy > 0 && y - dy < z.top - 2 && y > z.top + 2
-            ? z.top
-            : dy < 0 && y - dy > z.end + 2 && y < z.end - 2
-              ? z.end
-              : null;
-        if (to === null) continue;
-        window.scrollTo(0, to);
-        lastY = to;
-        busyUntil = performance.now() + DWELL;
-        break;
-      }
-    }
     scheduleSettle();
   };
 
   const onKey = (e) => {
     if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
     lastInput = 'key';
+    hold = null;
     if (lerp) stopLerp();
     const k = e.key;
     const dir =
@@ -348,38 +345,24 @@ export function initScrollGuide(root) {
     if (!dir || !(e.target instanceof Element)) return;
     if (e.target.closest('input, textarea, select, [contenteditable]')) return;
     if (k === ' ' && e.target.closest('a, button, summary')) return;
-    if (!zoneAt(window.scrollY)) return;
+    // Nas seções presas, cada tecla vai a um passo; apertar de novo já segue.
+    const from = glideTo ?? window.scrollY;
+    if (!zoneAt(from)) return;
     e.preventDefault();
-    if (anim || performance.now() < busyUntil) return;
-    stepFrom(window.scrollY, dir);
+    const to = nextStop(from, dir);
+    if (to !== undefined) glide(to);
   };
 
-  const onTouchStart = (e) => {
-    if (e.touches.length !== 1) {
-      touchY = null;
-      touchLock = false;
-      return;
-    }
+  const onTouchStart = () => {
+    touching = true;
     lastInput = 'touch';
-    touchY = e.touches[0].clientY;
-    touchLock = !!zoneAt(window.scrollY);
+    hold = null;
+    if (anim) stopGlide();
+    if (lerp) stopLerp();
   };
-  const onTouchMove = (e) => {
-    if (touchY === null) return;
-    // Dentro da seção presa, quem move a página é o guia.
-    if (touchLock || anim) e.preventDefault();
-  };
-  const onTouchEnd = (e) => {
-    if (touchY === null) return;
-    const dy = touchY - (e.changedTouches[0]?.clientY ?? touchY);
-    const locked = touchLock;
-    touchY = null;
-    touchLock = false;
-    lastTouch = performance.now();
-    if (locked && Math.abs(dy) > 30 && !anim && performance.now() >= busyUntil) {
-      lastDir = Math.sign(dy);
-      stepFrom(window.scrollY, lastDir);
-    } else scheduleSettle();
+  const onTouchEnd = () => {
+    touching = false;
+    scheduleSettle();
   };
 
   // Links internos deslizam até a seção (também os do indicador lateral).
@@ -391,6 +374,7 @@ export function initScrollGuide(root) {
     if (!el) return;
     e.preventDefault();
     lastInput = 'nav';
+    hold = null;
     glide(absTop(el), 'nav');
     history.replaceState(null, '', `#${id}`);
     // Como num link normal, o próximo Tab continua a partir da seção.
@@ -399,7 +383,9 @@ export function initScrollGuide(root) {
   };
   const onPointer = () => {
     lastInput = 'pointer';
+    hold = null;
     if (lerp) stopLerp();
+    if (anim) stopGlide();
   };
 
   window.addEventListener('wheel', onWheel, { passive: false });
@@ -407,8 +393,8 @@ export function initScrollGuide(root) {
   window.addEventListener('keydown', onKey);
   window.addEventListener('mousedown', onPointer);
   window.addEventListener('touchstart', onTouchStart, { passive: true });
-  window.addEventListener('touchmove', onTouchMove, { passive: false });
   window.addEventListener('touchend', onTouchEnd, { passive: true });
+  window.addEventListener('touchcancel', onTouchEnd, { passive: true });
   document.addEventListener('click', onClick);
   return () => {
     stopLerp();
@@ -419,8 +405,8 @@ export function initScrollGuide(root) {
     window.removeEventListener('keydown', onKey);
     window.removeEventListener('mousedown', onPointer);
     window.removeEventListener('touchstart', onTouchStart);
-    window.removeEventListener('touchmove', onTouchMove);
     window.removeEventListener('touchend', onTouchEnd);
+    window.removeEventListener('touchcancel', onTouchEnd);
     document.removeEventListener('click', onClick);
   };
 }
