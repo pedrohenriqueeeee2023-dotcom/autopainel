@@ -3,7 +3,7 @@ import { ctaHref } from '../config';
 import './Opening.css';
 
 /* Abertura centralizada sobre a foto de um pátio de revenda, com grade, brilhos
-   e cartões flutuantes das outras ferramentas. O visual central conta o produto
+   e uma fileira de cartões das outras ferramentas. O visual central conta o produto
    num relance: a placa é digitada e vira o preço máximo de compra. */
 
 // Foto gratuita do Unsplash (licença Unsplash).
@@ -73,7 +73,7 @@ function Chip({ ico, children, className, d }) {
           <path d={ICONS[ico]} />
         </svg>
       </span>
-      {children}
+      <span>{children}</span>
     </div>
   );
 }
@@ -96,19 +96,6 @@ export default function Opening() {
       <span className="open-grid" aria-hidden="true" />
       <span className="open-glow open-glow-a" aria-hidden="true" />
       <span className="open-glow open-glow-b" aria-hidden="true" />
-
-      <Chip ico="pub" className="c1" d="1.2s">
-        Publicado em <b>8 canais</b>
-      </Chip>
-      <Chip ico="crm" className="c2" d="1.5s">
-        Novo lead: <b>Corolla 2022</b>
-      </Chip>
-      <Chip ico="stock" className="c3" d="1.8s">
-        <b>32</b> no estoque
-      </Chip>
-      <Chip ico="fin" className="c4" d="2.1s">
-        Comissões <b>em dia</b>
-      </Chip>
 
       <div className="open-in">
         <p className="open-eyebrow load-in" style={{ '--d': '0ms' }}>
@@ -154,6 +141,21 @@ export default function Opening() {
             <span>Pague no máximo</span>
             <strong>{brl(price)}</strong>
           </div>
+        </div>
+
+        <div className="open-chips">
+          <Chip ico="pub" className="c1" d="1.6s">
+            Publicado em <b>8 canais</b>
+          </Chip>
+          <Chip ico="crm" className="c2" d="1.75s">
+            Novo lead: <b>Corolla 2022</b>
+          </Chip>
+          <Chip ico="stock" className="c3" d="1.9s">
+            <b>32</b> no estoque
+          </Chip>
+          <Chip ico="fin" className="c4" d="2.05s">
+            Comissões <b>em dia</b>
+          </Chip>
         </div>
 
         <a

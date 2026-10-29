@@ -119,16 +119,21 @@
   text-wrap: balance;
 }
 
-/* Cartões flutuantes das outras ferramentas */
+/* Fileira de cartões das outras ferramentas, entre a placa e o botão */
+.open-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: calc(clamp(32px, 5.5vh, 56px) * -0.3);
+}
 .open-chip {
-  position: absolute;
-  z-index: 0;
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 16px 10px 10px;
+  padding: 8px 16px 8px 8px;
   border: 1px solid var(--line-2);
-  border-radius: 16px;
+  border-radius: 14px;
   background: rgba(8, 41, 95, 0.7);
   backdrop-filter: blur(10px);
   box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.7);
@@ -137,8 +142,8 @@
   white-space: nowrap;
   opacity: 0;
   animation:
-    chip-in 0.8s var(--ease) var(--cd) forwards,
-    float 6s ease-in-out calc(var(--cd) + 0.8s) infinite alternate;
+    chip-in 0.7s var(--ease) var(--cd) forwards,
+    float 3.5s ease-in-out calc(var(--cd) + 0.7s) infinite alternate;
 }
 .open-chip b {
   color: var(--fg);
@@ -146,46 +151,26 @@
 .open-chip-ico {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
   background: var(--accent-grad);
   color: #fff;
 }
 .open-chip-ico svg {
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.c1 {
-  top: 15%;
-  left: 4%;
-  rotate: -4deg;
-}
-.c2 {
-  top: 15%;
-  right: 4%;
-  rotate: 3deg;
-}
 .c2 .open-chip-ico {
   background: #12b886;
 }
-.c3 {
-  bottom: 12%;
-  left: 5%;
-  rotate: 3deg;
-}
 .c3 .open-chip-ico {
   background: #f59f00;
-}
-.c4 {
-  bottom: 13%;
-  right: 5%;
-  rotate: -3deg;
 }
 .c4 .open-chip-ico {
   background: #7c5cff;
@@ -202,12 +187,7 @@
 }
 @keyframes float {
   to {
-    translate: 0 -12px;
-  }
-}
-@media (max-width: 1180px) {
-  .open-chip {
-    display: none;
+    translate: 0 -5px;
   }
 }
 
@@ -364,19 +344,63 @@
     min-height: 92svh;
     padding-top: 96px;
   }
+  .ap .open-in {
+    gap: 28px;
+  }
   .open-demo {
-    flex-direction: column;
-    gap: 10px;
+    gap: 8px;
+  }
+  .plate {
+    width: 150px;
+    border-width: 2px;
+    border-radius: 8px;
+  }
+  .plate-band {
+    font-size: 8px;
+  }
+  .plate-band i {
+    right: 5px;
+    width: 11px;
+    height: 8px;
+    margin-top: -4px;
+  }
+  .plate-num {
+    font-size: 29px;
+    padding: 0 6px 2px;
   }
   .open-arrow {
-    rotate: 90deg;
+    font-size: 20px;
   }
   .ap .open-price {
-    justify-items: center;
-    text-align: center;
+    padding: 8px 12px 10px;
+    border-radius: 12px;
+  }
+  .open-price span {
+    font-size: 11px;
+  }
+  .open-price strong {
+    font-size: 26px;
   }
   .ap .open-cta {
     width: 100%;
+  }
+  .open-chips {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+  }
+  .open-chip {
+    gap: 8px;
+    padding: 6px 10px 6px 6px;
+    font-size: 12.5px;
+    white-space: normal;
+    text-align: left;
+  }
+  .open-chip-ico {
+    flex: none;
+    width: 26px;
+    height: 26px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

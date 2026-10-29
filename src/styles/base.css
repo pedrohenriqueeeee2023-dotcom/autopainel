@@ -294,6 +294,17 @@ body {
   z-index: 60;
   display: flex;
   gap: 10px;
+  opacity: 0;
+  transform: translateY(16px);
+  pointer-events: none;
+  transition:
+    opacity 0.4s var(--ease),
+    transform 0.5s var(--ease);
+}
+.ap .ap-fab.is-on {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
 }
 .ap .ap-fab-wa {
   width: 44px;

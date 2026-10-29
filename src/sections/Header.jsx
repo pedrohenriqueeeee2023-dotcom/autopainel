@@ -1,6 +1,17 @@
+import { useEffect, useState } from 'react';
 import { CONFIG, ctaHref } from '../config';
 
 export default function Header() {
+  // Os botões fixos só aparecem depois que a abertura sai da tela.
+  const [fab, setFab] = useState(false);
+  useEffect(() => {
+    const hero = document.getElementById('topo');
+    if (!hero) return setFab(true);
+    const io = new IntersectionObserver(([e]) => setFab(!e.isIntersecting));
+    io.observe(hero);
+    return () => io.disconnect();
+  }, []);
+
   return (
     <>
       <header className="ap-header">
@@ -10,7 +21,7 @@ export default function Header() {
         </a>
         <span className="ap-progress" aria-hidden="true" />
       </header>
-      <div className="ap-fab">
+      <div className={`ap-fab ${fab ? 'is-on' : ''}`} aria-hidden={!fab} inert={fab ? undefined : ''}>
         <a
           className="btn btn-wa ap-fab-wa"
           href={ctaHref('contact')}
