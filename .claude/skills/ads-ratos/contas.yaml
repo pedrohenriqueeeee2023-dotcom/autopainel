@@ -1,0 +1,32 @@
+# ============================================================================
+# Ads Ratos — Cadastro de Contas
+# ============================================================================
+#
+# Preencha este arquivo com as contas de cada cliente.
+# O Claude consulta este arquivo automaticamente quando tu mencionares
+# o nome do cliente (ex: "diagnóstico do Meu Cliente").
+#
+# Rode `/ads-ratos setup` pra preencher de forma guiada.
+#
+# ============================================================================
+
+clientes:
+
+  # -- Exemplo (descomente e edite) --
+  #
+  # meu-cliente:
+  #   nome: "Nome do Cliente"
+  #   nicho: "e-commerce"       # pra benchmarks (ver references/benchmarks-br.md)
+  #   meta:
+  #     conta_anuncio: "act_XXXXXXXXX"
+  #     pagina_facebook: "XXXXXXXXX"
+  #     instagram_id: "XXXXXXXXX"
+  #     instagram_username: "@username"
+  #   google:
+  #     customer_id: "XXX-XXX-XXXX"
+  #   ga4:
+  #     property_id: "XXXXXXXXX"
+  #   moeda: "BRL"
+  #   notas: ""
+
+  # -- Teus clientes abaixo --
