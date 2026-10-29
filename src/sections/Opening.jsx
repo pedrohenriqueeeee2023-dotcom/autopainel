@@ -1,8 +1,11 @@
-import { CONFIG, ctaHref } from '../config';
+import { ctaHref } from '../config';
 import './Opening.css';
 
-/* Abertura: um título, uma linha e um número. O cartão mostra o resultado da
-   calculadora para uma placa de exemplo (mesmos dados da demonstração). */
+// Foto gratuita do Unsplash (licença Unsplash).
+const PHOTO = 'https://images.unsplash.com/photo-1570761511122-dd6342842496?auto=format&fit=crop&q=70';
+
+/* Abertura: título, uma linha, um botão e a foto de um carro com a etiqueta do
+   preço máximo, o resultado que a calculadora entrega. */
 export default function Opening() {
   return (
     <section id="topo" className="open" aria-labelledby="open-title">
@@ -10,45 +13,41 @@ export default function Opening() {
         <div className="hero-copy">
           <h1 id="open-title" className="open-title">
             <span className="mask load-mask" style={{ '--d': '20ms' }}>
-              <span>
-                Pare de pagar <em className="kw">caro</em>
-              </span>
+              <span>Pare de pagar</span>
             </span>
             <span className="mask load-mask" style={{ '--d': '55ms' }}>
-              <span>na troca.</span>
+              <span>
+                <em className="kw">caro</em> na troca.
+              </span>
             </span>
           </h1>
           <p className="open-sub load-in" style={{ '--d': '105ms' }}>
             Digite a placa e veja até quanto pagar.
           </p>
-          <div className="hero-btns load-in" style={{ '--d': '150ms' }}>
-            <a className="btn btn-accent btn-lg" href={ctaHref('trial')} target="_blank" rel="noreferrer">
-              Testar 7 dias grátis <span aria-hidden="true">→</span>
-            </a>
-          </div>
-          <p className="hero-note load-in" style={{ '--d': '190ms' }}>
-            {CONFIG.offer.text}
-          </p>
+          <a
+            className="btn btn-accent btn-lg hero-cta load-in"
+            style={{ '--d': '150ms' }}
+            href={ctaHref('trial')}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Testar 7 dias grátis <span aria-hidden="true">→</span>
+          </a>
         </div>
 
-        <div className="hero-visual load-in" style={{ '--d': '125ms' }}>
-          <figure className="hero-card" aria-label="Exemplo de resultado da calculadora de compra">
-            <div className="hc-top">
-              <span className="hc-plate">ABC·1D23</span>
-              <span className="hc-car">VW Polo Highline 2022</span>
-            </div>
-            <p className="hc-label">Pague no máximo</p>
-            <p className="hc-value">R$ 79.323</p>
-            <div className="hc-foot">
-              <span>
-                Valor de mercado <b>R$ 98.950</b>
-              </span>
-              <span>
-                Seu lucro <b className="hc-ok">R$ 11.874</b>
-              </span>
-            </div>
-          </figure>
-        </div>
+        <figure className="hero-photo load-in" style={{ '--d': '90ms' }}>
+          <img
+            src={`${PHOTO}&w=900&h=1100`}
+            srcSet={`${PHOTO}&w=600&h=733 600w, ${PHOTO}&w=900&h=1100 900w, ${PHOTO}&w=1200&h=1466 1200w`}
+            sizes="(max-width: 960px) 100vw, 45vw"
+            alt="Carro seminovo com a etiqueta do preço máximo de compra"
+            fetchPriority="high"
+          />
+          <figcaption className="hero-tag">
+            <span>Pague no máximo</span>
+            <strong>R$ 79.323</strong>
+          </figcaption>
+        </figure>
       </div>
     </section>
   );
