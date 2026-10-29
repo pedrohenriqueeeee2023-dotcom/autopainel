@@ -22,15 +22,17 @@ const CHANNELS = [
   'Loja Integrada',
 ];
 
+/* Valores que flutuam na abertura: [texto, x %, y %]. Os 4 primeiros ficam
+   nos cantos porque são os únicos que aparecem no celular. */
 const FLOATERS = [
-  'R$ 89.900',
-  'FIPE −4,2%',
-  'RIO2A18',
-  '+12 leads',
-  'R$ 64.500',
-  'QWE1J23',
-  '+8 canais',
-  'R$ 112.000',
+  ['R$ 89.900', 5, 15],
+  ['FIPE −4,2%', 74, 12],
+  ['RIO2A18', 8, 88],
+  ['+12 leads', 72, 90],
+  ['R$ 64.500', 90, 36],
+  ['QWE1J23', 2, 58],
+  ['+8 canais', 89, 70],
+  ['R$ 112.000', 24, 22],
 ];
 
 const STEPS = [
@@ -63,13 +65,6 @@ const WHY = [
   ['8 canais de uma vez', 'Um cadastro, oito anúncios. Mudou o preço, muda em todos.', 'grid'],
   ['Nenhum lead esquecido', 'Todo contato fica no CRM, com histórico e próximo passo.', 'chat'],
   ['A gente configura', 'Raio-X grátis e onboarding feito pela nossa equipe.', 'spark'],
-];
-
-const DAYS = [
-  ['Dia 1', 'Você cria a conta em um minuto, sem cartão.'],
-  ['Dia 2', 'A equipe faz o Raio-X grátis da sua loja.'],
-  ['Dia 3', 'Onboarding: a gente cadastra a loja, os carros e os vendedores.'],
-  ['Dia 7', 'Você já comprou, anunciou e atendeu com o painel no dia a dia.'],
 ];
 
 /* ---------------------------------------------------------------- efeitos */
@@ -197,7 +192,7 @@ function Nav() {
       <nav className="v-links" aria-label="Seções">
         <a href="#como">Como funciona</a>
         <a href="#perfis">Perfis</a>
-        <a href="#teste">Teste</a>
+        <a href="#depoimentos">Depoimentos</a>
         <a href="#duvidas">Dúvidas</a>
       </nav>
       <div className="v-nav-ctas">
@@ -215,8 +210,8 @@ function Hero() {
     <section id="topo" className="v-hero" aria-labelledby="hero-title">
       <div className="v-beam" aria-hidden="true" />
       <div className="v-floaters" aria-hidden="true">
-        {FLOATERS.map((f, i) => (
-          <span key={f} style={{ '--i': i }}>
+        {FLOATERS.map(([f, x, y], i) => (
+          <span key={f} style={{ '--i': i, '--x': `${x}%`, '--y': `${y}%` }}>
             {f}
           </span>
         ))}
@@ -306,30 +301,6 @@ function Capital() {
             </span>
           ))}
         </div>
-      </div>
-    </section>
-  );
-}
-
-function StartSelling() {
-  return (
-    <section className="v-start" aria-labelledby="start-title">
-      <div className="v-start-copy" data-in>
-        <h2 id="start-title">
-          Pare de perder lead no WhatsApp. <span className="v-grad">Comece a vender</span> com o painel certo.
-        </h2>
-        <div className="v-hero-ctas">
-          <Cta>Começar agora</Cta>
-          <Cta kind="contact">Tirar dúvida</Cta>
-        </div>
-      </div>
-      <div className="v-start-stack" data-scroll aria-hidden="true">
-        {Array.from({ length: 6 }, (_, i) => (
-          <span key={i} style={{ '--i': i }}>
-            Comece a vender
-          </span>
-        ))}
-        <i className="v-helix" />
       </div>
     </section>
   );
@@ -506,63 +477,6 @@ function Why() {
   );
 }
 
-function Timeline() {
-  const [day, setDay] = useState(DAYS.length - 1);
-  return (
-    <section id="teste" className="v-time" aria-labelledby="time-title">
-      <div className="v-head" data-in>
-        <h2 id="time-title">
-          Sua loja rodando no painel em <span className="v-grad">7 dias</span>
-        </h2>
-      </div>
-      <div className="v-time-box" data-in style={{ '--d': '150ms' }}>
-        <div className="v-time-copy">
-          <span className="v-tag">Teste grátis</span>
-          {DAYS.map(([d, t], i) => (
-            <p key={d} className={i === day ? 'on' : i < day ? 'past' : ''}>
-              <strong>{d}:</strong> {t}
-            </p>
-          ))}
-          <Cta>{CONFIG.ctas.trial.label}</Cta>
-        </div>
-        <div className="v-chart" role="group" aria-label="Dias do teste">
-          <span className="v-chart-grid" aria-hidden="true" />
-          {DAYS.map(([d], i) => (
-            <button
-              key={d}
-              className={`v-pin${i <= day ? ' on' : ''}`}
-              style={{ '--x': `${12 + i * 25}%`, '--h': `${18 + i * 22}%` }}
-              onClick={() => setDay(i)}
-              onMouseEnter={() => setDay(i)}
-              aria-pressed={i === day}
-            >
-              <span className="v-pin-label">{d}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Join() {
-  return (
-    <section className="v-join" aria-labelledby="join-title">
-      <span className="v-join-logo ap-logo-mark" aria-hidden="true" data-in />
-      <h2 id="join-title" data-in style={{ '--d': '100ms' }}>
-        Comece hoje a vender mais com o AutoPainel
-      </h2>
-      <p data-in style={{ '--d': '180ms' }}>
-        Raio-X grátis, onboarding feito pela equipe e 7 dias para ver o painel funcionando na sua loja.
-      </p>
-      <div className="v-hero-ctas" data-in style={{ '--d': '260ms' }}>
-        <Cta />
-        <Cta kind="contact" />
-      </div>
-    </section>
-  );
-}
-
 function Faq() {
   return (
     <section id="duvidas" className="v-faq" aria-labelledby="faq-title">
@@ -586,54 +500,10 @@ function Faq() {
   );
 }
 
-function AllInOne() {
-  const bars = [38, 52, 44, 61, 57, 70, 66, 82, 74, 90, 86, 97];
-  return (
-    <section className="v-all" aria-labelledby="all-title">
-      <div className="v-head" data-in>
-        <span className="v-tag">Painel AutoPainel</span>
-        <h2 id="all-title">
-          Tudo em <span className="v-grad">um só lugar</span>
-        </h2>
-        <p>Estoque, avaliações, anúncios e leads. Do celular ou do computador.</p>
-      </div>
-      <div className="v-dash" data-in style={{ '--d': '150ms' }} aria-hidden="true">
-        <div className="v-dash-side">
-          <span className="ap-logo-mark" />
-          {Array.from({ length: 5 }, (_, i) => (
-            <i key={i} className={i === 0 ? 'on' : ''} />
-          ))}
-        </div>
-        <div className="v-dash-main">
-          <div className="v-dash-kpis">
-            <div>
-              <span>Carros no estoque</span>
-              <strong>42</strong>
-            </div>
-            <div>
-              <span>Leads no mês</span>
-              <strong>318</strong>
-            </div>
-            <div className="hi">
-              <span>Margem média</span>
-              <strong>R$ 9.840</strong>
-            </div>
-          </div>
-          <div className="v-dash-chart">
-            {bars.map((h, i) => (
-              <i key={i} style={{ '--h': `${h}%`, '--i': i }} />
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function Voices() {
   const t = CONFIG.proof.testimonials;
   return (
-    <section className="v-voices" aria-labelledby="voices-title">
+    <section id="depoimentos" className="v-voices" aria-labelledby="voices-title">
       <div className="v-head" data-in>
         <h2 id="voices-title">
           Quem usa, <span className="v-grad">conta</span>
@@ -676,9 +546,10 @@ function Talk() {
         Fale com a equipe no WhatsApp
       </h2>
       <p data-in style={{ '--d': '100ms' }}>
-        Tire dúvidas, peça o Raio-X grátis e combine o onboarding da sua loja.
+        Tire dúvidas, peça o Raio-X grátis e comece o seu teste de 7 dias.
       </p>
-      <div data-in style={{ '--d': '180ms' }}>
+      <div className="v-hero-ctas" data-in style={{ '--d': '180ms' }}>
+        <Cta />
         <Cta kind="contact">Chamar no WhatsApp</Cta>
       </div>
     </section>
@@ -691,26 +562,22 @@ function Vendas() {
   useEffect(() => initAnalytics(), []);
   return (
     <div className="ap v" ref={ref}>
-      <a className="ap-skip" href="#teste">
-        Pular para o teste grátis
+      <a className="ap-skip" href="#conteudo">
+        Pular para o conteúdo
       </a>
       <Nav />
-      <main>
+      <main id="conteudo">
         <Hero />
         <Stats />
         <Slide>Pare de pagar caro na troca · Pare de pagar caro na troca ·</Slide>
         <Capital />
-        <StartSelling />
         <How />
         <Slide reverse>Raio-X grátis · Onboarding pela equipe · Raio-X grátis ·</Slide>
         <Roles />
         <Planet />
         <Why />
-        <Timeline />
-        <Join />
-        <Faq />
-        <AllInOne />
         <Voices />
+        <Faq />
         <Talk />
       </main>
       <Footer />

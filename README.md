@@ -14,6 +14,7 @@ npm run lint
 - `src/config.js`: textos da oferta, preços, **destinos dos botões** (`ctas.trial.href`, `ctas.contact.href`) e a seção de prova (`proof`). Enquanto um destino for `null`, o botão leva à seção de planos. `proof.example: true` mostra o aviso de dados de exemplo; troque números e depoimentos pelos reais e mude para `false`.
 - `src/sections/`: uma seção por arquivo, cada uma com o seu CSS ao lado (`Solved.jsx` + `Solved.css`).
 - `src/sections/app/`: a mini versão do painel usada na abertura e na seção "Teste o painel aqui mesmo". Cada ferramenta (`PubTool`, `CrmTool`, `EvalTool`, `StockTool`) tem o próprio CSS.
+- `vendas.html` + `src/vendas/`: a página de vendas (`/vendas`), com a mesma marca e os mesmos textos de `src/config.js`. Tudo dela fica em `main.jsx` (seções) e `vendas.css`. As perguntas do FAQ (`FAQ_ITEMS`) ficam em `src/config.js` e servem às duas páginas.
 - `src/styles/base.css`: cores, fontes, botões, cabeçalho e as regras de entrada (`data-reveal`, `data-build`).
 
 ## Como a página carrega
