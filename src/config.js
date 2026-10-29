@@ -15,10 +15,10 @@ export const CONFIG = {
   },
 
   ctas: {
-    // Oferta: 7 dias de teste com Raio-X grátis; a equipe faz o onboarding pelo WhatsApp.
+    // Oferta: 7 dias de teste. O botão leva direto para criar a conta.
     trial: {
       label: 'Quero testar 7 dias',
-      href: 'https://wa.me/5531991858934?text=Quero%20testar%20o%20AutoPainel%20por%207%20dias%20com%20o%20Raio-X%20gr%C3%A1tis',
+      href: 'https://autopainel.app.br/login',
     },
     // Ex.: 'https://wa.me/55XXXXXXXXXXX?text=Quero%20conhecer%20o%20AutoPainel'
     contact: {

@@ -2,14 +2,15 @@ import { useEffect, useRef, useState } from 'react';
 import { Icon } from './app/AppWindow';
 import './Solved.css';
 
-/* "O que resolvemos?": uma linha no meio carrega conforme a página desce. Cada
-   problema aparece de um lado quando a linha chega nele e leva um risco. */
+/* "O que resolvemos?": uma linha à esquerda carrega conforme a página desce. Cada
+   problema aparece legível; o risco só entra quando o próximo aparece, e aí a
+   solução surge embaixo. */
 const PROBLEMS = [
-  ['pub', 'Cadastrar o mesmo carro em cada site'],
-  ['crm', 'Esquecer o cliente que pediu um carro'],
-  ['eval', 'Comprar na troca sem saber o valor'],
-  ['stock', 'Carro parado no pátio sem ninguém ver'],
-  ['fin', 'Fechar o mês sem saber as comissões'],
+  ['pub', 'Cadastrar o mesmo carro em cada site', 'Cadastre uma vez e publique em 8 canais.'],
+  ['crm', 'Esquecer o cliente que pediu um carro', 'O vendedor é avisado quando o carro chega.'],
+  ['eval', 'Comprar na troca sem saber o valor', 'A placa mostra até quanto pagar.'],
+  ['stock', 'Carro parado no pátio sem ninguém ver', 'Dias de pátio e anúncios de cada carro.'],
+  ['fin', 'Fechar o mês sem saber as comissões', 'Comissões e caixa calculados no painel.'],
 ];
 
 export default function Solved() {
@@ -25,8 +26,8 @@ export default function Solved() {
     const update = () => {
       raf = 0;
       const r = track.current.getBoundingClientRect();
-      // A ponta da linha acompanha 62% da altura da tela.
-      const v = (window.innerHeight * 0.62 - r.top) / r.height;
+      // A ponta da linha acompanha 65% da altura da tela.
+      const v = (window.innerHeight * 0.65 - r.top) / r.height;
       setP(Math.max(0, Math.min(1, v)));
     };
     const onScroll = () => {
@@ -44,6 +45,7 @@ export default function Solved() {
 
   const n = PROBLEMS.length;
   const done = p >= 0.98;
+  const at = (i) => (i + 0.2) / n;
 
   return (
     <section id="resolvemos" className="solved" aria-labelledby="solved-title">
@@ -61,15 +63,22 @@ export default function Solved() {
           <span />
         </span>
         <ul className="solved-list">
-          {PROBLEMS.map(([ico, t], i) => {
-            const at = (i + 0.5) / n;
+          {PROBLEMS.map(([ico, problem, fix], i) => {
+            const on = p >= at(i);
+            // O risco só entra quando a próxima frase já apareceu inteira.
+            const struck = i + 1 < n ? p >= at(i + 1) : done;
             return (
-              <li key={t} className={p >= at ? 'is-on' : ''} style={{ '--at': at }}>
+              <li key={problem} className={`${on ? 'is-on' : ''} ${struck ? 'is-struck' : ''}`}>
                 <span className="solved-dot" aria-hidden="true" />
                 <span className="solved-ico" aria-hidden="true">
                   <Icon name={ico} />
                 </span>
-                <s>{t}</s>
+                <div className="solved-txt">
+                  <s>{problem}</s>
+                  <p className="solved-fix">
+                    <span aria-hidden="true">✓</span> {fix}
+                  </p>
+                </div>
               </li>
             );
           })}

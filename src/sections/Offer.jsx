@@ -3,7 +3,7 @@ import './Offer.css';
 
 /* Sem planos por enquanto: a seção explica o teste de 7 dias em quatro passos. */
 const STEPS = [
-  ['Chame no WhatsApp', 'Conte como a sua loja funciona hoje.'],
+  ['Crie sua conta', 'Leva um minuto, sem cartão.'],
   ['Raio-X grátis', 'A equipe faz o Raio-X da sua loja, sem custo.'],
   ['Onboarding pela equipe', 'A gente cadastra a loja, os carros e os vendedores.'],
   ['7 dias de teste', 'Use a calculadora de compra e o painel no dia a dia.'],

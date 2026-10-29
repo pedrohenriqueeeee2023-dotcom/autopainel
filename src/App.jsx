@@ -11,7 +11,6 @@ import Opening from './sections/Opening';
 // Cada seção abaixo da abertura é um pedaço separado: código e CSS só baixam
 // quando a seção chega perto da tela.
 const Solved = lazy(() => import('./sections/Solved'));
-const BeforeAfter = lazy(() => import('./sections/BeforeAfter'));
 const AppDemo = lazy(() => import('./sections/AppDemo'));
 const Compare = lazy(() => import('./sections/Compare'));
 const Proof = lazy(() => import('./sections/Proof'));
@@ -38,24 +37,6 @@ export default function App() {
             <Solved />
           </Defer>
         </div>
-        <PhotoBand>
-          <div className="band-quote" data-reveal>
-            <h2 className="h2">
-              <span className="mask">
-                <span>Feito para quem vive</span>
-              </span>
-              <span className="mask" style={{ '--i': 1 }}>
-                <span>
-                  de <em className="kw">comprar e vender</em> carro.
-                </span>
-              </span>
-            </h2>
-            <p>Calculadora de compra, anúncio em 8 canais, CRM e estoque no mesmo painel.</p>
-          </div>
-        </PhotoBand>
-        <Defer id="como" height="80vh">
-          <BeforeAfter />
-        </Defer>
         <Defer id="app" height="120vh">
           <AppDemo />
         </Defer>

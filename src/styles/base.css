@@ -292,6 +292,21 @@ body {
   right: max(var(--gutter), env(safe-area-inset-right, 0px));
   bottom: max(24px, calc(env(safe-area-inset-bottom, 0px) + 16px));
   z-index: 60;
+  display: flex;
+  gap: 10px;
+}
+.ap .ap-fab-wa {
+  width: 44px;
+  padding: 0;
+  justify-content: center;
+}
+.ap-fab-wa svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linejoin: round;
 }
 
 /* ---------- Entradas automáticas (reveal.js) ----------

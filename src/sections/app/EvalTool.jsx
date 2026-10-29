@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { ctaHref } from '../../config';
 import AppWindow, { Icon, money, useCount, useStart } from './AppWindow';
 import './EvalTool.css';
 
@@ -45,6 +46,8 @@ const CARS = {
     ads: [149900, 144800, 147500],
   },
 };
+// Placa no padrão antigo (ABC-1234) ou Mercosul (ABC1D23).
+const validPlate = (p) => /^[A-Z]{3}-?\d[A-Z\d]\d{2}$/.test(p);
 const avg = (a) => a.reduce((s, v) => s + v, 0) / a.length;
 
 /** Valor de mercado = média entre a FIPE e a média dos anúncios parecidos. */
@@ -134,6 +137,9 @@ export default function EvalTool() {
               <Icon name="search" className="a-btn-ico" /> Consultar
             </button>
           </div>
+          <p className="ev-demo-note">
+            Demonstração: escolha um dos carros abaixo. Placas reais você consulta na sua conta.
+          </p>
           <div className="ev-quick">
             <span>Atalhos:</span>
             {Object.entries(CARS).map(([p, v]) => (
@@ -153,7 +159,18 @@ export default function EvalTool() {
           <div className="a-card ev-car">
             <h4>Dados do veículo</h4>
             {car?.missing ? (
-              <p className="ev-missing">Placa sem dados nesta demonstração. Use um dos atalhos.</p>
+              <div className="ev-missing">
+                <p>
+                  {validPlate(car.plate) ? (
+                    <>
+                      A demonstração só tem as 5 placas dos atalhos. A consulta da <b>{car.plate}</b> com FIPE
+                      e anúncios reais é feita na sua conta.
+                    </>
+                  ) : (
+                    <>Placa inválida. Use o formato ABC1D23 ou ABC-1234, ou escolha um dos atalhos.</>
+                  )}
+                </p>
+              </div>
             ) : (
               <>
                 <dl className="ev-dl">
@@ -191,17 +208,28 @@ export default function EvalTool() {
             <Field label="Comissão" value={c.comm} onChange={upd('comm')} suffix="%" />
           </div>
 
-          <div className="ev-result">
-            <span>Preço máximo recomendado de compra</span>
-            <strong>{ok ? money(maxShown) : '—'}</strong>
-            <p>
-              Lucro estimado na revenda: <b>{ok ? money(profitShown) : '—'}</b>
-            </p>
-            <p className="ev-small">Total de custos previstos: {ok ? money(r.costs) : '—'}</p>
-            <button type="button" className="ev-save" disabled={!ok} onClick={() => setSaved(true)}>
-              {saved ? '✓ Avaliação salva' : 'Salvar avaliação'}
-            </button>
-          </div>
+          {car?.missing && validPlate(car.plate) ? (
+            <div className="ev-result ev-result-cta">
+              <span>Quer o valor da {car.plate}?</span>
+              <strong>Consulte grátis</strong>
+              <p>Crie sua conta e teste 7 dias com placas reais.</p>
+              <a className="ev-save ev-cta" href={ctaHref('trial')} target="_blank" rel="noreferrer">
+                Criar conta e consultar →
+              </a>
+            </div>
+          ) : (
+            <div className="ev-result">
+              <span>Preço máximo recomendado de compra</span>
+              <strong>{ok ? money(maxShown) : '—'}</strong>
+              <p>
+                Lucro estimado na revenda: <b>{ok ? money(profitShown) : '—'}</b>
+              </p>
+              <p className="ev-small">Total de custos previstos: {ok ? money(r.costs) : '—'}</p>
+              <button type="button" className="ev-save" disabled={!ok} onClick={() => setSaved(true)}>
+                {saved ? '✓ Avaliação salva' : 'Salvar avaliação'}
+              </button>
+            </div>
+          )}
         </div>
       </AppWindow>
     </div>
