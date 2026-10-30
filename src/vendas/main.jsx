@@ -751,13 +751,19 @@ function Planet() {
             Revendas de <G>todo o Brasil</G> já compram, anunciam e vendem com o AutoPainel
           </Split>
         </h2>
-        <div className="v-hero-ctas" data-in style={{ '--d': '600ms' }}>
-          <Cta />
-          <Cta kind="contact" />
-        </div>
+        {/* Sem botões aqui, para não parecer o fim da página: a pergunta e o
+            feixe de luz puxam para a seção de preço, que já aparece embaixo. */}
+        <a className="v-next" href="#por-que" data-in style={{ '--d': '600ms' }}>
+          E quanto custa?
+          <span className="v-next-arrow" aria-hidden="true">
+            <i />
+            <i />
+          </span>
+        </a>
       </div>
       {/* O planeta fica abaixo do texto: o brilho da borda nunca passa por trás dele. */}
       <div className="v-planet-ground" aria-hidden="true">
+        <i className="v-planet-beam" />
         <div className="v-orb" data-scroll />
       </div>
     </section>
