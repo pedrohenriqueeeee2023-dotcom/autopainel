@@ -1,0 +1,676 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<base href="/vitrine/">
+<title>Vitrine 3D de Vendas · JFA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+<style>
+@font-face{font-family:"Stretch Pro";src:url("fonts/StretchPro.woff") format("woff");font-display:swap}
+/* Layout: grade de produtos -> tela do produto em 3D com pontos de toque e cartão de informação.
+   Visual único escuro no padrão do site da JFA (marinho + azul JFA, Stretch Pro + Poppins). */
+:root{
+  --navy:#030C22; --navy2:#0B1528; --card:#0E1A33; --blue:#0068FF; --glow:#4D95FF;
+  --ink:#E5E9F4; --muted:rgb(230 238 255 / .62); --line:rgb(229 233 244 / .14);
+  --f-display:"Stretch Pro","Poppins","Segoe UI",system-ui,sans-serif;
+  --f-body:"Poppins","Segoe UI",system-ui,sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%}
+[hidden]{display:none!important}
+body{margin:0;background:var(--navy);color:var(--ink);font-family:var(--f-body);font-weight:500;overflow:hidden;
+  -webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+*,*::before,*::after{box-sizing:border-box}
+button,a{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--glow);outline-offset:3px}
+.pad{padding-top:max(16px,env(safe-area-inset-top,0px));padding-bottom:max(18px,env(safe-area-inset-bottom,0px));
+  padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}
+.eb{font-size:12.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--glow);margin:0}
+.mark{font-family:var(--f-display);font-size:18px;letter-spacing:.02em}
+.ghost{border:0;background:transparent;padding:8px 2px;font-size:13px;color:var(--muted);display:inline-flex;align-items:center;gap:8px}
+.ghost svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.btn{border:1px solid var(--line);background:rgb(229 233 244 / .05);border-radius:999px;padding:12px 18px;font-size:14px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center}
+.btn.fill{background:var(--blue);border-color:var(--blue);color:#FFFFFF}
+
+/* ---------- Grade de produtos ---------- */
+.home{position:fixed;inset:0;overflow:auto;background:radial-gradient(90% 60% at 50% 0%,#12244A 0%,var(--navy2) 45%,var(--navy) 100%);
+  transition:opacity .45s ease;z-index:5}
+.home.gone{opacity:0;pointer-events:none}
+.home-in{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+.home header{display:flex;justify-content:space-between;align-items:center}
+.home h1{margin:10px 0 0;font-family:var(--f-display);font-weight:400;font-size:clamp(26px,4.4vw,48px);line-height:1.08;text-transform:uppercase;text-wrap:balance}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.card{border:1px solid var(--line);background:var(--card);border-radius:18px;padding:0;text-align:left;overflow:hidden;display:flex;flex-direction:column;
+  transition:transform .25s ease,border-color .25s ease}
+.card:hover,.card:focus-visible{transform:translateY(-3px);border-color:rgb(77 149 255 / .6)}
+.card .pic{aspect-ratio:16/10;max-width:100%;display:grid;place-items:center;padding:18px;background:radial-gradient(80% 80% at 50% 40%,#16305E 0%,#0A1328 100%)}
+.card img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 10px 18px rgb(0 0 0 / .45))}
+.card .txt{padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px}
+.card b{font-family:var(--f-display);font-weight:400;font-size:22px;text-transform:uppercase}
+.card span{font-size:13.5px;color:var(--muted)}
+.card .go{margin-top:8px;font-size:13px;font-weight:600;color:var(--glow)}
+
+/* ---------- Tela do produto ---------- */
+#v3d{position:fixed;inset:0;touch-action:none}
+#v3d canvas{display:block;width:100%;height:100%}
+.ui{position:fixed;inset:0;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between;z-index:2}
+.ui > *{pointer-events:auto}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.bottom{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;pointer-events:none}
+.bottom > *{pointer-events:auto}
+.info{max-width:560px;min-width:0}
+.info h2{margin:10px 0 0;font-family:var(--f-display);font-weight:400;font-size:clamp(22px,3.8vw,44px);line-height:1.1;text-transform:uppercase;text-wrap:balance}
+.info p.sub{margin:12px 0 0;font-size:clamp(14.5px,1.5vw,17px);line-height:1.5;color:var(--muted);max-width:36ch}
+.info > *{animation:rise .55s cubic-bezier(.2,.8,.2,1) both}
+.info > *:nth-child(2){animation-delay:.06s}
+.info > *:nth-child(3){animation-delay:.12s}
+.info > *:nth-child(4){animation-delay:.18s}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.stats{display:flex;gap:clamp(16px,3.5vw,36px);margin-top:16px;flex-wrap:wrap}
+.stats div{display:flex;flex-direction:column}
+.stats b{font-family:var(--f-display);font-weight:400;font-size:clamp(18px,2.8vw,30px);line-height:1}
+.stats span{font-size:12px;color:var(--muted);margin-top:7px}
+.hint{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-size:12.5px;color:var(--muted)}
+.hint i{width:10px;height:10px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 4px rgb(0 104 255 / .25)}
+.acts{display:flex;flex-wrap:wrap;gap:8px}
+.ib{width:52px;height:52px;border-radius:50%;border:1px solid var(--line);background:rgb(11 21 40 / .65);display:grid;place-items:center;color:var(--ink)}
+.ib.fill{background:var(--blue);border-color:var(--blue);color:#FFFFFF;box-shadow:0 0 24px rgb(0 104 255 / .45)}
+.ib svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* Pontos de toque: âncora na bateria + tracinho + bolinha */
+#hs{position:fixed;inset:0;pointer-events:none;z-index:1}
+#hs svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+#hs line{stroke:rgb(229 233 244 / .7);stroke-width:1.5}
+#hs circle{fill:#FFFFFF}
+.hp{position:absolute;left:0;top:0;pointer-events:auto;border:0;background:transparent;padding:0;display:flex;align-items:center;gap:8px;
+  transition:opacity .25s ease}
+.hp .dot{width:34px;height:34px;border-radius:50%;flex:none;display:grid;place-items:center;background:rgb(3 12 34 / .55);border:2px solid #FFFFFF;
+  box-shadow:0 0 0 0 rgb(0 104 255 / .6);animation:pulse 2.2s ease-out infinite}
+.hp .dot::after{content:"";width:10px;height:10px;border-radius:50%;background:#FFFFFF}
+.hp[aria-pressed="true"] .dot{background:var(--blue);border-color:var(--blue);animation:none;box-shadow:0 0 22px rgb(0 104 255 / .8)}
+.hp .lbl{opacity:0;transform:translateX(-4px);transition:opacity .25s ease,transform .25s ease;font-size:12px;font-weight:600;letter-spacing:.04em;padding:5px 9px;border-radius:999px;background:rgb(3 12 34 / .7);border:1px solid var(--line);white-space:nowrap}
+.hp.left{flex-direction:row-reverse}
+.hp[aria-pressed="true"] .lbl,.hp:hover .lbl{opacity:1;transform:none}
+.hp.off{opacity:0;pointer-events:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgb(0 104 255 / .65)}70%{box-shadow:0 0 0 14px rgb(0 104 255 / 0)}100%{box-shadow:0 0 0 0 rgb(0 104 255 / 0)}}
+
+.sheet{position:fixed;left:0;right:0;bottom:0;max-height:80%;overflow:auto;background:var(--navy2);border-top:1px solid var(--line);z-index:4;
+  border-radius:20px 20px 0 0;box-shadow:0 -10px 40px rgb(0 0 0 / .5);transform:translateY(105%);transition:transform .45s cubic-bezier(.2,.8,.2,1);
+  padding:22px max(20px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px))}
+.sheet.open{transform:none}
+.sheet h3{margin:0;font-family:var(--f-display);font-weight:400;font-size:20px;text-transform:uppercase}
+.sheet dl{margin:14px 0 0;display:grid;grid-template-columns:auto 1fr;max-width:640px}
+.sheet dt,.sheet dd{margin:0;padding:11px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+.sheet dt{color:var(--muted);padding-right:16px}
+.sheet dd{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.sheet dd.tbd{color:var(--glow);font-weight:500}
+.sheet .row{display:flex;justify-content:space-between;align-items:center;max-width:640px}
+.sheet .acts{margin-top:16px}
+.note{font-size:12.5px;color:var(--muted);margin:14px 0 0;max-width:640px}
+.toast{font-size:13px;color:var(--glow);min-height:1em;margin:10px 0 0}
+.loading{position:fixed;inset:0;display:grid;place-items:center;color:var(--muted);font-size:13px;letter-spacing:.08em;text-transform:uppercase;pointer-events:none;z-index:3}
+
+
+@media (prefers-reduced-motion:reduce){.info > *{animation:none}.hp .dot{animation:none}.sheet,.home{transition:none}}
+/* Realidade aumentada (model-viewer) */
+.ar{position:fixed;inset:0;z-index:8;background:var(--navy)}
+.ar model-viewer{width:100%;height:100%;background:radial-gradient(90% 70% at 50% 40%,#16305E 0%,var(--navy2) 50%,var(--navy) 100%)}
+.ar-top{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.ar-top p{margin:0;font-size:13px;color:var(--muted)}
+.ar-go{position:absolute;left:50%;bottom:max(28px,env(safe-area-inset-bottom,0px));transform:translateX(-50%);font-size:16px;padding:16px 26px}
+.ar-no{position:absolute;left:0;right:0;bottom:max(28px,env(safe-area-inset-bottom,0px));margin:0;text-align:center;font-size:14px;color:var(--muted);padding-inline:24px}
+</style>
+</head>
+<body>
+
+<div id="v3d"></div>
+<div id="hs"><svg id="hs-svg"></svg></div>
+
+<div class="ui pad" id="ui" hidden>
+  <div class="topbar">
+    <button class="ghost" id="b-back" aria-label="Voltar aos produtos"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="mark">JFA</span>
+    <button class="ghost" id="b-full" aria-label="Tela cheia"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+  </div>
+  <div class="bottom">
+    <div class="info" id="info"></div>
+    <div class="acts">
+      <button class="ib" id="b-ar" aria-label="Ver em tamanho real" title="Ver em tamanho real"><svg viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></svg></button>
+      <button class="ib" id="b-sheet" aria-label="Ficha técnica" title="Ficha técnica"><svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/></svg></button>
+      <a class="ib fill" id="b-wa" href="#" target="_blank" rel="noopener" aria-label="Enviar no WhatsApp" title="Enviar no WhatsApp"><svg viewBox="0 0 24 24"><path d="M4 20l1.4-4.2A8 8 0 1 1 8.2 18.6z"/></svg></a>
+    </div>
+  </div>
+</div>
+<div class="loading" id="status" hidden>Carregando modelo…</div>
+
+<div class="home pad" id="home">
+  <div class="home-in">
+    <header><span class="mark">JFA</span><span class="eb">Vitrine 3D</span></header>
+    <div><p class="eb">Linha e-Lítio Pro · LiFePO4</p><h1>Escolha o produto</h1></div>
+    <div class="grid" id="grid"></div>
+  </div>
+</div>
+
+<div class="sheet" id="sheet" role="dialog" aria-label="Ficha técnica"></div>
+
+<div class="ar" id="ar" hidden>
+  <model-viewer id="mv" ar ar-modes="webxr scene-viewer quick-look" ar-scale="fixed" ar-placement="floor"
+    camera-controls touch-action="pan-y" shadow-intensity="1" exposure="1" environment-image="neutral" alt="Bateria em 3D">
+    <button slot="ar-button" class="btn fill ar-go">Abrir câmera</button>
+  </model-viewer>
+  <div class="ar-top pad">
+    <button class="ghost" id="ar-close" aria-label="Fechar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <p>Tamanho real · aponte para o chão ou a mesa</p>
+  </div>
+  <p class="ar-no" id="ar-no" hidden>Este aparelho não abre a câmera em realidade aumentada. Use um celular ou tablet (Android ou iPhone).</p>
+</div>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
+
+// ---------- Produtos (tudo em mm) ----------
+// Itens com "tbd" ainda precisam ser confirmados e não vão no WhatsApp.
+const TBD = [["Vida útil","a confirmar","tbd"],["Peso","a confirmar","tbd"],["Garantia","a confirmar","tbd"]];
+const small = (ah, wh, D) => ({
+  // Pontos de toque das baterias pequenas (posições do arquivo 3D)
+  hotspots: [
+    { label:"Terminais", title:"Terminais tipo lâmina.", text:"Encaixe rápido. Positivo em vermelho.", p:[-68.7,103,-(D===64?19:28.42)], n:[0,1,0], dir:[-0.7,1,0.35], zoom:0.8 },
+    { label:"LiFePO4", title:"Química LiFePO4.", text:"A química de lítio mais segura e durável, com BMS que protege as células. Interior ilustrativo.", p:[40,40,D/2+0.5], n:[0,0,1], dir:[0.55,0.6,0.9], zoom:1.25, tgt:[0,105,0], open:true },
+  ],
+});
+const PRODUCTS = [
+  { id:"6", name:"e-Lítio Pro", model:"12,8V 6Ah", thumb:"models/thumb-6ah.webp", file:"models/6ah.glb", ar:"models/6ah.glb", kind:"small",
+    stats:[["12,8V","tensão nominal"],["6Ah","capacidade"],["76,8Wh","energia"]],
+    specs:[["Tensão nominal","12,8 V"],["Capacidade","6 Ah"],["Energia","76,8 Wh"],["Química","LiFePO4"],["Terminais","tipo lâmina"],...TBD],
+    ...small(6,"76,8 Wh",64) },
+  { id:"10", name:"e-Lítio Pro", model:"12,8V 10Ah", thumb:"models/thumb-10ah.webp", file:"models/10ah.glb", ar:"models/10ah.glb", kind:"small",
+    stats:[["12,8V","tensão nominal"],["10Ah","capacidade"],["128Wh","energia"]],
+    specs:[["Tensão nominal","12,8 V"],["Capacidade","10 Ah"],["Energia","128 Wh"],["Química","LiFePO4"],["Terminais","tipo lâmina"],...TBD],
+    ...small(10,"128 Wh",96) },
+  { id:"280", name:"e-Lítio Pro", model:"12,8V 280Ah", thumb:"tex/front.webp", file:"models/280ah-caixa.glb", ar:"models/280ah.glb", kind:"big",
+    stats:[["12,8V","tensão nominal"],["280Ah","capacidade"],["3,58kWh","energia"]],
+    specs:[["Tensão nominal","12,8 V"],["Capacidade","280 Ah"],["Energia","3,58 kWh"],["Química","LiFePO4"],
+      ["Medidas","475 × 170 × 240 mm"],["Caixa","plástico rígido black piano"],["Bornes","parafuso sextavado"],...TBD],
+    hotspots:[
+      { label:"Painel", title:"Painel de controle.", text:"Visor com tensão, corrente, carga e temperatura, e botão liga/desliga.", p:[0,243,-20], n:[0,1,0.3], dir:[0.25,1,0.8], zoom:0.6 },
+      { label:"Instalação", title:"Fácil de instalar.", text:"Bornes com parafuso sextavado e alças de corda para carregar.", p:[185,247,-55], n:[0.3,1,-0.2], dir:[0.7,0.9,0.5], zoom:0.6 },
+      { label:"LiFePO4", title:"4 células LiFePO4.", text:"Células em série e BMS que protege cada uma. Interior ilustrativo.", p:[-160,150,86], n:[0,0,1], dir:[-0.45,0.7,0.85], zoom:1.4, tgt:[0,270,0], open:true },
+    ] },
+];
+
+// ---------- Cena ----------
+const wrap = document.getElementById('v3d');
+const statusEl = document.getElementById('status');
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.NeutralToneMapping;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.autoUpdate = false;
+wrap.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+{ const c = document.createElement('canvas'); c.width = 512; c.height = 512;
+  const g = c.getContext('2d'), gr = g.createRadialGradient(256,200,10,256,230,420);
+  gr.addColorStop(0,'#16305e'); gr.addColorStop(.45,'#0b1528'); gr.addColorStop(1,'#030c22');
+  g.fillStyle = gr; g.fillRect(0,0,512,512);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; scene.background = t; }
+function studioEnvironment(){
+  const env = new THREE.Scene();
+  env.add(new THREE.Mesh(new THREE.BoxGeometry(10,10,10), new THREE.MeshBasicMaterial({ color:0x1a2234, side:THREE.BackSide })));
+  const box = (w,h,k,pos,tint=[1,1,1]) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w,h), new THREE.MeshBasicMaterial({ color:new THREE.Color(...tint).multiplyScalar(k), side:THREE.DoubleSide }));
+    m.position.set(...pos); m.lookAt(0,0.4,0); env.add(m);
+  };
+  box(5,3.2,1.3,[0,4.8,0.4]);
+  for (let k=0;k<8;k++){ const a = k/8*Math.PI*2+0.2; box(2.2,4.2,k%2?1.5:0.9,[Math.cos(a)*4.9,0.4,Math.sin(a)*4.9], k%3===0?[0.45,0.65,1]:[1,1,1]); }
+  box(6,1.2,1.1,[0,1.6,4.8]);
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  const tex = pmrem.fromScene(env, 0.035).texture; pmrem.dispose(); return tex;
+}
+scene.environment = studioEnvironment();
+
+const camera = new THREE.PerspectiveCamera(30, 1, 5, 10000);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.08; controls.enablePan = false;
+controls.maxPolarAngle = Math.PI*0.49; controls.autoRotateSpeed = 0.8;
+
+const key = new THREE.DirectionalLight(0xffffff, 1.2);
+key.castShadow = true; key.shadow.mapSize.set(1024,1024); key.shadow.radius = 8; key.shadow.bias = -0.0004; key.shadow.normalBias = 0.6;
+scene.add(key, key.target);
+const rim = new THREE.DirectionalLight(0x4d95ff, 1.4); scene.add(rim);
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(6000,6000), new THREE.ShadowMaterial({ opacity:0.35 }));
+ground.rotation.x = -Math.PI/2; ground.receiveShadow = true; scene.add(ground);
+const glow = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const g = c.getContext('2d'), gr = g.createRadialGradient(128,128,10,128,128,128);
+  gr.addColorStop(0,'rgba(0,104,255,.55)'); gr.addColorStop(.5,'rgba(0,78,208,.18)'); gr.addColorStop(1,'rgba(0,0,0,0)');
+  g.fillStyle = gr; g.fillRect(0,0,256,256);
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(1,1), new THREE.MeshBasicMaterial({ map:new THREE.CanvasTexture(c), transparent:true, depthWrite:false }));
+  m.rotation.x = -Math.PI/2; m.position.y = 0.2; scene.add(m); return m;
+})();
+
+// ---------- Materiais comuns ----------
+const piano = () => new THREE.MeshPhysicalMaterial({ color:0x030304, roughness:0.12, ior:1.5, specularIntensity:1, clearcoat:1, clearcoatRoughness:0.015 });
+const zinc = new THREE.MeshStandardMaterial({ color:0xc2c5ca, roughness:0.32, metalness:1 });
+function add(mesh, parent, x=0, y=0, z=0){ mesh.position.set(x,y,z); mesh.castShadow = mesh.receiveShadow = true; parent.add(mesh); return mesh; }
+async function loadGLB(url){
+  const buf = await fetch(url).then(r => { if (!r.ok) throw new Error(url); return r.arrayBuffer(); });
+  return new GLTFLoader().parseAsync(buf, '');
+}
+
+// ---------- Baterias pequenas (6Ah / 10Ah): arquivo 3D completo ----------
+async function buildSmall(p){
+  const gltf = await loadGLB(p.file), root = gltf.scene, g = new THREE.Group();
+  root.scale.setScalar(1000);
+  root.traverse(o => {
+    if (!o.isMesh) return;
+    o.castShadow = o.receiveShadow = true;
+    const m = o.material, n = m.name || '';
+    if (n === 'Caixa black piano') Object.assign(m, { color:new THREE.Color(0x0b0b0c), roughness:0.5, specularIntensity:0, clearcoat:1, clearcoatRoughness:0.025, envMapIntensity:2.5 });
+    if (n.startsWith('Adesivo')){ o.castShadow = false; m.envMapIntensity = 0.8; }
+  });
+  g.add(root);
+  const lid = root.getObjectByName('EXPLODE_lid'), lidY = lid ? lid.position.y : 0;
+  const deep = D => D > 80;   // 10Ah tem caixa mais funda: duas fileiras de células
+  const box = new THREE.Box3().setFromObject(root), D = box.max.z - box.min.z;
+  const pack = new THREE.Group(); pack.visible = false; g.add(pack);
+  const wrapM = new THREE.MeshStandardMaterial({ color:0x1d4fb8, roughness:0.4, metalness:0.1 });
+  const capM = new THREE.MeshStandardMaterial({ color:0xd7dde8, roughness:0.5, metalness:0.4 });
+  const ni = new THREE.MeshStandardMaterial({ color:0xb9c0c9, roughness:0.3, metalness:0.9 });
+  const rows = deep(D) ? [-22,22] : [0];
+  for (const z of rows) for (let i=0;i<4;i++){
+    const x = (i-1.5)*34;
+    add(new THREE.Mesh(new THREE.CylinderGeometry(15,15,64,28), wrapM), pack, x, 36, z);
+    add(new THREE.Mesh(new THREE.CylinderGeometry(13,13,1.5,28), capM), pack, x, 68.7, z);
+  }
+  for (const z of rows) add(new THREE.Mesh(new THREE.BoxGeometry(130,1.2,10), ni), pack, 0, 70, z);
+  add(new THREE.Mesh(new THREE.BoxGeometry(120,2,deep(D)?70:46), new THREE.MeshStandardMaterial({ color:0x0b3a2a, roughness:0.6 })), pack, 0, 76, 0);
+  const chip = new THREE.MeshStandardMaterial({ color:0x111318, roughness:0.6 }), jb = new THREE.MeshStandardMaterial({ color:0x0068ff, roughness:0.5 });
+  for (let i=0;i<4;i++) add(new THREE.Mesh(new THREE.BoxGeometry(14,3,10), chip), pack, -40+i*24, 78.5, -8);
+  for (let i=0;i<3;i++) add(new THREE.Mesh(new THREE.BoxGeometry(8,8,8), jb), pack, 20+i*14, 81, 12);
+  const open = e => {
+    if (lid) lid.position.y = lidY + e*125;
+    pack.visible = e > 0.01; pack.position.y = e*92;
+  };
+  return { group:g, open };
+}
+
+// ---------- 280Ah: caixa do CAD + adesivos + interior ilustrativo ----------
+async function buildBig(p){
+  const gltf = await loadGLB(p.file), g = new THREE.Group(), cad = gltf.scene;
+  cad.scale.setScalar(1000); g.add(cad);
+  const casePiano = piano();
+  const lcd = (() => {
+    const c = document.createElement('canvas'); c.width = 1024; c.height = 534;
+    const x = c.getContext('2d'), gr = x.createLinearGradient(0,0,0,534);
+    gr.addColorStop(0,'#3b38cc'); gr.addColorStop(1,'#27218c'); x.fillStyle = gr; x.fillRect(0,0,1024,534);
+    x.fillStyle = '#eef0ff'; x.font = '600 46px Poppins, monospace'; x.fillText('STATUS',400,70); x.fillRect(40,92,944,4);
+    x.font = '700 180px Poppins, monospace'; x.fillText('12.8',40,280); x.fillText('155',40,480);
+    x.font = '700 90px Poppins, monospace'; x.fillText('V',500,280); x.fillText('A',400,480);
+    x.font = '500 48px Poppins, monospace'; ['SOC 100%','TEMP 25°C','DESCARGA','BMS OK'].forEach((t,i) => x.fillText(t,650,180+i*86));
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
+  })();
+  const lcdMat = new THREE.MeshPhysicalMaterial({ map:lcd, emissiveMap:lcd, emissive:0xffffff, emissiveIntensity:0.45, roughness:0.08, clearcoat:1, clearcoatRoughness:0.02 });
+  const dm = {
+    frame:new THREE.MeshPhysicalMaterial({ color:0x8e9197, roughness:0.35, metalness:0.1, clearcoat:0.6, clearcoatRoughness:0.15 }),
+    face:new THREE.MeshPhysicalMaterial({ color:0x060607, roughness:0.1, clearcoat:1, clearcoatRoughness:0.02 }),
+    dark:new THREE.MeshPhysicalMaterial({ color:0x111215, roughness:0.4 }),
+    light:new THREE.MeshStandardMaterial({ color:0xdfe2e6, roughness:0.45 }),
+    key:new THREE.MeshPhysicalMaterial({ color:0x2b2e33, roughness:0.35, clearcoat:0.5 }),
+  };
+  const buttonMetal = new THREE.MeshStandardMaterial({ color:0xa9adb3, roughness:0.28, metalness:1 });
+  const CAD_MATS = { 1:'dark', 2:'light', 3:'dark', 5:'key', 6:'light', 7:'face', 8:'dark' };
+  cad.traverse(o => {
+    if (!o.isMesh) return;
+    o.castShadow = o.receiveShadow = true;
+    const idx = gltf.parser.associations.get(o.material)?.materials;
+    const inDisplay = o.parent?.name?.includes('DISPLAY') || o.name.startsWith('mesh_1');
+    const isButton = o.name.includes('Bot') || o.parent?.name?.includes('Bot');
+    if (isButton) o.material = buttonMetal;
+    else if (!inDisplay) o.material = casePiano;
+    else if (idx === 4){
+      const geo = o.geometry; geo.computeBoundingBox();
+      const { min, max } = geo.boundingBox, ps = geo.attributes.position, uv = new Float32Array(ps.count*2);
+      for (let i=0;i<ps.count;i++){ uv[i*2] = (ps.getX(i)-min.x)/(max.x-min.x); uv[i*2+1] = (ps.getZ(i)-min.z)/(max.z-min.z); }
+      geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); o.material = lcdMat;
+    } else if (idx === 0) o.material = dm.frame;
+    else o.material = dm[CAD_MATS[idx]] || dm.dark;
+  });
+  const red = new THREE.MeshPhysicalMaterial({ color:0xb3121a, roughness:0.18, clearcoat:1, clearcoatRoughness:0.03 });
+  for (const [x,ring] of [[185,red],[-185,null]]){
+    if (ring) add(new THREE.Mesh(new THREE.TorusGeometry(13,2.2,12,40), ring), g, x, 234.6, -55).rotation.x = Math.PI/2;
+    add(new THREE.Mesh(new THREE.CylinderGeometry(9.5,9.5,1.4,32), zinc), g, x, 237.3, -55);
+    add(new THREE.Mesh(new THREE.CylinderGeometry(6.8,6.8,5.5,6), zinc), g, x, 240.75, -55).rotation.y = Math.PI/6;
+    add(new THREE.Mesh(new THREE.CylinderGeometry(6.0,6.8,0.8,24), zinc), g, x, 243.9, -55);
+  }
+  const ropeTex = (() => {
+    const c = document.createElement('canvas'); c.width = 128; c.height = 64;
+    const x = c.getContext('2d'); x.fillStyle = '#060606'; x.fillRect(0,0,128,64);
+    for (let i=-4;i<12;i++){ const gr = x.createLinearGradient(i*16,0,i*16+16,0);
+      gr.addColorStop(0,'#050505'); gr.addColorStop(.5,'#3a3a3a'); gr.addColorStop(1,'#050505');
+      x.fillStyle = gr; x.beginPath(); x.moveTo(i*16,64); x.lineTo(i*16+32,0); x.lineTo(i*16+46,0); x.lineTo(i*16+14,64); x.fill(); }
+    const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; return t;
+  })();
+  const grip = new THREE.MeshPhysicalMaterial({ color:0x050506, roughness:0.35, clearcoat:0.6, clearcoatRoughness:0.2 });
+  for (const side of [1,-1]){
+    const hx = side*230, gx = side*(445/2+14);
+    add(new THREE.Mesh(new RoundedBoxGeometry(16,20,132,3,6), grip), g, gx, 40, 0);
+    for (const z of [-52,52]){
+      const zs = Math.sign(z);
+      const curve = new THREE.CatmullRomCurve3([ new THREE.Vector3(hx,188,z), new THREE.Vector3(hx,200,z), new THREE.Vector3(hx+side*7,201,z+zs*2),
+        new THREE.Vector3(gx+side,175,z+zs*4), new THREE.Vector3(gx,110,z+zs*7), new THREE.Vector3(gx,52,z+zs*9), new THREE.Vector3(gx,36,z+zs*9) ]);
+      const t = ropeTex.clone(); t.repeat.set(curve.getLength()/7, 1); t.needsUpdate = true;
+      add(new THREE.Mesh(new THREE.TubeGeometry(curve,48,2.6,6,false), new THREE.MeshStandardMaterial({ map:t, bumpMap:t, bumpScale:1.2, roughness:0.75 })), g);
+    }
+  }
+  const loader = new THREE.TextureLoader();
+  const label = (url, w, h) => {
+    const t = loader.load(url, () => { dirty = true; }); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w,h), new THREE.MeshPhysicalMaterial({ map:t, transparent:true, alphaTest:0.5, roughness:0.6,
+      specularIntensity:0.35, envMapIntensity:0.35, polygonOffset:true, polygonOffsetFactor:-2 }));
+    m.receiveShadow = true; g.add(m); return m;
+  };
+  label('tex/front.webp',235,152.9).position.set(0,97.5,85.25);
+  { const m = label('tex/side.webp',75,152.9); m.rotation.y = Math.PI; m.position.set(445/2-15-37.5,97.5,-85.25); }
+  { const m = label('tex/top.webp',235,58.1); m.rotation.x = -Math.PI/2; m.position.set(-8,240.1,39); }
+  for (const [u,x] of [['tex/warn1.webp',180],['tex/warn2.webp',-180]]){ const m = label(u,58.1,25); m.rotation.x = -Math.PI/2; m.position.set(x,240.1,-14); }
+  const caseMats = new Set(); g.traverse(o => { if (o.isMesh) caseMats.add(o.material); });
+
+  // Interior ILUSTRATIVO (não vem do CAD)
+  const inside = new THREE.Group(); inside.visible = false; g.add(inside);
+  const top = 173, blue = new THREE.MeshStandardMaterial({ color:0x1d4fb8, roughness:0.45, metalness:0.15 });
+  const capM = new THREE.MeshStandardMaterial({ color:0xd7dde8, roughness:0.6 }), cu = new THREE.MeshStandardMaterial({ color:0xc77a35, roughness:0.3, metalness:0.8 });
+  for (let i=0;i<4;i++){
+    const x = (i-1.5)*103;
+    add(new THREE.Mesh(new THREE.BoxGeometry(95,165,140), blue), inside, x, 90.5, 0);
+    add(new THREE.Mesh(new THREE.BoxGeometry(93,2,138), capM), inside, x, top+1, 0);
+    for (const dz of [-45,45]) add(new THREE.Mesh(new THREE.CylinderGeometry(8,8,8,16), zinc), inside, x, top+6, dz);
+  }
+  for (let i=0;i<3;i++) add(new THREE.Mesh(new THREE.BoxGeometry(123,3,22), cu), inside, (i-1)*103, top+11.5, i%2 ? 45 : -45);
+  add(new THREE.Mesh(new THREE.BoxGeometry(200,3,90), new THREE.MeshStandardMaterial({ color:0x0b3a2a, roughness:0.6 })), inside, 0, 205, 20);
+  const chip = new THREE.MeshStandardMaterial({ color:0x111318, roughness:0.6 }), jb = new THREE.MeshStandardMaterial({ color:0x0068ff, roughness:0.5 });
+  for (let i=0;i<5;i++) add(new THREE.Mesh(new THREE.BoxGeometry(22,4,16), chip), inside, -70+i*35, 208, 0);
+  for (let i=0;i<4;i++) add(new THREE.Mesh(new THREE.BoxGeometry(14,14,14), jb), inside, 20+i*22, 213, 42);
+  const open = e => {
+    const o = 1 - e*0.6;
+    caseMats.forEach(m => { m.opacity = o; m.transparent = o < 0.99 || !!m.alphaTest; m.depthWrite = o > 0.5; });
+    inside.visible = e > 0.01; inside.position.y = e*300;
+  };
+  return { group:g, open, inside };
+}
+
+const ease = t => t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2;
+
+// ---------- Estado ----------
+let cur = null, active = null, fly = null, drift = null, dirty = true, openE = 0, openTo = 0;
+const cache = {};
+const hsLayer = document.getElementById('hs'), svg = document.getElementById('hs-svg');
+const info = document.getElementById('info');
+
+function frame(p, b){
+  // enquadramento a partir do tamanho real do modelo
+  const size = b.getSize(new THREE.Vector3()), maxD = Math.max(size.x, size.y, size.z);
+  return { tgt:new THREE.Vector3(0, size.y*0.42, 0), dist:maxD*2.4 + 60, size };
+}
+async function openProduct(p){
+  statusEl.hidden = false;
+  if (!cache[p.id]){
+    try { cache[p.id] = await (p.kind === 'big' ? buildBig(p) : buildSmall(p)); }
+    catch (e) { statusEl.textContent = 'Não foi possível carregar o modelo 3D.'; throw e; }
+    const b = new THREE.Box3().setFromObject(cache[p.id].group);
+    cache[p.id].frame = frame(p, b);
+  }
+  if (cur) scene.remove(cache[cur.id].group);
+  cur = p; const c = cache[p.id]; scene.add(c.group);
+  const { dist, size } = c.frame;
+  controls.minDistance = dist*0.25; controls.maxDistance = dist*2.2;
+  camera.near = dist/200; camera.far = dist*20; camera.updateProjectionMatrix();
+  key.position.set(-size.x*0.7, dist*0.9, dist*0.45);
+  Object.assign(key.shadow.camera, { left:-size.x, right:size.x, top:size.x, bottom:-size.x, near:dist*0.2, far:dist*3 });
+  key.shadow.camera.updateProjectionMatrix();
+  rim.position.set(size.x, size.y*1.6, -dist);
+  glow.scale.set(size.x*2, size.z*3, 1);
+  renderer.shadowMap.needsUpdate = true;
+  openE = openTo = 0; applyOpen();
+  buildHotspots(p);
+  if (reduce) overview(true); else intro();
+  renderInfo(null);
+  document.getElementById('b-wa').href = 'https://wa.me/?text=' + encodeURIComponent(sheetText());
+  statusEl.hidden = true;
+  document.getElementById('home').classList.add('gone');
+  document.getElementById('ui').hidden = false; hsLayer.hidden = false;
+  dirty = true; running = true;
+  try { localStorage.setItem('vitrine-prod', p.id); } catch(e){}
+}
+function overview(instant){
+  const { tgt, dist } = cache[cur.id].frame;
+  const pos = tgt.clone().add(new THREE.Vector3(-0.55,0.42,0.73).normalize().multiplyScalar(dist));
+  flyTo(pos, tgt, instant, { spin:true, dur:1.6 });
+}
+function intro(){
+  // entrada: começa longe e baixo, de lado, e faz uma curva até a vista geral
+  const { tgt, dist } = cache[cur.id].frame;
+  camera.position.copy(tgt).add(new THREE.Vector3(0.95,0.06,-0.3).normalize().multiplyScalar(dist*2.1));
+  controls.target.copy(tgt);
+  const pos = tgt.clone().add(new THREE.Vector3(-0.55,0.42,0.73).normalize().multiplyScalar(dist));
+  flyTo(pos, tgt, false, { spin:true, dur:2.4, lift:0 });
+}
+// Assistente de câmera: viaja em arco (sobe e recua no meio do caminho), chega devagar
+// e depois fica num leve balanço até o vendedor tocar na tela.
+function flyTo(pos, tgt, instant, o = {}){
+  drift = null; controls.autoRotate = false;
+  if (instant || reduce){ camera.position.copy(pos); controls.target.copy(tgt); fly = null; afterFly(o); dirty = true; return; }
+  const s0 = new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));
+  const s1 = new THREE.Spherical().setFromVector3(pos.clone().sub(tgt));
+  let dT = s1.theta - s0.theta; dT = ((dT + Math.PI) % (2*Math.PI) + 2*Math.PI) % (2*Math.PI) - Math.PI;
+  fly = { s0, s1, dT, t0:controls.target.clone(), t1:tgt.clone(), t:0, dur:o.dur ?? 1.5, lift:o.lift ?? 0.22, o };
+  dirty = true;
+}
+function afterFly(o){
+  if (o.spin) controls.autoRotate = !reduce;
+  else if (!reduce) drift = { s:new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target)), t:0 };
+}
+const sp = new THREE.Spherical();
+function stepCamera(dt){
+  if (fly){
+    fly.t = Math.min(1, fly.t + dt/fly.dur);
+    const e = ease(fly.t), arc = Math.sin(Math.PI*fly.t);
+    controls.target.lerpVectors(fly.t0, fly.t1, e);
+    sp.set(THREE.MathUtils.lerp(fly.s0.radius, fly.s1.radius, e) * (1 + fly.lift*arc),
+           Math.max(0.15, THREE.MathUtils.lerp(fly.s0.phi, fly.s1.phi, e) - 0.12*arc),
+           fly.s0.theta + fly.dT*e);
+    camera.position.setFromSpherical(sp).add(controls.target);
+    if (fly.t >= 1){ const o = fly.o; fly = null; afterFly(o); }
+    return true;
+  }
+  if (drift){
+    drift.t += dt; const a = Math.min(1, drift.t/1.5), t = drift.t;
+    sp.set(drift.s.radius * (1 + 0.02*a*Math.sin(t*0.5)), drift.s.phi + 0.03*a*Math.sin(t*0.33), drift.s.theta + 0.09*a*Math.sin(t*0.42));
+    camera.position.setFromSpherical(sp).add(controls.target);
+    return true;
+  }
+  return false;
+}
+
+// ---------- Pontos de toque ----------
+let spots = [];
+function buildHotspots(p){
+  hsLayer.querySelectorAll('.hp').forEach(e => e.remove()); svg.innerHTML = '';
+  spots = p.hotspots.map((h, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'hp'; btn.setAttribute('aria-pressed','false'); btn.setAttribute('aria-label', h.label);
+    btn.innerHTML = `<span class="dot"></span><span class="lbl">${h.label}</span>`;
+    btn.onclick = e => { e.stopPropagation(); if (active === i){ select(null); overview(); } else select(i); };
+    hsLayer.appendChild(btn);
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    const dot = document.createElementNS('http://www.w3.org/2000/svg','circle'); dot.setAttribute('r','3.5');
+    svg.append(line, dot);
+    return { h, btn, line, dot, p:new THREE.Vector3(...h.p), n:new THREE.Vector3(...h.n).normalize() };
+  });
+}
+const v = new THREE.Vector3(), toCam = new THREE.Vector3(), centerS = new THREE.Vector3();
+function placeHotspots(){
+  const w = innerWidth, h = innerHeight;
+  centerS.copy(cache[cur.id].frame.tgt).project(camera);
+  const cx = (centerS.x*0.5+0.5)*w, cy = (-centerS.y*0.5+0.5)*h;
+  const L = Math.min(70, w*0.09);
+  for (const s of spots){
+    v.copy(s.p).project(camera);
+    const ax = (v.x*0.5+0.5)*w, ay = (-v.y*0.5+0.5)*h;
+    toCam.copy(camera.position).sub(s.p).normalize();
+    const facing = s.n.dot(toCam) > 0.05 && v.z < 1;
+    const hideForGhost = openTo > 0 && !s.h.open;
+    let dx = ax - cx, dy = ay - cy - 30; const d = Math.hypot(dx,dy) || 1; dx /= d; dy /= d;
+    const bx = ax + dx*L, by = ay + dy*L;
+    const show = facing && !hideForGhost && !fly;
+    s.btn.classList.toggle('off', !show);
+    s.btn.classList.toggle('left', dx < 0);
+    s.btn.style.transform = `translate(${(dx < 0 ? bx - s.btn.offsetWidth + 17 : bx - 17).toFixed(1)}px, ${(by - 17).toFixed(1)}px)`;
+    s.line.setAttribute('x1', ax); s.line.setAttribute('y1', ay); s.line.setAttribute('x2', bx); s.line.setAttribute('y2', by);
+    s.dot.setAttribute('cx', ax); s.dot.setAttribute('cy', ay);
+    const op = show ? 1 : 0; s.line.style.opacity = op; s.dot.style.opacity = op;
+  }
+}
+function select(i){
+  active = i;
+  spots.forEach((s,j) => s.btn.setAttribute('aria-pressed', String(j === i)));
+  if (i === null){ openTo = 0; renderInfo(null); dirty = true; return; }
+  const s = spots[i], { dist } = cache[cur.id].frame;
+  const tgt = s.h.tgt ? new THREE.Vector3(...s.h.tgt) : s.p.clone();
+  const pos = tgt.clone().add(new THREE.Vector3(...s.h.dir).normalize().multiplyScalar(dist*s.h.zoom));
+  openTo = s.h.open ? 1 : 0;
+  flyTo(pos, tgt, false, { dur:s.h.open ? 1.8 : 1.5 });
+  renderInfo(s.h);
+}
+function renderInfo(h){
+  if (!h){
+    info.innerHTML = `<p class="eb">${cur.name}</p><h2>${cur.model}</h2>`;
+  } else {
+    info.innerHTML = `<p class="eb">${h.label}</p><h2>${h.title}</h2><p class="sub">${h.text}</p>`;
+  }
+}
+function applyOpen(){ cache[cur.id].open?.(ease(openE)); }
+
+// ---------- Ficha ----------
+function sheetText(){
+  return `*JFA ${cur.name} ${cur.model}*\nBateria de lítio LiFePO4\n\n` + cur.specs.filter(s => !s[2]).map(([a,b]) => `• ${a}: ${b}`).join('\n');
+}
+const sheet = document.getElementById('sheet');
+function openSheet(){
+  sheet.innerHTML = `<div class="row"><h3>${cur.name} ${cur.model}</h3><button class="ghost" id="b-close">Fechar</button></div>
+    <dl>${cur.specs.map(([a,b,t]) => `<dt>${a}</dt><dd${t ? ' class="tbd"' : ''}>${b}</dd>`).join('')}</dl>
+    <div class="acts"><button class="btn" id="b-copy">Copiar ficha</button></div>
+    <p class="toast" id="toast"></p>
+    <p class="note">Itens em azul ainda serão confirmados e não entram na ficha enviada.${cur.kind === 'big' ? ' O interior mostrado no 3D é ilustrativo.' : ''}</p>`;
+  sheet.classList.add('open');
+  document.getElementById('b-close').onclick = closeSheet;
+  document.getElementById('b-copy').onclick = () => {
+    const txt = sheetText(), toast = document.getElementById('toast');
+    const fallback = () => { const ta = document.createElement('textarea'); ta.value = txt; sheet.appendChild(ta); ta.select();
+      let ok = false; try { ok = document.execCommand('copy'); } catch(e){} ta.remove();
+      toast.textContent = ok ? 'Ficha copiada.' : 'Não foi possível copiar neste aparelho.'; };
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(txt).then(() => toast.textContent = 'Ficha copiada.', fallback);
+    else fallback();
+  };
+}
+function closeSheet(){ sheet.classList.remove('open'); }
+
+// Ferramenta interna: gera o GLB completo da 280Ah (caixa + adesivos + alças) usado na RA.
+if (new URLSearchParams(location.search).has('exportar280')) window.exportar280 = async () => {
+  const c = await buildBig(PRODUCTS.find(p => p.id === '280'));
+  c.group.remove(c.inside);
+  await new Promise(r => setTimeout(r, 1500));          // espera os adesivos carregarem
+  const root = new THREE.Group(); root.scale.setScalar(0.001); root.add(c.group);   // mm -> metros
+  const buf = await new GLTFExporter().parseAsync(root, { binary:true });
+  let bin = ''; new Uint8Array(buf).forEach(b => bin += String.fromCharCode(b)); return btoa(bin);
+};
+
+// ---------- Grade ----------
+const grid = document.getElementById('grid');
+grid.innerHTML = PRODUCTS.map(p => `<button class="card" data-id="${p.id}">
+  <span class="pic"><img src="${p.thumb}" alt="Adesivo frontal da ${p.name} ${p.model}"></span>
+  <span class="txt"><b>${p.model.split(' ')[1]}</b><span>${p.name} · ${p.stats[0][0]} · ${p.stats[2][0]}</span><span class="go">Ver em 3D →</span></span>
+</button>`).join('');
+grid.onclick = e => { const b = e.target.closest('[data-id]'); if (b) openProduct(PRODUCTS.find(p => p.id === b.dataset.id)); };
+function goHome(){
+  closeSheet(); select(null); running = false;
+  document.getElementById('ui').hidden = true; hsLayer.hidden = true;
+  document.getElementById('home').classList.remove('gone');
+}
+hsLayer.hidden = true;
+
+// ---------- Controles ----------
+let down = null;
+renderer.domElement.addEventListener('pointerdown', e => { down = { x:e.clientX, y:e.clientY }; });
+renderer.domElement.addEventListener('pointerup', e => {
+  if (!down) return;
+  if (Math.hypot(e.clientX-down.x, e.clientY-down.y) <= 8){
+    if (sheet.classList.contains('open')) closeSheet();
+    else if (active !== null){ select(null); overview(); }
+  }
+  down = null;
+});
+controls.addEventListener('start', () => { fly = null; drift = null; controls.autoRotate = false; });
+document.getElementById('b-back').onclick = goHome;
+document.getElementById('b-sheet').onclick = openSheet;
+// Realidade aumentada: abre o model-viewer com o arquivo do produto em escala real
+const arEl = document.getElementById('ar'), mv = document.getElementById('mv');
+document.getElementById('b-ar').onclick = () => {
+  closeSheet(); running = false; arEl.hidden = false;
+  document.getElementById('ar-no').hidden = true;
+  mv.alt = `${cur.name} ${cur.model} em tamanho real`;
+  if (mv.getAttribute('src') !== cur.ar) mv.src = cur.ar;
+  else document.getElementById('ar-no').hidden = !!mv.canActivateAR;
+};
+mv.addEventListener('load', () => { document.getElementById('ar-no').hidden = !!mv.canActivateAR; });
+document.getElementById('ar-close').onclick = () => { arEl.hidden = true; running = true; dirty = true; };
+document.getElementById('b-full').onclick = () => {
+  if (document.fullscreenElement) document.exitFullscreen?.().catch(()=>{});
+  else document.documentElement.requestFullscreen?.().catch(()=>{});
+};
+addEventListener('keydown', e => { if (e.key === 'Escape'){ if (sheet.classList.contains('open')) closeSheet(); else if (active !== null){ select(null); overview(); } } });
+
+// ---------- Enquadramento e loop (só desenha quando algo muda) ----------
+function resize(){
+  const w = wrap.clientWidth, h = wrap.clientHeight; if (!w || !h) return;
+  renderer.setSize(w, h, false); camera.aspect = w/h;
+  camera.zoom = Math.min(1, (w/h)/1.0);
+  camera.setViewOffset(w, h, 0, h*(w > h*1.2 ? 0.07 : 0.14), w, h);
+  camera.updateProjectionMatrix(); dirty = true;
+}
+new ResizeObserver(resize).observe(wrap); resize();
+let running = false, last = performance.now();
+renderer.setAnimationLoop(() => {
+  const now = performance.now(), dt = Math.min((now-last)/1000, 0.1); last = now;
+  if (!running || !cur) return;
+  let animating = false;
+  if (openE !== openTo){
+    // abre/fecha em ~1,2 s, no mesmo ritmo da câmera
+    openE = reduce ? openTo : Math.min(1, Math.max(0, openE + Math.sign(openTo - openE)*dt/1.2));
+    applyOpen(); animating = true;
+  }
+  if (stepCamera(dt)) animating = true;
+  const changed = controls.update();
+  if (changed || animating || dirty){ renderer.render(scene, camera); placeHotspots(); dirty = false; }
+});
+</script>
+</body>
+</html>
