@@ -46,18 +46,62 @@ export const CONFIG = {
   },
 
   /**
-   * Contagem regressiva da página de vendas (seção do planeta). Conta
-   * `minutes` a partir da primeira visita de cada pessoa (o horário fica no
-   * navegador dela). A condição precisa acabar mesmo depois desse prazo para
-   * quem viu a contagem: prazo que não acaba engana o cliente. Para uma data
-   * fixa igual para todos, use `until` ou a variável VITE_COUNTDOWN_UNTIL
+   * Contagem regressiva da página de vendas (bloco depois dos depoimentos).
+   * Conta `minutes` a partir da primeira visita de cada pessoa (o horário fica
+   * no navegador dela). A condição precisa acabar mesmo depois desse prazo
+   * para quem viu a contagem: prazo que não acaba engana o cliente. Para uma
+   * data fixa igual para todos, use `until` ou a variável VITE_COUNTDOWN_UNTIL
    * (formato 2026-11-30T23:59:00-03:00); ela tem prioridade. `minutes: null`
-   * desliga.
+   * desliga. `text` descreve a condição (vazio não aparece). Quando o prazo
+   * acaba, o bloco vira um convite comum para o teste.
    */
   countdown: {
-    label: 'A condição especial termina em',
+    title: 'Condição especial para quem começa hoje',
+    text: '',
+    label: 'A condição termina em',
     minutes: 90,
     until: import.meta.env.VITE_COUNTDOWN_UNTIL || null,
+  },
+
+  /**
+   * Preço e comparação com outros sistemas (página de vendas, seção "Por que
+   * o AutoPainel?"). `example: true` mostra o aviso "Valores de exemplo".
+   * Antes de publicar, coloque o preço real e, em `others`, os preços
+   * públicos e atuais de cada concorrente (guarde a fonte e a data):
+   * comparação de preço precisa ser verdadeira e comprovável. Em cada
+   * concorrente, `base` é o plano por mês, `extras` são as funções cobradas à
+   * parte ([nome, valor por mês]) e `missing` o que ele não tem.
+   */
+  pricing: {
+    example: true,
+    price: 297,
+    features: [
+      'Calculadora de compra pela placa',
+      'Anúncio em 8 canais com um clique',
+      'CRM com aviso de carro compatível',
+      'Estoque com dias de pátio',
+      'Financeiro com caixa e comissões',
+      'Painel para sócio, gerente, vendedor e financeiro',
+      'Raio-X e onboarding pela equipe',
+    ],
+    others: [
+      {
+        name: 'Sistema A',
+        base: 449,
+        extras: [
+          ['CRM', 149],
+          ['Financeiro', 119],
+          ['Mais canais de anúncio', 89],
+        ],
+        missing: ['Calculadora de compra pela placa'],
+      },
+      {
+        name: 'Sistema B',
+        base: 590,
+        extras: [['Anúncio em vários canais', 149]],
+        missing: ['Calculadora de compra pela placa', 'Financeiro'],
+      },
+    ],
   },
 
   /**

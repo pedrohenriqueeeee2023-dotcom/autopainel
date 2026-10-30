@@ -129,16 +129,6 @@ const ROLES = [
   },
 ];
 
-const WHY = [
-  ['Compra sem achismo', 'A calculadora mostra até quanto pagar antes de você fechar a troca.', 'chart'],
-  ['8 canais de uma vez', 'Um cadastro, oito anúncios. Mudou o preço, muda em todos.', 'channels'],
-  ['Nenhum lead esquecido', 'Todo contato fica no CRM, com histórico e próximo passo.', 'chat'],
-  ['A gente configura', 'Raio-X grátis e onboarding feito pela nossa equipe.', 'check'],
-];
-
-/* Linha do gráfico do cartão "Compra sem achismo": o ponto brilhante corre por ela. */
-const CHART_PATH = 'M8 82C40 76 58 80 84 62S128 50 150 54 196 42 232 38';
-
 const XRAY = [
   ['Raio-X', 'Raio-X: a equipe analisa a sua loja e mostra onde você perde dinheiro. Sem custo.'],
   ['Onboarding', 'Onboarding: a gente cadastra a loja, os carros e os vendedores para você.'],
@@ -153,8 +143,9 @@ const RAIL = [
   ['raio-x', 'Raio-X'],
   ['perfis', 'Perfis'],
   ['brasil', 'Revendas'],
-  ['por-que', 'Por que'],
+  ['por-que', 'Preço'],
   ['depoimentos', 'Depoimentos'],
+  ['oferta', 'Oferta'],
   ['duvidas', 'Dúvidas'],
   ['contato', 'Contato'],
 ];
@@ -199,6 +190,7 @@ function Nav() {
   const links = [
     ['#como', 'Como funciona'],
     ['#perfis', 'Perfis'],
+    ['#por-que', 'Preço'],
     ['#depoimentos', 'Depoimentos'],
     ['#duvidas', 'Dúvidas'],
   ];
@@ -746,7 +738,6 @@ function useCountdown(cfg) {
 }
 
 function Planet() {
-  const left = useCountdown(CONFIG.countdown);
   return (
     <section id="brasil" className="v-planet v-iso" data-snap="" aria-labelledby="planet-title">
       <Sparks n={34} seed={11} className="v-planet-sparks" />
@@ -760,20 +751,7 @@ function Planet() {
             Revendas de <G>todo o Brasil</G> já compram, anunciam e vendem com o AutoPainel
           </Split>
         </h2>
-        {left && (
-          <div className="v-count" data-in style={{ '--d': '600ms' }}>
-            <p>{CONFIG.countdown.label}</p>
-            <div className="v-count-digits" role="timer">
-              {left.map(([v, u]) => (
-                <span key={u}>
-                  <b>{String(v).padStart(2, '0')}</b>
-                  <small>{u}</small>
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-        <div className="v-hero-ctas" data-in style={{ '--d': '800ms' }}>
+        <div className="v-hero-ctas" data-in style={{ '--d': '600ms' }}>
           <Cta />
           <Cta kind="contact" />
         </div>
@@ -786,74 +764,154 @@ function Planet() {
   );
 }
 
-function WhyArt({ type }) {
-  if (type === 'chart')
-    return (
-      <div className="v-art v-art-chart">
-        <svg width="240" height="96" viewBox="0 0 240 96">
-          <path className="v-art-grid" d="M0 24H240M0 48H240M0 72H240" />
-          <path className="v-art-limit" d="M0 30H240" />
-          <path className="v-art-line" d={CHART_PATH} pathLength="1" />
-        </svg>
-        <i className="v-art-dot" style={{ offsetPath: `path('${CHART_PATH}')` }} />
-        <span className="v-art-label">até R$ 110 mil</span>
-      </div>
-    );
-  if (type === 'channels')
-    return (
-      <div className="v-art v-art-ch">
-        {['OLX', 'ML', 'Site', 'Tray', 'Nuvem', 'Shopify', 'Woo', 'Loja Int.'].map((c, i) => (
-          <span key={c} style={{ '--i': i }}>
-            {c}
-          </span>
-        ))}
-      </div>
-    );
-  if (type === 'chat')
-    return (
-      <div className="v-art v-art-chat">
-        <i style={{ '--i': 0 }}>Tem SUV até 120 mil?</i>
-        <i className="me" style={{ '--i': 1 }}>
-          Chegou um Compass 2021!
-        </i>
-        <i style={{ '--i': 2 }}>Posso ver amanhã?</i>
-        <b>3</b>
-      </div>
-    );
+const brl = (v) => `R$ ${v.toLocaleString('pt-BR')}`;
+
+/** Total por mês de outro sistema: o plano mais as funções cobradas à parte. */
+const totalOf = (o) => o.base + o.extras.reduce((s, [, v]) => s + v, 0);
+
+/** Valor em reais que conta ao aparecer; o leitor de tela lê só o valor final. */
+function Money({ to, per }) {
   return (
-    <ul className="v-art v-art-check">
-      {['Raio-X da loja', 'Carros cadastrados', 'Equipe com acesso'].map((t, i) => (
-        <li key={t} style={{ '--i': i }}>
-          <svg viewBox="0 0 24 24">
-            <path d="M5 12.5l4.5 4.5L19 7.5" pathLength="1" />
-          </svg>
-          {t}
-        </li>
-      ))}
-    </ul>
+    <>
+      <span className="v-sr">
+        {brl(to)}
+        {per && ` por ${per}`}
+      </span>
+      <span aria-hidden="true">
+        R$ <Counter to={to} />
+        {per && <small>/{per}</small>}
+      </span>
+    </>
   );
 }
 
-function Why() {
+/* Uma linha do comparativo: a barra soma o plano e cada função cobrada à
+   parte, um pedaço depois do outro. Passar o mouse num pedaço destaca o valor
+   no texto de baixo, e vice-versa. */
+function PriceRow({ row, max, i }) {
+  const [hot, setHot] = useState(-1);
+  const hover = (k) => ({ onMouseEnter: () => setHot(k), onMouseLeave: () => setHot(-1) });
   return (
-    <section id="por-que" className="v-why v-iso" data-snap="" aria-labelledby="why-title">
+    <li className={`v-bar-row${row.us ? ' us' : ''}${hot >= 0 ? ' has-hot' : ''}`} style={{ '--r': i }}>
+      <p className="v-bar-top">
+        <strong>{row.name}</strong>
+        <span>
+          <Money to={row.total} per="mês" />
+        </span>
+      </p>
+      <div className="v-bar" aria-hidden="true">
+        <span className="v-bar-fill" style={{ width: `${(row.total / max) * 100}%` }}>
+          {row.parts.map(([label, v], k) => (
+            <i
+              key={label}
+              className={`${k ? 'x' : ''}${hot === k ? ' hot' : ''}`}
+              style={{ flexGrow: v, '--k': k }}
+              {...hover(k)}
+            />
+          ))}
+        </span>
+      </div>
+      <p className="v-bar-note">
+        {row.us
+          ? 'Todas as funções inclusas'
+          : row.parts.map(([label, v], k) => (
+              <span key={label} className={hot === k ? 'hot' : ''} {...hover(k)}>
+                {k > 0 && '+ '}
+                {label} {brl(v)}
+              </span>
+            ))}
+      </p>
+      {row.missing?.length > 0 && <p className="v-bar-miss">Não tem: {row.missing.join(', ')}</p>}
+    </li>
+  );
+}
+
+/* "Por que o AutoPainel?": o preço com tudo incluso ao lado do custo de ter
+   as mesmas funções em outros sistemas. Valores em CONFIG.pricing. */
+function Price() {
+  const { price, features, others, example } = CONFIG.pricing;
+  const rows = [
+    { name: CONFIG.brand.name, total: price, parts: [['Tudo incluso', price]], us: true },
+    ...others.map((o) => ({
+      name: o.name,
+      total: totalOf(o),
+      parts: [['Plano', o.base], ...o.extras],
+      missing: o.missing,
+    })),
+  ];
+  const max = Math.max(...rows.map((r) => r.total));
+  const top = rows.reduce((a, b) => (b.total > a.total ? b : a));
+  const save = (top.total - price) * 12;
+  return (
+    <section id="por-que" className="v-price v-iso" data-snap="" aria-labelledby="price-title">
       <GridFx seed={7} runners={4} />
       <div className="v-head">
-        <h2 id="why-title" data-in="own">
+        <h2 id="price-title" data-in="own">
           <Split>
             Por que o <G>AutoPainel?</G>
           </Split>
         </h2>
+        <p data-in style={{ '--d': '300ms' }}>
+          Porque tem todas as funções inclusas e custa bem menos que os outros sistemas.
+        </p>
       </div>
-      <div className="v-why-grid">
-        {WHY.map(([t, d, art], i) => (
-          <article key={t} className="v-why-card" data-in data-spot="" style={{ '--d': `${i * 100}ms` }}>
-            <WhyArt type={art} />
-            <h3>{t}</h3>
-            <p>{d}</p>
-          </article>
-        ))}
+      <div className="v-price-grid">
+        <article className="v-plan" data-in data-spot="">
+          <p className="v-plan-name">{CONFIG.brand.name} completo</p>
+          <p className="v-plan-price">
+            <span className="v-sr">{brl(price)} por mês</span>
+            <span aria-hidden="true">
+              <small>R$</small>
+              <b>
+                <Counter to={price} />
+              </b>
+              <small>/mês</small>
+            </span>
+          </p>
+          <p className="v-plan-sub">Todas as funções inclusas, sem módulo cobrado à parte.</p>
+          <ul className="v-plan-list">
+            {features.map((f, i) => (
+              <li key={f} style={{ '--i': i }}>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 12.5l4.5 4.5L19 7.5" pathLength="1" />
+                </svg>
+                {f}
+              </li>
+            ))}
+          </ul>
+          <Cta />
+          <p className="v-plan-fine">{CONFIG.offer.badge} e Raio-X grátis.</p>
+        </article>
+        <div className="v-vs" data-in style={{ '--d': '150ms' }}>
+          <h3>Quanto custa ter as mesmas funções</h3>
+          <ul className="v-vs-legend" aria-hidden="true">
+            <li>
+              <i className="us" /> {CONFIG.brand.name}
+            </li>
+            <li>
+              <i /> Plano
+            </li>
+            <li>
+              <i className="x" /> Cobrado à parte
+            </li>
+          </ul>
+          <ol className="v-bars">
+            {rows.map((r, i) => (
+              <PriceRow key={r.name} row={r} max={max} i={i} />
+            ))}
+          </ol>
+          {save > 0 && (
+            <p className="v-save">
+              Até{' '}
+              <strong>
+                <Money to={save} />
+              </strong>{' '}
+              por ano a menos que o {top.name}, somando o que ele cobra à parte.
+            </p>
+          )}
+        </div>
       </div>
+      {example && <p className="v-note">Valores de exemplo.</p>}
     </section>
   );
 }
@@ -912,6 +970,55 @@ function Voices() {
   );
 }
 
+/* Condição especial com contagem regressiva, logo depois dos depoimentos.
+   Quando o prazo acaba, vira um convite comum para o teste. */
+function Offer() {
+  const left = useCountdown(CONFIG.countdown);
+  const { title, text, label } = CONFIG.countdown;
+  return (
+    <section id="oferta" className="v-offer v-iso" data-snap="" aria-labelledby="offer-title">
+      <Sparks n={24} seed={17} className="v-offer-sparks" />
+      <div className="v-offer-in" data-in>
+        {left && <span className="v-tag">Por tempo limitado</span>}
+        <h2 id="offer-title">{left ? title : 'Comece o seu teste de 7 dias'}</h2>
+        {left ? (
+          text && <p className="v-offer-text">{text}</p>
+        ) : (
+          <p className="v-offer-text">{CONFIG.offer.text}</p>
+        )}
+        {left && (
+          <div className="v-count">
+            <p>{label}</p>
+            <div className="v-count-digits" role="timer">
+              {left.map(([v, u]) => (
+                <span key={u}>
+                  {/* A chave troca a cada valor: o número novo entra caindo. */}
+                  <b key={v}>{String(v).padStart(2, '0')}</b>
+                  <small>{u}</small>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+        <div className="v-hero-ctas">
+          <Cta />
+          <Cta kind="contact" />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* Na página de vendas, "Quanto custa?" responde com o preço da seção de preço. */
+const FAQ = FAQ_ITEMS.map(([q, a]) =>
+  q === 'Quanto custa?'
+    ? [
+        q,
+        `${brl(CONFIG.pricing.price)} por mês, com todas as funções inclusas. Os 7 dias de teste e o Raio-X são grátis.`,
+      ]
+    : [q, a],
+);
+
 function Faq() {
   return (
     <section id="duvidas" className="v-faq v-iso" data-snap="" aria-labelledby="faq-title">
@@ -924,7 +1031,7 @@ function Faq() {
         </h2>
       </div>
       <div className="v-faq-list" data-in style={{ '--d': '150ms' }}>
-        {FAQ_ITEMS.map(([q, a]) => (
+        {FAQ.map(([q, a]) => (
           <details key={q}>
             <summary>
               {q}
@@ -993,10 +1100,11 @@ function Vendas() {
         <Roles pin={pin} />
         <div className="v-curtain">
           <Planet />
-          <Why />
+          <Price />
         </div>
         <Marquee text="Teste 7 dias sem cartão · " curve className="v-mq-big" />
         <Voices />
+        <Offer />
         <Faq />
         <Talk />
       </main>
