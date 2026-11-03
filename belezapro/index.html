@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>BelezaPro Painel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,500;1,600&family=Poppins:wght@400;500;600&display=swap">
+<style>
+/* Visual claro fixo, sem modo escuro. Layout: toda página = barra (título + ações) → faixa de números opcional → folhas sólidas. Mesmo espaçamento em tudo. */
+:root{
+  --page:#ffffff; --bg:#f6f4f1; --surface:#ffffff; --line:#ece8e3; --line-strong:#dcd5cd; --fg:#2e2420; --muted:#7c706a;
+  --accent:#8d5f3c; --accent-soft:#f5ebe1; --accent-fg:#fff8f1;
+  --lime:#b3bb1c; --lime-soft:#eef0c6; --lime-fg:#5c620f;
+  --ok:#1f8a5b; --ok-soft:#e3f4ec; --warn:#a86400; --warn-soft:#fbefd9; --bad:#c23b3b; --bad-soft:#fbe7e7;
+  --wa:#1d9a5a; --bubble-in:#ffffff; --bubble-out:#eef0d2; --chat-bg:#f6f4f1; --scrim:rgb(74 52 38 / .35);
+  --display:"Cormorant Garamond",Georgia,serif;
+  --body:"Poppins",system-ui,sans-serif;
+  --r:6px; --gap:16px; --pad:16px; color-scheme:light;
+}
+
+*{box-sizing:border-box}
+body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+html,body{height:100%}
+body{background:var(--page);color:var(--fg);font:14px/1.55 var(--body);font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ro [data-w]{display:none!important}
+
+.app{display:grid;grid-template-columns:220px 1fr;min-height:100%}
+.side{background:var(--surface);border-right:1px solid var(--line);padding:20px 12px;display:flex;flex-direction:column;gap:24px;position:sticky;top:0;height:100vh}
+.brand{font:600 20px/1 var(--body);letter-spacing:-.01em;padding:0 10px}
+em.hl{font:italic 600 1.2em/1 var(--display);color:var(--accent);letter-spacing:0}
+.brand span{color:var(--lime)}
+nav{display:flex;flex-direction:column;gap:2px}
+nav button{display:flex;align-items:center;gap:10px;border:0;background:none;padding:8px 10px;border-radius:var(--r);text-align:left;color:var(--muted);font-weight:500}
+nav button:hover{color:var(--fg)}
+nav button[aria-current="page"]{background:var(--accent-soft);color:var(--accent);box-shadow:inset 3px 0 var(--lime)}
+nav svg{width:18px;height:18px;flex:none}
+nav .count{margin-left:auto;background:var(--wa);color:#fff;font-size:11px;font-weight:600;line-height:1;padding:3px 6px;border-radius:99px}
+.side-foot{margin-top:auto;font-size:12px;color:var(--muted);padding:0 10px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.link{border:0;background:none;padding:0;color:var(--muted);text-decoration:underline;font-size:12px}
+.link.danger{color:var(--bad)}
+
+main{min-width:0;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:var(--gap)}
+.note{font-size:13.5px;padding:10px 14px;border-radius:var(--r);background:var(--warn-soft);color:var(--warn)}
+
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;min-height:40px}
+h1{font:600 24px/1.2 var(--body);letter-spacing:-.01em;margin:0;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+h1 small{font:italic 500 22px/1.2 var(--display);color:var(--accent);letter-spacing:0}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;border:1px solid var(--line-strong);background:var(--surface);padding:0 16px;border-radius:99px;font-weight:500;font-size:13.5px;white-space:nowrap}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.danger.armed{background:var(--bad);color:#fff}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.icon{width:36px;padding:0}
+.search{height:36px;border:1px solid var(--line-strong);background:var(--surface);color:var(--fg);border-radius:99px;padding:0 14px;font:inherit;font-size:13.5px;width:220px;max-width:100%}
+
+.sheet{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);min-width:0}
+.sheet>h2{font:600 11.5px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0;padding:0 var(--pad);height:48px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.sheet>h2 .btn{text-transform:none;letter-spacing:0;height:30px;padding:0 12px;font-size:12.5px}
+.cols{display:grid;grid-template-columns:3fr 2fr;gap:var(--gap)}
+.empty{padding:28px var(--pad);color:var(--muted);text-align:center;font-size:14px}
+
+.strip{display:grid;grid-template-columns:repeat(4,1fr)}
+.stat{padding:var(--pad);border-left:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
+.stat:first-child{border-left:0}
+.stat .l{font-size:13px;color:var(--muted)}
+.stat .v{font:600 26px/1.1 var(--body);letter-spacing:-.01em}
+.stat .d{font-size:12.5px;color:var(--muted)}
+.stat .d.bad{color:var(--bad)} .stat .d.ok{color:var(--ok)}
+
+.rows{list-style:none;margin:0;padding:0}
+.rows li{display:flex;align-items:center;gap:12px;padding:12px var(--pad);border-top:1px solid var(--line)}
+.rows li:first-child{border-top:0}
+.rows li.click{cursor:pointer}
+.rows li.click:hover{background:var(--bg)}
+.time{font-weight:600;font-size:14px;width:44px;flex:none}
+.who{min-width:0;flex:1}
+.who b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who span{font-size:13px;color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;display:inline-block}
+.tag{font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:99px;white-space:nowrap}
+.tag.wa{background:var(--lime-soft);color:var(--lime-fg)}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.tag.warn{background:var(--warn-soft);color:var(--warn)}
+.tag.bad{background:var(--bad-soft);color:var(--bad)}
+.tag.plain{background:var(--bg);color:var(--muted)}
+
+.bar-row{display:grid!important;grid-template-columns:72px 1fr 80px;gap:10px;font-size:14px}
+.meter{height:8px;background:var(--bg);border-radius:99px;overflow:hidden}
+.meter i{display:block;height:100%;border-radius:99px}
+.bar-row .n{text-align:right;font-weight:600}
+
+.scroll{overflow-x:auto}
+.cal{display:grid;min-width:570px}
+.cal .head{height:48px;padding:0 var(--pad);border-bottom:1px solid var(--line);font-weight:600;display:flex;align-items:center;gap:8px}
+.hours div{height:56px;font-size:12px;color:var(--muted);padding:2px 8px 0;text-align:right}
+.col{position:relative;border-left:1px solid var(--line);background:repeating-linear-gradient(to bottom,transparent 0 55px,var(--line) 55px 56px)}
+.col .slot{position:absolute;left:0;right:0;height:28px;border:0;background:none;padding:0}
+.col .slot:hover{background:var(--accent-soft)}
+.ev{position:absolute;left:5px;right:5px;border-radius:4px;padding:5px 8px;font-size:12.5px;line-height:1.3;overflow:hidden;background:var(--ev);color:var(--fg);border:0;text-align:left;z-index:1}
+.ev b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev span{color:var(--muted)}
+.ev.done{opacity:.6}
+.ev.block{background:repeating-linear-gradient(45deg,var(--bg) 0 6px,var(--surface) 6px 12px);color:var(--muted);border:1px solid var(--line)}
+.ev.cancel{background:transparent;border:1px dashed var(--ok);color:var(--ok);z-index:0}
+.ev.cancel span{color:var(--ok)}
+.daynav{display:flex;align-items:center;gap:6px}
+
+.chat{display:grid;grid-template-columns:290px 1fr;height:600px;overflow:hidden}
+.threads{border-right:1px solid var(--line);overflow-y:auto}
+.threads button{display:flex;gap:10px;width:100%;border:0;border-bottom:1px solid var(--line);background:none;padding:12px var(--pad);text-align:left}
+.threads button.on{background:var(--accent-soft)}
+.av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:600;font-size:12.5px;flex:none;background:var(--bg);color:var(--muted)}
+.threads .t{min-width:0;flex:1;display:flex;flex-direction:column;gap:2px}
+.threads .t b{display:flex;justify-content:space-between;gap:6px;font-weight:600}
+.threads .t b small{font-weight:400;font-size:12px;color:var(--muted)}
+.threads .t>span{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.threads .tag{align-self:flex-start}
+.conv{display:flex;flex-direction:column;min-width:0;min-height:0}
+.conv-head{display:flex;align-items:center;gap:10px;padding:10px var(--pad);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.msgs{flex:1;overflow-y:auto;background:var(--chat-bg);padding:var(--pad);display:flex;flex-direction:column;gap:8px}
+.m{max-width:78%;padding:7px 11px;border-radius:8px;font-size:14px;background:var(--bubble-in);align-self:flex-start;overflow-wrap:anywhere}
+.m.out{align-self:flex-end;background:var(--bubble-out)}
+.m small{display:block;text-align:right;font-size:11px;color:var(--muted)}
+.sys{align-self:center;font-size:12px;color:var(--muted);padding:2px 10px;text-align:center}
+.sys.ok{color:var(--ok);font-weight:500}
+.compose{display:flex;gap:8px;padding:10px var(--pad);border-top:1px solid var(--line)}
+.compose input{flex:1;min-width:0;border:1px solid var(--line-strong);background:var(--surface);color:var(--fg);border-radius:var(--r);padding:8px 12px;font:inherit}
+.compose input:disabled{background:var(--bg)}
+
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;text-align:left;height:48px;padding:0 var(--pad);border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:middle}
+td{padding:12px var(--pad);border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tbody tr.click{cursor:pointer}
+tbody tr.click:hover td{background:var(--bg)}
+.num{text-align:right}
+td.num{font-weight:600}
+td .sub{display:block;color:var(--muted);font-size:13px}
+.neg{color:var(--bad)} .pos{color:var(--ok)}
+.x{border:0;background:none;color:var(--muted);padding:2px 6px;border-radius:4px}
+.x:hover{color:var(--bad);background:var(--bad-soft)}
+
+/* Janela de formulário */
+.scrim{position:fixed;inset:0;background:var(--scrim);display:grid;place-items:center;z-index:20;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.dlg{background:var(--surface);border:1px solid var(--line);border-radius:8px;width:100%;max-width:440px;max-height:100%;overflow-y:auto}
+.dlg h3{font:600 18px/1.3 var(--body);margin:0;padding:var(--pad);border-bottom:1px solid var(--line)}
+.dlg form{padding:var(--pad);display:flex;flex-direction:column;gap:12px}
+.dlg .info{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px;margin:0}
+.dlg .info dt{color:var(--muted)} .dlg .info dd{margin:0;font-weight:500}
+.field{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+.field input,.field select,.field textarea{font:inherit;font-size:14px;min-height:40px;color:var(--fg);background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--r);padding:8px 10px;width:100%}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.err{color:var(--bad);font-size:13.5px;margin:0}
+.dlg-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding-top:4px}
+.dlg-actions .left{margin-right:auto;display:flex;gap:8px;flex-wrap:wrap}
+
+@media (max-width:960px){.strip{grid-template-columns:repeat(2,1fr)}.stat:nth-child(odd){border-left:0}.stat:nth-child(n+3){border-top:1px solid var(--line)}.cols{grid-template-columns:1fr}}
+@media (max-width:760px){
+  .app{grid-template-columns:1fr}
+  .side{position:sticky;top:env(safe-area-inset-top,0px);height:auto;flex-direction:row;align-items:center;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));gap:12px;border-right:0;border-bottom:1px solid var(--line);z-index:5}
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+  .side-foot{display:none}
+  .brand{padding:0;font-size:19px}
+  nav{flex-direction:row;overflow-x:auto;gap:4px;scrollbar-width:none}
+  nav button{white-space:nowrap}
+  nav svg{display:none}
+  .chat{grid-template-columns:1fr;height:auto}
+  .threads{max-height:210px;border-right:0;border-bottom:1px solid var(--line)}
+  .msgs{height:400px;flex:none}
+  .row2{grid-template-columns:1fr}
+  h1{font-size:21px} h1 small{font-size:19px}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="side">
+    <div class="brand">Beleza<em class="hl">Pro</em><span>.</span></div>
+    <nav id="nav" aria-label="Menu"></nav>
+    <div class="side-foot" id="foot"></div>
+  </aside>
+  <main><div class="wrap"><div class="note" id="note" hidden></div><div class="wrap" id="view" style="max-width:none"></div></div></main>
+</div>
+<div id="modal"></div>
+
+<script>
+/* ---------- utilidades ---------- */
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const brl=v=>(+v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const pad=n=>String(n).padStart(2,"0");
+const iso=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const parseISO=s=>{const[y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)};
+const addDays=(s,n)=>{const d=parseISO(s);d.setDate(d.getDate()+n);return iso(d)};
+const today=()=>iso(new Date());
+const hm=m=>pad(Math.floor(m/60))+":"+pad(m%60);
+const toMin=s=>{const[h,m]=s.split(":").map(Number);return h*60+(m||0)};
+const durTxt=m=>m>=60?Math.floor(m/60)+"h"+(m%60?pad(m%60):""):m+"min";
+const dayLabel=s=>parseISO(s).toLocaleDateString("pt-BR",{weekday:"short",day:"numeric",month:"short"}).replace(/\./g,"");
+const monthLabel=s=>parseISO(s).toLocaleDateString("pt-BR",{month:"long"});
+const ini=n=>String(n||"?").trim().split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
+const nowHM=()=>{const d=new Date();return pad(d.getHours())+":"+pad(d.getMinutes())};
+const OPEN=8*60, CLOSE=20*60, ROW=56;
+
+/* ---------- estado ---------- */
+const COLS=["profissionais","servicos","clientes","agendamentos","lancamentos","conversas"];
+const S={profissionais:[],servicos:[],clientes:[],agendamentos:[],lancamentos:[],conversas:[]};
+let db=null, canWrite=true, page="inicio", day=today(), cur=null, q="";
+const byId=(c,id)=>S[c].find(x=>x.id===id);
+const proOf=id=>byId("profissionais",id)||{nome:"—",cor:"#999",comissao:0};
+const cliOf=id=>byId("clientes",id)||{nome:"Cliente removida",telefone:""};
+const srvOf=id=>byId("servicos",id)||{nome:"Serviço removido",duracao:60,preco:0};
+const pros=()=>[...S.profissionais].sort((a,b)=>(a.ordem??99)-(b.ordem??99)||a.nome.localeCompare(b.nome));
+const appts=()=>S.agendamentos.filter(a=>a.tipo!=="bloqueio");
+const done=a=>a.status==="concluido";
+
+function note(t){const n=document.getElementById("note");n.textContent=t||"";n.hidden=!t}
+async function w(fn){ // toda escrita passa por aqui
+  if(!db){note("Não foi possível salvar: abra o painel logado no claude.ai.");return false}
+  try{await fn();return true}catch(e){
+    if(e?.code==="invalid_argument"&&!canWrite){note("Você só tem acesso de leitura a este painel.")}
+    else if(e?.code==="quota_exceeded"){note("O limite de registros foi atingido. Apague registros antigos para continuar.")}
+    else note("Não foi possível salvar agora. Tente de novo em alguns segundos.");
+    return false}
+}
+const col=c=>db.collection(c);
+
+/* ---------- navegação ---------- */
+const icons={
+  inicio:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  agenda:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  conversas:'<path d="M4 20l1.5-4A8 8 0 1 1 8 19z"/>',
+  clientes:'<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M17 11a3 3 0 1 0 0-6M22 21a6 6 0 0 0-4-5.6"/>',
+  servicos:'<path d="M6 3l6 9 6-9M12 12v9M8 21h8"/>',
+  financeiro:'<path d="M12 2v20M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'
+};
+const pages=[["inicio","Hoje"],["agenda","Agenda"],["conversas","Conversas"],["clientes","Clientes"],["servicos","Serviços"],["financeiro","Financeiro"]];
+function go(p){if(location.hash!=="#"+p)location.hash=p;else render()}
+addEventListener("hashchange",()=>{const h=location.hash.slice(1);page=views[h]?h:"inicio";render()});
+
+const bar=(title,actions="")=>`<header class="bar"><h1>${title}</h1><div class="actions">${actions}</div></header>`;
+const strip=items=>`<div class="sheet strip">${items.map(([l,v,d,cls])=>`<div class="stat"><span class="l">${l}</span><span class="v">${v}</span>${d?`<span class="d ${cls||""}">${d}</span>`:""}</div>`).join("")}</div>`;
+
+/* ---------- páginas ---------- */
+const views={
+inicio(){
+  const t=today(), lw=addDays(t,-7);
+  const tdy=appts().filter(a=>a.data===t);
+  const fat=tdy.filter(done).reduce((s,a)=>s+(+a.valor||0),0);
+  const fatLw=appts().filter(a=>a.data===lw&&done(a)).reduce((s,a)=>s+(+a.valor||0),0);
+  const diff=fat-fatLw;
+  const ativos=tdy.filter(a=>a.status!=="cancelado");
+  const canc=tdy.filter(a=>a.status==="cancelado");
+  const wa=ativos.filter(a=>a.origem==="whatsapp").length;
+  const prox=ativos.filter(a=>a.status==="agendado").sort((a,b)=>a.ini-b.ini);
+  const mes=t.slice(0,7);
+  const porPro=pros().map(p=>[p,appts().filter(a=>a.profissionalId===p.id&&done(a)&&a.data.startsWith(mes)).reduce((s,a)=>s+(+a.valor||0),0)]);
+  const max=Math.max(1,...porPro.map(x=>x[1]));
+  return bar(`Hoje <small>${dayLabel(t)}</small>`,'<button class="btn primary" data-w onclick="formAgendamento({data:today()})">+ Agendar</button>')+
+  strip([["Faturamento",brl(fat),fatLw||fat?(diff>=0?"+":"−")+brl(Math.abs(diff))+" vs. semana passada":"",diff>=0?"ok":"bad"],
+         ["Atendimentos",ativos.length,`${ativos.filter(done).length} concluídos`],
+         ["Pelo WhatsApp",wa,ativos.length?`de ${ativos.length}`:""],
+         ["Cancelados",canc.length,canc.length?canc.map(a=>hm(a.ini)).join(", ")+" livre":"",canc.length?"bad":""]])+
+  `<div class="cols">
+   <section class="sheet"><h2>A seguir</h2>${prox.length?`<ul class="rows">${prox.map(a=>{const p=proOf(a.profissionalId);return `<li class="click" onclick="detalhe('${a.id}')"><span class="time">${hm(a.ini)}</span><span class="dot" style="background:${esc(p.cor)}"></span><span class="who"><b>${esc(cliOf(a.clienteId).nome)}</b><span>${esc(srvOf(a.servicoId).nome)} · ${esc(p.nome)}</span></span>${a.origem==="whatsapp"?'<span class="tag wa">WhatsApp</span>':'<span class="tag plain">Balcão</span>'}</li>`}).join("")}</ul>`:'<p class="empty">Nenhum horário pendente hoje.</p>'}</section>
+   <section class="sheet"><h2>Profissionais em ${monthLabel(t)}</h2>${porPro.length?`<ul class="rows">${porPro.map(([p,v])=>`<li class="bar-row"><span>${esc(p.nome)}</span><span class="meter"><i style="width:${v/max*100}%;background:${esc(p.cor)}"></i></span><span class="n">${brl(v).replace(",00","")}</span></li>`).join("")}</ul>`:'<p class="empty">Cadastre as profissionais em Serviços.</p>'}</section>
+  </div>`},
+
+agenda(){
+  const P=pros(), hrs=[];for(let m=OPEN;m<CLOSE;m+=60)hrs.push(m);
+  const H=hrs.length*ROW;
+  const list=S.agendamentos.filter(a=>a.data===day);
+  return bar(`Agenda <small>${dayLabel(day)}</small>`,
+   `<div class="daynav"><button class="btn icon" aria-label="Dia anterior" onclick="day=addDays(day,-1);render()">‹</button><button class="btn" onclick="day=today();render()">Hoje</button><button class="btn icon" aria-label="Próximo dia" onclick="day=addDays(day,1);render()">›</button><input type="date" class="search" style="width:auto" id="pickday" value="${day}" onchange="if(this.value){day=this.value;render()}"></div>
+    <button class="btn" data-w onclick="formBloqueio()">Bloquear</button><button class="btn primary" data-w onclick="formAgendamento({data:day})">+ Agendar</button>`)+
+  (P.length?`<section class="sheet scroll"><div class="cal" style="grid-template-columns:52px repeat(${P.length},minmax(160px,1fr))">
+   <div class="head"></div>${P.map(p=>`<div class="head"><span class="dot" style="background:${esc(p.cor)}"></span>${esc(p.nome)}</div>`).join("")}
+   <div class="hours">${hrs.map(m=>`<div>${hm(m)}</div>`).join("")}</div>
+   ${P.map(p=>`<div class="col" style="height:${H}px">
+     ${canWrite?Array.from({length:hrs.length*2},(_,i)=>`<button class="slot" style="top:${i*ROW/2}px" aria-label="Agendar ${hm(OPEN+i*30)} com ${esc(p.nome)}" onclick="formAgendamento({data:day,ini:${OPEN+i*30},profissionalId:'${p.id}'})"></button>`).join(""):""}
+     ${list.filter(a=>a.profissionalId===p.id).map(a=>{
+       const top=(a.ini-OPEN)/60*ROW+2, h=Math.max(22,a.dur/60*ROW-4);
+       if(a.tipo==="bloqueio")return `<button class="ev block" style="top:${top}px;height:${h}px" onclick="detalhe('${a.id}')"><b>${esc(a.motivo||"Bloqueado")}</b><span>${hm(a.ini)}–${hm(a.ini+a.dur)}</span></button>`;
+       const cls=a.status==="cancelado"?"ev cancel":a.status==="concluido"?"ev done":"ev";
+       return `<button class="${cls}" style="top:${top}px;height:${h}px;--ev:color-mix(in srgb,${esc(p.cor)} 16%,var(--surface))" onclick="detalhe('${a.id}')"><b>${a.status==="cancelado"?"Vaga livre":esc(cliOf(a.clienteId).nome)}</b><span>${a.status==="cancelado"?"Cancelado: "+esc(cliOf(a.clienteId).nome):hm(a.ini)+" · "+esc(srvOf(a.servicoId).nome)}</span></button>`}).join("")}
+   </div>`).join("")}
+  </div></section>`:`<section class="sheet"><p class="empty">Cadastre as profissionais em Serviços para montar a agenda.</p></section>`)},
+
+conversas(){
+  const T=[...S.conversas].sort((a,b)=>(b.atualizado||"").localeCompare(a.atualizado||""));
+  if(!T.length)return bar("Conversas")+'<section class="sheet"><p class="empty">Nenhuma conversa ainda.</p></section>';
+  if(!T.find(x=>x.id===cur))cur=T[0].id;
+  const t=T.find(x=>x.id===cur), you=t.status==="voce";
+  const tag={auto:'<span class="tag wa">Automático</span>',voce:'<span class="tag warn">Com você</span>',ok:'<span class="tag ok">Resolvido</span>',pix:'<span class="tag warn">Aguardando Pix</span>'};
+  const last=x=>(x.msgs||[]).filter(m=>m.d!=="sys").at(-1);
+  return bar("Conversas <small>simulação</small>")+
+  `<section class="sheet chat">
+   <div class="threads">${T.map(x=>`<button class="${x.id===cur?"on":""}" onclick="cur='${x.id}';render()"><span class="av">${esc(ini(x.nome))}</span><span class="t"><b>${esc(x.nome)}<small>${esc(last(x)?.h||"")}</small></b><span>${esc(last(x)?.t||"")}</span>${tag[x.status]||""}</span></button>`).join("")}</div>
+   <div class="conv">
+    <div class="conv-head"><span class="av">${esc(ini(t.nome))}</span><span class="who"><b>${esc(t.nome)}</b><span>${esc(t.telefone)}</span></span>
+     <button class="btn" data-w onclick="formAgendamento({data:today(),nome:${esc(JSON.stringify(t.nome))},telefone:${esc(JSON.stringify(t.telefone))},origem:'whatsapp'})">Agendar</button>
+     <button class="btn" data-w onclick="assumir()">${you?"Voltar ao automático":"Assumir"}</button></div>
+    <div class="msgs" id="msgs">${(t.msgs||[]).map(m=>m.d==="sys"?`<div class="sys ${m.ok?"ok":""}">${esc(m.t)}</div>`:`<div class="m ${m.d}">${esc(m.t)}<small>${esc(m.h)}</small></div>`).join("")}</div>
+    <form class="compose" onsubmit="enviar(event)" data-w><input id="msg" placeholder="${you?"Mensagem":"Assuma para responder"}" ${you?"":"disabled"} autocomplete="off"><button class="btn primary" ${you?"":"disabled"}>Enviar</button></form>
+   </div>
+  </section>`},
+
+clientes(){
+  const t=today();
+  const rows=S.clientes.map(c=>{
+    const a=appts().filter(x=>x.clienteId===c.id);
+    const feitos=a.filter(done).sort((x,y)=>y.data.localeCompare(x.data));
+    const prox=a.filter(x=>x.status==="agendado"&&x.data>=t).sort((x,y)=>(x.data+hm(x.ini)).localeCompare(y.data+hm(y.ini)))[0];
+    const dias=feitos[0]?Math.round((parseISO(t)-parseISO(feitos[0].data))/864e5):null;
+    return {c,total:feitos.reduce((s,x)=>s+(+x.valor||0),0),ult:feitos[0],dias,prox};
+  }).filter(r=>!q||(r.c.nome+" "+r.c.telefone).toLowerCase().includes(q.toLowerCase()))
+    .sort((a,b)=>a.c.nome.localeCompare(b.c.nome));
+  return bar(`Clientes <small>${S.clientes.length}</small>`,`<input class="search" id="busca" placeholder="Buscar nome ou telefone" value="${esc(q)}" oninput="q=this.value;render()"><button class="btn primary" data-w onclick="formCliente()">+ Cliente</button>`)+
+  `<section class="sheet scroll">${rows.length?`<table><thead><tr><th>Cliente</th><th>Último serviço</th><th>Última visita</th><th>Próximo</th><th class="num">Total</th></tr></thead><tbody>
+  ${rows.map(r=>`<tr class="click" onclick="formCliente('${r.c.id}')"><td><b>${esc(r.c.nome)}</b><span class="sub">${esc(r.c.telefone)}</span></td><td>${r.ult?esc(srvOf(r.ult.servicoId).nome):"—"}</td><td>${r.dias===null?"—":r.dias===0?"hoje":r.dias>60?`<span class="tag bad">${r.dias} dias</span>`:r.dias+" dias"}</td><td>${r.prox?dayLabel(r.prox.data)+" "+hm(r.prox.ini):"—"}</td><td class="num">${brl(r.total)}</td></tr>`).join("")}
+  </tbody></table>`:`<p class="empty">${q?"Nenhuma cliente encontrada.":"Nenhuma cliente cadastrada."}</p>`}</section>`},
+
+servicos(){
+  const sv=[...S.servicos].sort((a,b)=>a.nome.localeCompare(b.nome));
+  return bar(`Serviços <small>${sv.length}</small>`,'<button class="btn primary" data-w onclick="formServico()">+ Serviço</button>')+
+  `<div class="cols">
+   <section class="sheet scroll">${sv.length?`<table><thead><tr><th>Serviço</th><th>Duração</th><th>Profissional</th><th class="num">Preço</th></tr></thead><tbody>
+   ${sv.map(s=>{const p=proOf(s.profissionalId);return `<tr class="click" onclick="formServico('${s.id}')"><td><b>${esc(s.nome)}</b></td><td>${durTxt(+s.duracao)}</td><td><span class="dot" style="background:${esc(p.cor)};margin-right:8px"></span>${esc(p.nome)}</td><td class="num">${brl(s.preco)}</td></tr>`}).join("")}
+   </tbody></table>`:'<p class="empty">Nenhum serviço cadastrado.</p>'}</section>
+   <section class="sheet"><h2>Profissionais <button class="btn" data-w onclick="formPro()">+ Profissional</button></h2>${S.profissionais.length?`<ul class="rows">${pros().map(p=>`<li class="click" onclick="formPro('${p.id}')"><span class="dot" style="background:${esc(p.cor)}"></span><span class="who"><b>${esc(p.nome)}</b><span>Comissão ${+p.comissao||0}%</span></span></li>`).join("")}</ul>`:'<p class="empty">Nenhuma profissional cadastrada.</p>'}</section>
+  </div>`},
+
+financeiro(){
+  const mes=day.slice(0,7);
+  const L=S.lancamentos.filter(l=>(l.data||"").startsWith(mes)).sort((a,b)=>b.data.localeCompare(a.data));
+  const ent=L.filter(l=>l.valor>0).reduce((s,l)=>s+l.valor,0), sai=L.filter(l=>l.valor<0).reduce((s,l)=>s-l.valor,0);
+  const com=appts().filter(a=>done(a)&&a.data.startsWith(mes)).reduce((s,a)=>s+(+a.valor||0)*(+proOf(a.profissionalId).comissao||0)/100,0);
+  const pend=appts().filter(a=>a.status==="agendado"&&a.data.startsWith(mes)).reduce((s,a)=>s+(+a.valor||0),0);
+  const d=parseISO(mes+"-01"); const prev=iso(new Date(d.getFullYear(),d.getMonth()-1,1)), next=iso(new Date(d.getFullYear(),d.getMonth()+1,1));
+  return bar(`Financeiro <small>${d.toLocaleDateString("pt-BR",{month:"long",year:"numeric"})}</small>`,`<div class="daynav"><button class="btn icon" aria-label="Mês anterior" onclick="day='${prev}';render()">‹</button><button class="btn" onclick="day=today();render()">Este mês</button><button class="btn icon" aria-label="Próximo mês" onclick="day='${next}';render()">›</button></div><button class="btn primary" data-w onclick="formLanc()">+ Lançamento</button>`)+
+  strip([["Entradas",brl(ent)],["Saídas",brl(sai)],["Saldo",brl(ent-sai),"",ent-sai>=0?"ok":"bad"],["Comissões",brl(com),pend?brl(pend)+" ainda agendado":""]])+
+  `<section class="sheet scroll">${L.length?`<table><thead><tr><th>Data</th><th>Descrição</th><th>Forma</th><th class="num">Valor</th><th></th></tr></thead><tbody>
+  ${L.map(l=>`<tr><td>${parseISO(l.data).toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"})}</td><td>${esc(l.descricao)}</td><td>${esc(l.forma)}</td><td class="num ${l.valor<0?"neg":"pos"}">${brl(l.valor)}</td><td class="num"><button class="x" data-w aria-label="Apagar lançamento" onclick="apagarLanc('${l.id}',this)">✕</button></td></tr>`).join("")}
+  </tbody></table>`:'<p class="empty">Nenhum lançamento neste mês.</p>'}</section>`}
+};
+
+/* ---------- render ---------- */
+function render(){
+  document.body.classList.toggle("ro",!canWrite);
+  const pend=S.conversas.filter(c=>c.status==="voce").length;
+  document.getElementById("nav").innerHTML=pages.map(([k,l])=>`<button aria-current="${k===page?"page":"false"}" onclick="go('${k}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${icons[k]}</svg>${l}${k==="conversas"&&pend?`<span class="count">${pend}</span>`:""}</button>`).join("");
+  const a=document.activeElement, keep=a&&a.id&&document.getElementById("view").contains(a)?{id:a.id,v:a.value,s:a.selectionStart}:null;
+  document.getElementById("view").innerHTML=views[page]();
+  if(keep){const el=document.getElementById(keep.id);if(el){if(el.tagName==="INPUT"&&el.type!=="date"){el.value=keep.v;el.focus();try{el.setSelectionRange(keep.s,keep.s)}catch(e){}}}}
+  const m=document.getElementById("msgs");if(m)m.scrollTop=m.scrollHeight;
+  const ex=COLS.some(c=>S[c].some(x=>x.exemplo));
+  document.getElementById("foot").innerHTML=`<span>${ex?"Inclui dados de exemplo":"Studio Lumière"}<br>Salvo neste navegador</span>${ex&&canWrite&&db?'<button class="link danger" onclick="limparExemplos(this)">Apagar dados de exemplo</button>':""}`;
+}
+
+/* ---------- janela de formulário ---------- */
+function closeModal(){document.getElementById("modal").innerHTML=""}
+function modal({title,body="",fields=[],submit,onSubmit,extra=[],info}){
+  const f=fields.map(x=>{
+    const id="f_"+x.id;
+    if(x.row)return `<div class="row2">${x.row.map(y=>fieldHtml(y)).join("")}</div>`;
+    return fieldHtml(x);
+  }).join("");
+  document.getElementById("modal").innerHTML=`<div class="scrim" onclick="if(event.target===this)closeModal()"><div class="dlg" role="dialog" aria-modal="true" aria-label="${esc(title)}"><h3>${esc(title)}</h3>
+   <form id="dlgform">${info?`<dl class="info">${info.map(([k,v])=>`<dt>${esc(k)}</dt><dd>${v}</dd>`).join("")}</dl>`:""}${body}${f}<p class="err" id="dlgerr" hidden></p>
+   <div class="dlg-actions"><span class="left">${extra.map((e,i)=>`<button type="button" class="btn ${e.cls||""}" data-x="${i}">${esc(e.label)}</button>`).join("")}</span><button type="button" class="btn" onclick="closeModal()">${submit?"Cancelar":"Fechar"}</button>${submit?`<button class="btn primary">${esc(submit)}</button>`:""}</div></form></div></div>`;
+  const form=document.getElementById("dlgform");
+  form.querySelectorAll("[data-x]").forEach(b=>b.onclick=async()=>{
+    const e=extra[+b.dataset.x];
+    if(e.confirm&&!b.classList.contains("armed")){b.classList.add("armed");b.textContent=e.confirm;return}
+    b.disabled=true; if(await e.onClick()!==false)closeModal(); else b.disabled=false;
+  });
+  form.onsubmit=async ev=>{ev.preventDefault();
+    const vals={};form.querySelectorAll("[name]").forEach(i=>vals[i.name]=i.value.trim());
+    const err=await onSubmit(vals);
+    if(err){const e=document.getElementById("dlgerr");e.textContent=err;e.hidden=false}else closeModal();
+  };
+  const first=form.querySelector("input,select,textarea");if(first)first.focus();
+  document.addEventListener("keydown",function k(e){if(e.key==="Escape"){closeModal();document.removeEventListener("keydown",k)}});
+}
+function fieldHtml(x){
+  const id="f_"+x.id, v=esc(x.value??"");
+  let inp;
+  if(x.type==="select")inp=`<select id="${id}" name="${x.id}" ${x.onchange?`onchange="${x.onchange}"`:""}>${x.options.map(([ov,ol])=>`<option value="${esc(ov)}" ${String(ov)===String(x.value??"")?"selected":""}>${esc(ol)}</option>`).join("")}</select>`;
+  else if(x.type==="textarea")inp=`<textarea id="${id}" name="${x.id}" rows="3">${v}</textarea>`;
+  else inp=`<input id="${id}" name="${x.id}" type="${x.type||"text"}" value="${v}" ${x.list?`list="${x.list}"`:""} ${x.step?`step="${x.step}"`:""} ${x.min!=null?`min="${x.min}"`:""} ${x.req?"required":""} ${x.ph?`placeholder="${esc(x.ph)}"`:""} ${x.oninput?`oninput="${x.oninput}"`:""} autocomplete="off">`;
+  return `<label class="field" for="${id}">${esc(x.label)}${inp}</label>`;
+}
+
+/* ---------- agendamentos ---------- */
+function conflito(a,ignoreId){
+  return S.agendamentos.find(b=>b.id!==ignoreId&&b.data===a.data&&b.profissionalId===a.profissionalId&&b.status!=="cancelado"&&a.ini<b.ini+b.dur&&b.ini<a.ini+a.dur);
+}
+function formAgendamento(pre={},editId){
+  if(!S.servicos.length||!S.profissionais.length){note("Cadastre pelo menos um serviço e uma profissional antes de agendar.");go("servicos");return}
+  const e=editId?byId("agendamentos",editId):null;
+  const c=e?cliOf(e.clienteId):{nome:pre.nome||"",telefone:pre.telefone||""};
+  const sv=[...S.servicos].sort((a,b)=>a.nome.localeCompare(b.nome));
+  const srvId=e?.servicoId||(pre.profissionalId&&sv.find(s=>s.profissionalId===pre.profissionalId)?.id)||sv[0].id;
+  const proId=e?.profissionalId||pre.profissionalId||srvOf(srvId).profissionalId||pros()[0].id;
+  let hora=e?hm(e.ini):pre.ini!=null?hm(pre.ini):"";
+  modal({title:e?"Remarcar":"Novo agendamento",submit:e?"Salvar":"Agendar",
+   body:`<datalist id="cli-list">${S.clientes.map(x=>`<option value="${esc(x.nome)}">`).join("")}</datalist>`,
+   fields:[
+    {row:[{id:"nome",label:"Cliente",value:c.nome,list:"cli-list",req:1,oninput:"autoFone(this.value)"},{id:"telefone",label:"Telefone",type:"tel",value:c.telefone,ph:"(11) 90000-0000"}]},
+    {id:"servicoId",label:"Serviço",type:"select",value:srvId,options:sv.map(s=>[s.id,`${s.nome} · ${durTxt(+s.duracao)} · ${brl(s.preco)}`]),onchange:"autoPro(this.value)"},
+    {id:"profissionalId",label:"Profissional",type:"select",value:proId,options:pros().map(p=>[p.id,p.nome])},
+    {row:[{id:"data",label:"Data",type:"date",value:e?.data||pre.data||today(),req:1},{id:"hora",label:"Horário",type:"time",value:hora,step:900,req:1}]},
+    {id:"origem",label:"Como marcou",type:"select",value:e?.origem||pre.origem||"balcao",options:[["balcao","Balcão / telefone"],["whatsapp","WhatsApp"]]}
+   ],
+   onSubmit:async v=>{
+    if(!v.nome)return "Informe o nome da cliente.";
+    if(!v.hora)return "Escolha o horário.";
+    const s=srvOf(v.servicoId), ini=toMin(v.hora), dur=+s.duracao||60;
+    if(ini<OPEN||ini+dur>CLOSE)return `O salão atende das ${hm(OPEN)} às ${hm(CLOSE)}.`;
+    const novo={data:v.data,ini,dur,profissionalId:v.profissionalId};
+    const cf=conflito(novo,editId);
+    if(cf)return `${proOf(v.profissionalId).nome} já tem ${cf.tipo==="bloqueio"?"um bloqueio":cliOf(cf.clienteId).nome} às ${hm(cf.ini)}. Escolha outro horário.`;
+    let cli=S.clientes.find(x=>x.nome.toLowerCase()===v.nome.toLowerCase());
+    const ok=await w(async()=>{
+      if(!cli){const r=await col("clientes").add({nome:v.nome,telefone:v.telefone,obs:""});cli={id:r.id}}
+      else if(v.telefone&&v.telefone!==cli.telefone)await col("clientes").doc(cli.id).update({telefone:v.telefone});
+      const body={...novo,tipo:"atendimento",clienteId:cli.id,servicoId:v.servicoId,valor:+s.preco||0,origem:v.origem,status:e?.status||"agendado"};
+      if(e)await col("agendamentos").doc(editId).update(body); else await col("agendamentos").add(body);
+    });
+    if(!ok)return "Não foi possível salvar.";
+    day=v.data; if(page!=="agenda"&&page!=="inicio")go("agenda"); else render();
+   }});
+}
+function autoPro(srvId){const s=srvOf(srvId),el=document.getElementById("f_profissionalId");if(el&&s.profissionalId)el.value=s.profissionalId}
+function autoFone(nome){const c=S.clientes.find(x=>x.nome.toLowerCase()===nome.trim().toLowerCase()),el=document.getElementById("f_telefone");if(c&&el&&!el.value)el.value=c.telefone||""}
+
+function formBloqueio(pre={}){
+  if(!S.profissionais.length){note("Cadastre uma profissional primeiro.");return}
+  modal({title:"Bloquear horário",submit:"Bloquear",fields:[
+    {id:"profissionalId",label:"Profissional",type:"select",value:pre.profissionalId||pros()[0].id,options:pros().map(p=>[p.id,p.nome])},
+    {row:[{id:"data",label:"Data",type:"date",value:day,req:1},{id:"motivo",label:"Motivo",value:"Almoço"}]},
+    {row:[{id:"de",label:"De",type:"time",value:"12:00",step:900,req:1},{id:"ate",label:"Até",type:"time",value:"13:00",step:900,req:1}]}
+  ],onSubmit:async v=>{
+    const ini=toMin(v.de),fim=toMin(v.ate);
+    if(fim<=ini)return "O fim precisa ser depois do início.";
+    if(ini<OPEN||fim>CLOSE)return `O salão atende das ${hm(OPEN)} às ${hm(CLOSE)}.`;
+    const b={data:v.data,ini,dur:fim-ini,profissionalId:v.profissionalId};
+    const cf=conflito(b);
+    if(cf)return `Já existe ${cf.tipo==="bloqueio"?"um bloqueio":"atendimento de "+cliOf(cf.clienteId).nome} às ${hm(cf.ini)}.`;
+    if(!await w(()=>col("agendamentos").add({...b,tipo:"bloqueio",motivo:v.motivo||"Bloqueado",status:"bloqueio"})))return "Não foi possível salvar.";
+    day=v.data;render();
+  }});
+}
+
+function detalhe(id){
+  const a=byId("agendamentos",id);if(!a)return;
+  const p=proOf(a.profissionalId);
+  if(a.tipo==="bloqueio"){
+    modal({title:a.motivo||"Bloqueado",info:[["Profissional",esc(p.nome)],["Data",dayLabel(a.data)],["Horário",hm(a.ini)+" – "+hm(a.ini+a.dur)]],
+      extra:canWrite?[{label:"Remover bloqueio",cls:"danger",confirm:"Confirmar",onClick:()=>w(()=>col("agendamentos").doc(id).delete())}]:[]});
+    return;
+  }
+  const c=cliOf(a.clienteId), s=srvOf(a.servicoId);
+  const st={agendado:'<span class="tag wa">Agendado</span>',concluido:'<span class="tag ok">Concluído</span>',cancelado:'<span class="tag bad">Cancelado</span>'}[a.status];
+  const ex=[];
+  if(canWrite&&a.status==="agendado"){
+    ex.push({label:"Cancelar horário",cls:"danger",confirm:"Confirmar cancelamento",onClick:()=>w(()=>col("agendamentos").doc(id).update({status:"cancelado"}))});
+    ex.push({label:"Remarcar",onClick:()=>{setTimeout(()=>formAgendamento({},id));}});
+  }
+  if(canWrite&&a.status!=="agendado")ex.push({label:"Excluir",cls:"danger",confirm:"Confirmar exclusão",onClick:()=>w(async()=>{
+    const l=S.lancamentos.find(x=>x.agendamentoId===id);if(l)await col("lancamentos").doc(l.id).delete();
+    await col("agendamentos").doc(id).delete()})});
+  modal({title:c.nome,info:[["Serviço",esc(s.nome)],["Profissional",esc(p.nome)],["Quando",dayLabel(a.data)+", "+hm(a.ini)+" – "+hm(a.ini+a.dur)],["Valor",brl(a.valor)],["Telefone",esc(c.telefone||"—")],["Origem",a.origem==="whatsapp"?"WhatsApp":"Balcão"],["Situação",st]],
+    fields:canWrite&&a.status==="agendado"?[{row:[{id:"valor",label:"Valor cobrado",type:"number",step:"0.01",min:0,value:a.valor},{id:"forma",label:"Pagamento",type:"select",value:"Pix",options:[["Pix","Pix"],["Cartão","Cartão"],["Dinheiro","Dinheiro"]]}]}]:[],
+    submit:canWrite&&a.status==="agendado"?"Concluir atendimento":null,
+    onSubmit:async v=>{
+      const valor=+v.valor||0;
+      const ok=await w(async()=>{
+        await col("agendamentos").doc(id).update({status:"concluido",valor});
+        await col("lancamentos").add({data:a.data,descricao:`${c.nome} · ${s.nome}`,forma:v.forma,valor,agendamentoId:id});
+      });
+      if(!ok)return "Não foi possível salvar.";
+    },extra:ex});
+}
+
+/* ---------- clientes, serviços, profissionais ---------- */
+function formCliente(id){
+  const c=id?byId("clientes",id):{};
+  const hist=id?appts().filter(a=>a.clienteId===id&&a.status!=="cancelado").sort((a,b)=>b.data.localeCompare(a.data)).slice(0,5):[];
+  modal({title:id?c.nome:"Nova cliente",submit:"Salvar",
+    body:hist.length?`<dl class="info">${hist.map(a=>`<dt>${dayLabel(a.data)}</dt><dd>${esc(srvOf(a.servicoId).nome)} · ${a.status==="concluido"?brl(a.valor):"agendado"}</dd>`).join("")}</dl>`:"",
+    fields:[{row:[{id:"nome",label:"Nome",value:c.nome,req:1},{id:"telefone",label:"Telefone",type:"tel",value:c.telefone,ph:"(11) 90000-0000"}]},{id:"obs",label:"Observações",type:"textarea",value:c.obs}],
+    onSubmit:async v=>{
+      if(!v.nome)return "Informe o nome.";
+      if(S.clientes.some(x=>x.id!==id&&x.nome.toLowerCase()===v.nome.toLowerCase()))return "Já existe uma cliente com esse nome.";
+      if(!await w(()=>id?col("clientes").doc(id).update(v):col("clientes").add(v)))return "Não foi possível salvar.";
+    },
+    extra:id?[{label:"Agendar",onClick:()=>{setTimeout(()=>formAgendamento({nome:c.nome,telefone:c.telefone,data:today()}))}},
+      ...(appts().some(a=>a.clienteId===id)?[]:[{label:"Excluir",cls:"danger",confirm:"Confirmar exclusão",onClick:()=>w(()=>col("clientes").doc(id).delete())}])]:[]});
+}
+function formServico(id){
+  if(!S.profissionais.length){note("Cadastre uma profissional primeiro.");formPro();return}
+  const s=id?byId("servicos",id):{duracao:60};
+  modal({title:id?s.nome:"Novo serviço",submit:"Salvar",fields:[
+    {id:"nome",label:"Nome",value:s.nome,req:1},
+    {row:[{id:"duracao",label:"Duração (minutos)",type:"number",step:15,min:15,value:s.duracao,req:1},{id:"preco",label:"Preço (R$)",type:"number",step:"0.01",min:0,value:s.preco,req:1}]},
+    {id:"profissionalId",label:"Profissional",type:"select",value:s.profissionalId||pros()[0].id,options:pros().map(p=>[p.id,p.nome])}
+  ],onSubmit:async v=>{
+    if(!v.nome)return "Informe o nome.";
+    const body={nome:v.nome,duracao:Math.max(15,+v.duracao||60),preco:+v.preco||0,profissionalId:v.profissionalId};
+    if(!await w(()=>id?col("servicos").doc(id).update(body):col("servicos").add(body)))return "Não foi possível salvar.";
+  },extra:id&&!S.agendamentos.some(a=>a.servicoId===id)?[{label:"Excluir",cls:"danger",confirm:"Confirmar exclusão",onClick:()=>w(()=>col("servicos").doc(id).delete())}]:[]});
+}
+const CORES=[["#9c6b45","Caramelo"],["#a3ab1a","Lima"],["#c27a66","Nude"],["#5f7f8c","Azul-acinzentado"],["#8a6a9c","Lilás"],["#6b8f5f","Sálvia"]];
+function formPro(id){
+  const p=id?byId("profissionais",id):{comissao:30,cor:CORES[S.profissionais.length%CORES.length][0]};
+  modal({title:id?p.nome:"Nova profissional",submit:"Salvar",fields:[
+    {id:"nome",label:"Nome",value:p.nome,req:1},
+    {row:[{id:"comissao",label:"Comissão (%)",type:"number",min:0,step:1,value:p.comissao},{id:"cor",label:"Cor na agenda",type:"select",value:p.cor,options:CORES}]}
+  ],onSubmit:async v=>{
+    if(!v.nome)return "Informe o nome.";
+    const body={nome:v.nome,comissao:Math.min(100,Math.max(0,+v.comissao||0)),cor:v.cor};
+    if(!id)body.ordem=S.profissionais.length+1;
+    if(!await w(()=>id?col("profissionais").doc(id).update(body):col("profissionais").add(body)))return "Não foi possível salvar.";
+  },extra:id&&!S.agendamentos.some(a=>a.profissionalId===id)&&!S.servicos.some(s=>s.profissionalId===id)?[{label:"Excluir",cls:"danger",confirm:"Confirmar exclusão",onClick:()=>w(()=>col("profissionais").doc(id).delete())}]:[]});
+}
+
+/* ---------- financeiro ---------- */
+function formLanc(){
+  modal({title:"Novo lançamento",submit:"Salvar",fields:[
+    {row:[{id:"tipo",label:"Tipo",type:"select",value:"saida",options:[["saida","Saída"],["entrada","Entrada"]]},{id:"data",label:"Data",type:"date",value:today(),req:1}]},
+    {id:"descricao",label:"Descrição",req:1,ph:"Ex.: produtos, aluguel, venda de produto"},
+    {row:[{id:"valor",label:"Valor (R$)",type:"number",step:"0.01",min:0,req:1},{id:"forma",label:"Forma",type:"select",value:"Pix",options:[["Pix","Pix"],["Cartão","Cartão"],["Dinheiro","Dinheiro"],["Boleto","Boleto"],["Débito","Débito"]]}]}
+  ],onSubmit:async v=>{
+    const val=Math.abs(+v.valor||0);
+    if(!val)return "Informe um valor maior que zero.";
+    if(!v.descricao)return "Informe a descrição.";
+    if(!await w(()=>col("lancamentos").add({data:v.data,descricao:v.descricao,forma:v.forma,valor:v.tipo==="saida"?-val:val})))return "Não foi possível salvar.";
+    day=v.data;render();
+  }});
+}
+async function apagarLanc(id,btn){
+  if(!btn.dataset.armed){btn.dataset.armed=1;btn.textContent="Apagar?";btn.style.color="var(--bad)";setTimeout(()=>{if(btn.isConnected){delete btn.dataset.armed;btn.textContent="✕";btn.style.color=""}},3000);return}
+  await w(()=>col("lancamentos").doc(id).delete());
+}
+
+/* ---------- conversas (simulação) ---------- */
+async function assumir(){
+  const t=byId("conversas",cur);const you=t.status==="voce";
+  await w(()=>col("conversas").doc(cur).update({status:you?"auto":"voce",msgs:[...(t.msgs||[]),{d:"sys",t:you?"Automático ligado":"Você assumiu",h:nowHM()}].slice(-200),atualizado:new Date().toISOString()}));
+}
+async function enviar(e){
+  e.preventDefault();const i=document.getElementById("msg");const txt=i.value.trim();if(!txt)return;
+  const t=byId("conversas",cur);i.value="";
+  await w(()=>col("conversas").doc(cur).update({msgs:[...(t.msgs||[]),{d:"out",t:txt,h:nowHM()}].slice(-200),atualizado:new Date().toISOString()}));
+  document.getElementById("msg")?.focus();
+}
+
+/* ---------- dados de exemplo ---------- */
+async function limparExemplos(btn){
+  if(!btn.dataset.armed){btn.dataset.armed=1;btn.textContent="Clique de novo para apagar tudo que é exemplo";return}
+  btn.disabled=true;btn.textContent="Apagando...";
+  await w(async()=>{for(const c of COLS)for(const x of S[c].filter(x=>x.exemplo))await col(c).doc(x.id).delete()});
+}
+
+/* ---------- início ---------- */
+render();
+(async()=>{
+  /* Versão do site: os dados ficam salvos neste navegador (localStorage). */
+  const SEED={"profissionais": {"p1": {"nome": "Carla", "cor": "#9c6b45", "comissao": 30, "ordem": 1, "exemplo": true}, "p2": {"nome": "Juliana", "cor": "#a3ab1a", "comissao": 40, "ordem": 2, "exemplo": true}, "p3": {"nome": "Bia", "cor": "#c27a66", "comissao": 35, "ordem": 3, "exemplo": true}}, "servicos": {"s1": {"nome": "Corte feminino", "duracao": 60, "preco": 80, "profissionalId": "p1", "exemplo": true}, "s2": {"nome": "Escova + hidratação", "duracao": 90, "preco": 120, "profissionalId": "p1", "exemplo": true}, "s3": {"nome": "Coloração", "duracao": 120, "preco": 180, "profissionalId": "p1", "exemplo": true}, "s4": {"nome": "Escova progressiva", "duracao": 90, "preco": 220, "profissionalId": "p1", "exemplo": true}, "s5": {"nome": "Manicure", "duracao": 45, "preco": 40, "profissionalId": "p2", "exemplo": true}, "s6": {"nome": "Manicure + pedicure", "duracao": 60, "preco": 70, "profissionalId": "p2", "exemplo": true}, "s7": {"nome": "Unha em gel", "duracao": 60, "preco": 90, "profissionalId": "p2", "exemplo": true}, "s8": {"nome": "Sobrancelha", "duracao": 45, "preco": 50, "profissionalId": "p3", "exemplo": true}, "s9": {"nome": "Lash lifting", "duracao": 90, "preco": 150, "profissionalId": "p3", "exemplo": true}}, "clientes": {"c1": {"nome": "Marina Costa", "telefone": "(11) 98712-4410", "obs": "Prefere gel nude", "exemplo": true}, "c2": {"nome": "Renata Alves", "telefone": "(11) 99134-5520", "obs": "", "exemplo": true}, "c3": {"nome": "Patrícia Lima", "telefone": "(11) 98840-2201", "obs": "Alergia a amônia", "exemplo": true}, "c4": {"nome": "Luana Prado", "telefone": "(11) 97455-0032", "obs": "", "exemplo": true}, "c5": {"nome": "Cristina Barros", "telefone": "(11) 99001-8745", "obs": "", "exemplo": true}, "c6": {"nome": "Helena Duarte", "telefone": "(11) 98233-6619", "obs": "", "exemplo": true}, "c7": {"nome": "Fernanda Rocha", "telefone": "(11) 99456-1203", "obs": "", "exemplo": true}, "c8": {"nome": "Amanda Souza", "telefone": "(11) 99620-1187", "obs": "Cabelo longo", "exemplo": true}, "c9": {"nome": "Tatiane Melo", "telefone": "(11) 98577-3390", "obs": "", "exemplo": true}, "c10": {"nome": "Gabriela Pires", "telefone": "(11) 97310-8824", "obs": "", "exemplo": true}}, "agendamentos": {"a1": {"data": 0, "ini": 540, "dur": 90, "profissionalId": "p1", "clienteId": "c2", "servicoId": "s2", "valor": 120, "origem": "whatsapp", "status": "concluido", "tipo": "atendimento", "exemplo": true}, "a2": {"data": 0, "ini": 660, "dur": 120, "profissionalId": "p1", "clienteId": "c3", "servicoId": "s3", "valor": 180, "origem": "balcao", "status": "agendado", "tipo": "atendimento", "exemplo": true}, "a3": {"data": 0, "ini": 840, "dur": 60, "profissionalId": "p1", "clienteId": "c7", "servicoId": "s1", "valor": 80, "origem": "whatsapp", "status": "agendado", "tipo": "atendimento", "exemplo": true}, "a4": {"data": 0, "ini": 930, "dur": 90, "profissionalId": "p1", "clienteId": "c8", "servicoId": "s4", "valor": 220, "origem": "whatsapp", "status": "agendado", "tipo": "atendimento", "exemplo": true}, "a5": {"data": 0, "ini": 540, "dur": 60, "profissionalId": "p2", "clienteId": "c4", "servicoId": "s6", "valor": 70, "origem": "whatsapp", "status": "concluido", "tipo": "atendimento", "exemplo": true}, "a6": {"data": 0, "ini": 720, "dur": 60, "profissionalId": "p2", "tipo": "bloqueio", "motivo": "Almoço", "status": "bloqueio", "exemplo": true}, "a7": {"data": 1, "ini": 780, "dur": 60, "profissionalId": "p2", "clienteId": "c1", "servicoId": "s7", "valor": 90, "origem": "whatsapp", "status": "agendado", "tipo": "atendimento", "exemplo": true}, "a8": {"data": 0, "ini": 840, "dur": 60, "profissionalId": "p2", "clienteId": "c5", "servicoId": "s7", "valor": 90, "origem": "whatsapp", "status": "cancelado", "tipo": "atendimento", "exemplo": true}, "a9": {"data": 0, "ini": 570, "dur": 45, "profissionalId": "p3", "clienteId": "c9", "servicoId": "s8", "valor": 50, "origem": "whatsapp", "status": "concluido", "tipo": "atendimento", "exemplo": true}, "a10": {"data": 0, "ini": 810, "dur": 90, "profissionalId": "p3", "clienteId": "c10", "servicoId": "s9", "valor": 150, "origem": "whatsapp", "status": "agendado", "tipo": "atendimento", "exemplo": true}, "a11": {"data": -7, "ini": 600, "dur": 60, "profissionalId": "p1", "clienteId": "c2", "servicoId": "s1", "valor": 80, "origem": "balcao", "status": "concluido", "tipo": "atendimento", "exemplo": true}, "a12": {"data": -7, "ini": 540, "dur": 60, "profissionalId": "p2", "clienteId": "c4", "servicoId": "s6", "valor": 70, "origem": "whatsapp", "status": "concluido", "tipo": "atendimento", "exemplo": true}, "a13": {"data": -7, "ini": 660, "dur": 45, "profissionalId": "p3", "clienteId": "c9", "servicoId": "s8", "valor": 50, "origem": "whatsapp", "status": "concluido", "tipo": "atendimento", "exemplo": true}, "a14": {"data": -72, "ini": 600, "dur": 60, "profissionalId": "p1", "clienteId": "c5", "servicoId": "s1", "valor": 80, "origem": "balcao", "status": "concluido", "tipo": "atendimento", "exemplo": true}, "a15": {"data": -65, "ini": 840, "dur": 90, "profissionalId": "p3", "clienteId": "c6", "servicoId": "s9", "valor": 150, "origem": "whatsapp", "status": "concluido", "tipo": "atendimento", "exemplo": true}, "a16": {"data": -21, "ini": 780, "dur": 60, "profissionalId": "p2", "clienteId": "c1", "servicoId": "s7", "valor": 90, "origem": "whatsapp", "status": "concluido", "tipo": "atendimento", "exemplo": true}, "a17": {"data": -34, "ini": 660, "dur": 120, "profissionalId": "p1", "clienteId": "c3", "servicoId": "s3", "valor": 180, "origem": "balcao", "status": "concluido", "tipo": "atendimento", "exemplo": true}}, "lancamentos": {"l1": {"data": 0, "descricao": "Renata Alves · Escova + hidratação", "forma": "Pix", "valor": 120, "agendamentoId": "a1", "exemplo": true}, "l2": {"data": 0, "descricao": "Luana Prado · Manicure + pedicure", "forma": "Cartão", "valor": 70, "agendamentoId": "a5", "exemplo": true}, "l3": {"data": 0, "descricao": "Tatiane Melo · Sobrancelha", "forma": "Pix", "valor": 50, "agendamentoId": "a9", "exemplo": true}, "l4": {"data": -1, "descricao": "Produtos de coloração", "forma": "Boleto", "valor": -386, "exemplo": true}, "l5": {"data": -2, "descricao": "Aluguel", "forma": "Pix", "valor": -1800, "exemplo": true}, "l6": {"data": -7, "descricao": "Renata Alves · Corte feminino", "forma": "Pix", "valor": 80, "agendamentoId": "a11", "exemplo": true}, "l7": {"data": -7, "descricao": "Luana Prado · Manicure + pedicure", "forma": "Cartão", "valor": 70, "agendamentoId": "a12", "exemplo": true}, "l8": {"data": -7, "descricao": "Tatiane Melo · Sobrancelha", "forma": "Pix", "valor": 50, "agendamentoId": "a13", "exemplo": true}, "l9": {"data": -21, "descricao": "Marina Costa · Unha em gel", "forma": "Pix", "valor": 90, "agendamentoId": "a16", "exemplo": true}, "l10": {"data": -34, "descricao": "Patrícia Lima · Coloração", "forma": "Cartão", "valor": 180, "agendamentoId": "a17", "exemplo": true}, "l11": {"data": -65, "descricao": "Helena Duarte · Lash lifting", "forma": "Pix", "valor": 150, "agendamentoId": "a15", "exemplo": true}, "l12": {"data": -72, "descricao": "Cristina Barros · Corte feminino", "forma": "Dinheiro", "valor": 80, "agendamentoId": "a14", "exemplo": true}}, "conversas": {"v1": {"nome": "Marina Costa", "telefone": "(11) 98712-4410", "status": "auto", "ordem": 0, "exemplo": true, "msgs": [{"d": "in", "t": "oi, queria marcar unha", "h": "10:38"}, {"d": "out", "t": "Oi Marina! Gel com a Juliana de novo? Amanhã ela tem 10h, 13h ou 15h.", "h": "10:38"}, {"d": "in", "t": "13h", "h": "10:40"}, {"d": "sys", "t": "Agendado · Unha em gel · amanhã 13:00", "h": "10:40", "ok": true}, {"d": "out", "t": "Marcado, amanhã 13h com a Juliana. Te mando um lembrete de manhã.", "h": "10:41"}, {"d": "in", "t": "Combinado, obrigada!", "h": "10:42"}]}, "v2": {"nome": "Amanda Souza", "telefone": "(11) 99620-1187", "status": "voce", "ordem": -1, "exemplo": true, "msgs": [{"d": "in", "t": "Bom dia! Quanto fica a progressiva pra cabelo longo?", "h": "10:12"}, {"d": "out", "t": "Bom dia, Amanda! Começa em R$ 220. Para cabelo longo a Carla precisa ver o comprimento, ela já te responde.", "h": "10:12"}, {"d": "sys", "t": "Passado para a equipe", "h": "10:12"}, {"d": "in", "t": "Ok, aguardo", "h": "10:15"}]}, "v3": {"nome": "Luana Prado", "telefone": "(11) 97455-0032", "status": "ok", "ordem": -2, "exemplo": true, "msgs": [{"d": "out", "t": "Oi, Luana! Amanhã às 9h você tem manicure + pedicure com a Juliana. Responda 1 para confirmar ou 2 para remarcar.", "h": "ontem"}, {"d": "in", "t": "1", "h": "08:01"}, {"d": "out", "t": "Confirmado, até amanhã!", "h": "08:02"}]}, "v4": {"nome": "Helena Duarte", "telefone": "(11) 98233-6619", "status": "pix", "ordem": -3, "exemplo": true, "msgs": [{"d": "in", "t": "Queria marcar lash lifting sábado", "h": "ontem"}, {"d": "out", "t": "Sábado a Bia tem 9h30 ou 11h. Aos sábados cobramos sinal de R$ 30 no Pix, que desconta no dia.", "h": "ontem"}, {"d": "in", "t": "11h", "h": "ontem"}, {"d": "sys", "t": "Pix de R$ 30 enviado · aguardando", "h": "ontem"}]}}};
+  const KEY="belezapro:v1";
+  function load(){
+    try{const j=JSON.parse(localStorage.getItem(KEY));if(j)return j}catch(e){}
+    const d=structuredClone(SEED), t=today();
+    for(const c in d)for(const id in d[c]){const x=d[c][id];if(typeof x.data==="number")x.data=addDays(t,x.data);if(c==="conversas"){x.atualizado=new Date(Date.now()+x.ordem*36e5).toISOString();delete x.ordem}}
+    return d;
+  }
+  let data=load(); const subs={};
+  const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){note("O navegador bloqueou o salvamento. As mudanças somem ao fechar a página.")}};
+  const snap=c=>({docs:Object.entries(data[c]||{}).map(([id,v])=>({id,data:()=>v})),metadata:{fromCache:false}});
+  const emit=c=>(subs[c]||[]).forEach(fn=>fn(snap(c)));
+  const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+  db={collection:c=>({
+    onSnapshot(fn){(subs[c]=subs[c]||[]).push(fn);fn(snap(c));return()=>{}},
+    async add(v){const id=uid();(data[c]=data[c]||{})[id]=structuredClone(v);save();emit(c);return{id}},
+    doc:id=>({
+      async set(v){(data[c]=data[c]||{})[id]=structuredClone(v);save();emit(c)},
+      async update(v){data[c][id]={...data[c][id],...structuredClone(v)};save();emit(c)},
+      async delete(){if(data[c])delete data[c][id];save();emit(c)}})
+  })};
+  addEventListener("storage",e=>{if(e.key===KEY){data=load();COLS.forEach(emit)}});
+  canWrite=true;
+  COLS.forEach(c=>col(c).onSnapshot(s=>{S[c]=s.docs.map(d=>({id:d.id,...d.data()}));render()}));
+})();
+</script>
+
+</body>
+</html>
