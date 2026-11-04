@@ -14,6 +14,7 @@ const reais = (n) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'B
 const estado = {
   whatsapp: 'iniciando', // iniciando | qr | conectando | conectado | desconectado
   qr: null,
+  codigo: null, // código de conexão pelo número
   numero: null,
   grupoEncontrado: false,
   grupos: [],
@@ -73,9 +74,29 @@ client.on('qr', async (qr) => {
   qrcodeTerminal.generate(qr, { small: true });
 });
 
+// Código de 8 letras (conectar pelo número, sem QR). O WhatsApp troca a cada ~3 min.
+client.on('code', (codigo) => {
+  estado.codigo = codigo;
+});
+
+async function pedirCodigo(numero) {
+  if (estado.whatsapp !== 'qr') {
+    throw new Error(estado.whatsapp === 'conectado'
+      ? 'O robô já está conectado a um WhatsApp.'
+      : 'O robô ainda está ligando o WhatsApp. Espere uns segundos e tente de novo.');
+  }
+  let n = String(numero || '').replace(/\D/g, '');
+  if (n.length === 10 || n.length === 11) n = '55' + n; // digitou só DDD + número
+  if (n.length < 12 || n.length > 13) throw new Error('Digite o número com DDD, por exemplo (11) 98765-4321.');
+  registrar('Gerando código de conexão pelo número...');
+  estado.codigo = await client.requestPairingCode(n);
+  return estado.codigo;
+}
+
 client.on('authenticated', () => {
   estado.whatsapp = 'conectando';
   estado.qr = null;
+  estado.codigo = null;
   registrar('QR Code lido! Carregando conversas...');
 });
 
@@ -113,8 +134,25 @@ async function iniciarWhatsApp() {
   }
 }
 
+// Logo depois de conectar o WhatsApp Web ainda está carregando as conversas,
+// então tenta algumas vezes antes de desistir (e nunca derruba o robô).
 async function acharGrupo() {
-  if (estado.whatsapp !== 'conectado') return null;
+  for (let tentativa = 1; tentativa <= 6; tentativa++) {
+    if (estado.whatsapp !== 'conectado') return null;
+    try {
+      return await procurarGrupo();
+    } catch (e) {
+      if (tentativa === 6) {
+        registrar('Não consegui ler os grupos agora (' + (e.message || e) + '). Use "Procurar grupo de novo" no painel.');
+        return null;
+      }
+      await new Promise((r) => setTimeout(r, 5000 * tentativa));
+    }
+  }
+  return null;
+}
+
+async function procurarGrupo() {
   const chats = await client.getChats();
   const grupos = chats.filter((c) => c.isGroup);
   estado.grupos = grupos.map((c) => c.name).sort();
@@ -270,6 +308,11 @@ client.on('message', async (msg) => {
 
 // ---------- Liga tudo ----------
 
+// Um erro inesperado vira aviso no painel em vez de desligar o robô
+process.on('unhandledRejection', (erro) => {
+  registrar('Erro inesperado (o robô continua ligado): ' + ((erro && erro.message) || erro));
+});
+
 iniciarPainel({
   estado,
   config,
@@ -281,6 +324,7 @@ iniciarPainel({
   mensagensDoGrupo,
   registrar,
   desconectar: () => client.logout(),
+  pedirCodigo,
   desligar: async () => {
     registrar('Desligando o robô a pedido do painel...');
     try { await client.destroy(); } catch {}

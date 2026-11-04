@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Conectar WhatsApp ao robô</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: #fff5f8; color: #2b2b2b; margin: 0; padding: 16px; }
+  .caixa { background: #fff; max-width: 440px; margin: 24px auto; padding: 24px; border-radius: 18px; box-shadow: 0 4px 24px #0001; }
+  h1 { font-size: 1.35rem; margin: 0 0 6px; }
+  p { line-height: 1.45; }
+  .sub { color: #666; margin-top: 0; }
+  .abas { display: flex; gap: 8px; margin: 18px 0; }
+  .abas button { flex: 1; padding: 10px; border: 2px solid #f2c4d6; background: #fff; border-radius: 10px; font-weight: 600; cursor: pointer; }
+  .abas button.ativa { background: #e0457b; border-color: #e0457b; color: #fff; }
+  label { font-weight: 600; display: block; margin-bottom: 6px; }
+  input { width: 100%; font-size: 1.1rem; padding: 12px; border: 2px solid #ddd; border-radius: 10px; }
+  .botao { width: 100%; margin-top: 12px; padding: 14px; font-size: 1rem; font-weight: 700; border: 0; border-radius: 10px; background: #e0457b; color: #fff; cursor: pointer; }
+  .botao:disabled { opacity: .6; cursor: default; }
+  .codigo { font-family: ui-monospace, Consolas, monospace; font-size: 2.2rem; letter-spacing: 4px; text-align: center; background: #f7f7f7; border-radius: 12px; padding: 16px; margin: 14px 0; font-weight: 700; }
+  ol { padding-left: 20px; line-height: 1.6; }
+  .qr { text-align: center; }
+  .qr img { width: 260px; max-width: 100%; border: 8px solid #fff; box-shadow: 0 0 0 1px #eee; }
+  .aviso { background: #fff7e0; border-radius: 10px; padding: 10px 12px; font-size: .92rem; }
+  .ok { text-align: center; font-size: 1.1rem; }
+  .ok b { font-size: 3rem; display: block; }
+  .erro { color: #c0392b; font-size: .95rem; }
+  .esconder { display: none; }
+</style>
+</head>
+<body>
+<div class="caixa">
+  <h1>Conectar WhatsApp ao robô 🤖</h1>
+  <p class="sub">O robô de ofertas vai usar este WhatsApp para mandar as promoções no grupo.</p>
+
+  <div id="carregando"><p>Carregando…</p></div>
+
+  <div id="pronto" class="esconder">
+    <div class="abas">
+      <button id="abaCodigo" class="ativa">📱 Pelo número</button>
+      <button id="abaQr">🔳 Por QR Code</button>
+    </div>
+
+    <!-- Pelo número (funciona no próprio celular) -->
+    <div id="telaCodigo">
+      <div id="pedir">
+        <label for="numero">Número do WhatsApp que vai conectar</label>
+        <input id="numero" type="tel" inputmode="numeric" placeholder="(11) 98765-4321" autocomplete="tel">
+        <button class="botao" id="btnCodigo">Gerar código</button>
+        <p class="erro" id="erro"></p>
+      </div>
+      <div id="mostrar" class="esconder">
+        <p>Seu código:</p>
+        <div class="codigo" id="codigo">—</div>
+        <ol>
+          <li>Abra o <b>WhatsApp</b> neste celular.</li>
+          <li>Toque em <b>⋮</b> (Android) ou <b>Configurações</b> (iPhone) &gt; <b>Aparelhos conectados</b>.</li>
+          <li>Toque em <b>Conectar um aparelho</b>.</li>
+          <li>Embaixo, toque em <b>Conectar com número de telefone</b>.</li>
+          <li>Digite o código acima.</li>
+        </ol>
+        <p class="aviso">O código muda a cada 3 minutos. Se não funcionar, use o mais novo que aparecer aqui.</p>
+      </div>
+    </div>
+
+    <!-- Por QR Code (precisa de outra tela) -->
+    <div id="telaQr" class="esconder">
+      <p>Abra esta página <b>em outro aparelho</b> (computador ou outro celular) e aponte a câmera do WhatsApp para o QR Code:</p>
+      <div class="qr" id="qr"><p>Gerando QR Code…</p></div>
+      <ol>
+        <li>WhatsApp &gt; <b>Aparelhos conectados</b> &gt; <b>Conectar um aparelho</b>.</li>
+        <li>Aponte para o QR Code acima.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div id="conectando" class="esconder ok"><b>⏳</b>Conectando… Não feche o WhatsApp ainda.</div>
+  <div id="conectado" class="esconder ok"><b>✅</b>WhatsApp conectado ao robô!<br>Pode fechar esta página.</div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const base = location.pathname.replace(/\/$/, '');
+let modo = 'codigo';
+
+function mostrarSo(id) {
+  ['carregando', 'pronto', 'conectando', 'conectado'].forEach((x) => $(x).classList.toggle('esconder', x !== id));
+}
+function trocarAba(m) {
+  modo = m;
+  $('abaCodigo').classList.toggle('ativa', m === 'codigo');
+  $('abaQr').classList.toggle('ativa', m === 'qr');
+  $('telaCodigo').classList.toggle('esconder', m !== 'codigo');
+  $('telaQr').classList.toggle('esconder', m !== 'qr');
+}
+$('abaCodigo').onclick = () => trocarAba('codigo');
+$('abaQr').onclick = () => trocarAba('qr');
+
+function formatar(c) { return c && c.length === 8 ? c.slice(0, 4) + '-' + c.slice(4) : (c || '—'); }
+
+$('btnCodigo').onclick = async () => {
+  $('erro').textContent = '';
+  $('btnCodigo').disabled = true; $('btnCodigo').textContent = 'Gerando…';
+  try {
+    const r = await fetch(base + '/codigo', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ numero: $('numero').value }),
+    }).then((x) => x.json());
+    if (!r.ok) throw new Error(r.erro || 'Não deu certo, tente de novo.');
+    $('codigo').textContent = formatar(r.codigo);
+    $('pedir').classList.add('esconder'); $('mostrar').classList.remove('esconder');
+  } catch (e) {
+    $('erro').textContent = e.message;
+  }
+  $('btnCodigo').disabled = false; $('btnCodigo').textContent = 'Gerar código';
+};
+
+let ultimoQr = null;
+async function atualizar() {
+  try {
+    const r = await fetch(base + '/estado', { cache: 'no-store' });
+    if (!r.ok) { $('carregando').innerHTML = '<p class="erro">Este link não vale mais. Peça um link novo.</p>'; mostrarSo('carregando'); return; }
+    const e = await r.json();
+    if (e.whatsapp === 'conectado') return mostrarSo('conectado');
+    if (e.whatsapp === 'conectando') mostrarSo('conectando');
+    else if (e.whatsapp === 'qr') {
+      mostrarSo('pronto');
+      if (e.codigo) $('codigo').textContent = formatar(e.codigo);
+      if (e.qr && e.qr !== ultimoQr) { ultimoQr = e.qr; $('qr').innerHTML = `<img src="${e.qr}" alt="QR Code">`; }
+    } else {
+      $('carregando').innerHTML = '<p>O robô está ligando o WhatsApp… isso leva até 1 minuto. Esta página atualiza sozinha.</p>';
+      mostrarSo('carregando');
+    }
+  } catch {}
+  setTimeout(atualizar, 2500);
+}
+atualizar();
+</script>
+</body>
+</html>

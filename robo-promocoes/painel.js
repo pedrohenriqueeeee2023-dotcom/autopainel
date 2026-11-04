@@ -1,10 +1,60 @@
 // Painel de controle no navegador: http://localhost:3000
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
+const crypto = require('crypto');
+
+// Link secreto para outra pessoa conectar o WhatsApp sem ter a senha do painel.
+// Fica salvo em dados/ para continuar o mesmo depois de reiniciar.
+const arquivoLink = path.join(__dirname, 'dados', 'link-conexao.txt');
+function novoLink() {
+  const t = crypto.randomBytes(16).toString('hex');
+  fs.mkdirSync(path.dirname(arquivoLink), { recursive: true });
+  fs.writeFileSync(arquivoLink, t);
+  return t;
+}
+let linkConexao;
+try { linkConexao = fs.readFileSync(arquivoLink, 'utf8').trim(); } catch {}
+if (!/^[0-9a-f]{32}$/.test(linkConexao || '')) linkConexao = novoLink();
+
+const linkValido = (t) =>
+  typeof t === 'string' && t.length === linkConexao.length &&
+  crypto.timingSafeEqual(Buffer.from(t), Buffer.from(linkConexao));
 
 function iniciarPainel(robo) {
   const app = express();
   app.use(express.json());
+
+  // ---- Página pública de conexão (só com o link secreto; vem antes da senha) ----
+  const soComLink = (req, res, next) =>
+    linkValido(req.params.link) ? next() : res.status(404).send('Link inválido ou trocado. Peça um link novo.');
+
+  app.get('/conectar/:link', soComLink, (req, res) => {
+    res.set('Cache-Control', 'no-store');
+    res.sendFile(path.join(__dirname, 'paginas', 'conectar.html'));
+  });
+  app.get('/conectar/:link/estado', soComLink, (req, res) => {
+    const e = robo.estado;
+    const esperando = e.whatsapp === 'qr';
+    res.set('Cache-Control', 'no-store');
+    res.json({ whatsapp: e.whatsapp, qr: esperando ? e.qr : null, codigo: esperando ? e.codigo : null });
+  });
+  // Limita a 1 código a cada 15s (o WhatsApp não gosta de muitos pedidos seguidos)
+  let ultimoPedido = 0;
+  let pedindo = false;
+  app.post('/conectar/:link/codigo', soComLink, async (req, res) => {
+    try {
+      if (pedindo || Date.now() - ultimoPedido < 15000) throw new Error('Espere uns segundos e tente de novo.');
+      pedindo = true;
+      const codigo = await robo.pedirCodigo(req.body && req.body.numero);
+      ultimoPedido = Date.now();
+      res.json({ ok: true, codigo });
+    } catch (erro) {
+      res.json({ ok: false, erro: erro.message });
+    } finally {
+      pedindo = false;
+    }
+  });
 
   // Senha opcional (obrigatória se o painel ficar na internet, ex.: VPS)
   const senha = process.env.PAINEL_SENHA;
@@ -28,8 +78,13 @@ function iniciarPainel(robo) {
   };
 
   app.get('/api/estado', (req, res) => {
-    res.json({ ...robo.estado, config: robo.config, fila: robo.fila.listar() });
+    res.json({ ...robo.estado, config: robo.config, fila: robo.fila.listar(), linkConexao });
   });
+  app.post('/api/link-conexao/novo', responder(async () => {
+    linkConexao = novoLink();
+    robo.registrar('Link de conexão trocado (o antigo parou de funcionar).');
+    return { ok: true, linkConexao };
+  }));
 
   app.post('/api/fila', responder((req) => robo.adicionarML(req.body.titulo, req.body.link)));
   app.delete('/api/fila/:id', responder((req) => robo.fila.remover(req.params.id)));

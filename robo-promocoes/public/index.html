@@ -39,6 +39,10 @@
   .qr { text-align: center; }
   .qr img { width: 260px; max-width: 100%; border: 1px solid var(--borda); border-radius: 12px; }
   .qr ol { text-align: left; margin: 12px auto 0; max-width: 360px; padding-left: 20px; }
+  .caixa-link { margin-top: 16px; padding: 14px; border-radius: 12px; background: var(--fundo); border: 1px dashed var(--borda); }
+  .caixa-link p { margin: 0 0 10px; }
+  .caixa-link .ajuda { margin: 10px 0 0; }
+  .botao-link { display: inline-block; text-decoration: none; border-radius: 10px; padding: 10px 14px; font-weight: 600; background: #25d366; color: #fff; }
   .numeros { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .numero { background: var(--fundo); border-radius: 10px; padding: 10px; text-align: center; }
   .numero b { display: block; font-size: 1.3rem; }
@@ -180,6 +184,38 @@ async function api(metodo, url, corpo) {
   } catch { avisar('⚠️ Não consegui falar com o robô. Ele está ligado?'); return { ok: false }; }
 }
 
+// ---------- Link para conectar o WhatsApp de outra pessoa ----------
+function urlLink(e) { return `${location.origin}/conectar/${e.linkConexao}`; }
+function caixaLink(e) {
+  if (!e.linkConexao) return '';
+  return `<div class="caixa-link">
+    <p><b>🔗 O celular do robô está com outra pessoa?</b><br>
+    Mande este link. Ela abre no celular dela e conecta pelo número, sem precisar desta senha.</p>
+    <input id="campoLink" readonly value="${esc(urlLink(e))}" onclick="this.select()">
+    <div class="botoes">
+      <button id="btnCopiarLink">📋 Copiar link</button>
+      <a class="botao-link" target="_blank" rel="noopener"
+         href="https://wa.me/?text=${encodeURIComponent('Abra este link para conectar seu WhatsApp ao robô de ofertas: ' + urlLink(e))}">💬 Mandar pelo WhatsApp</a>
+      <button id="btnNovoLink" class="secundario">♻️ Trocar link</button>
+    </div>
+    <p class="ajuda">Quem tiver o link consegue conectar o WhatsApp dele ao robô. Se mandou para a pessoa errada, clique em <b>Trocar link</b>.</p>
+  </div>`;
+}
+function ligarCaixaLink() {
+  const copiar = $('btnCopiarLink'); if (!copiar) return;
+  copiar.onclick = async () => {
+    try { await navigator.clipboard.writeText($('campoLink').value); }
+    catch { $('campoLink').select(); document.execCommand('copy'); }
+    avisar('✅ Link copiado!');
+  };
+  $('btnNovoLink').onclick = async () => {
+    if (!confirm('Trocar o link? O link antigo para de funcionar.')) return;
+    const r = await api('POST', '/api/link-conexao/novo');
+    if (r.ok) { avisar('♻️ Link novo criado.'); ultimoLink = null; atualizar(); }
+  };
+}
+let ultimoLink = null;
+
 // ---------- Desenha a tela ----------
 function desenharWhatsapp(e) {
   const selo = $('seloWpp'), area = $('areaWpp');
@@ -190,11 +226,18 @@ function desenharWhatsapp(e) {
   selo.className = 'selo ' + s[0]; selo.textContent = s[1];
 
   if (e.whatsapp === 'qr' && e.qr) {
+    // Só redesenha quando o QR ou o link mudam (senão o clique nos botões se perde)
+    const chave = e.qr + e.linkConexao;
+    if (chave === ultimoLink) return;
+    ultimoLink = chave;
     area.innerHTML = `<div class="qr"><img src="${e.qr}" alt="QR Code do WhatsApp">
       <ol><li>Pegue o celular com o <b>chip do robô</b>.</li>
       <li>Abra o WhatsApp &gt; <b>⋮</b> ou <b>Configurações</b> &gt; <b>Aparelhos conectados</b>.</li>
-      <li>Toque em <b>Conectar um aparelho</b> e aponte para este QR Code.</li></ol></div>`;
+      <li>Toque em <b>Conectar um aparelho</b> e aponte para este QR Code.</li></ol></div>
+      ${caixaLink(e)}`;
+    ligarCaixaLink();
   } else if (e.whatsapp === 'conectado') {
+    ultimoLink = null;
     const g = e.grupoEncontrado
       ? `<span class="selo ok">✔ Grupo "${esc(e.config.nomeDoGrupo)}" encontrado</span>`
       : `<span class="selo erro">✖ Grupo "${esc(e.config.nomeDoGrupo)}" não encontrado</span><p class="ajuda" style="margin-top:8px">Confira se o número do robô está no grupo e escolha o grupo em Configurações.</p>`;
@@ -207,6 +250,7 @@ function desenharWhatsapp(e) {
       await api('POST', '/api/whatsapp/desconectar'); avisar('Desconectando…');
     };
   } else {
+    ultimoLink = null;
     area.innerHTML = `<p class="ajuda">Aguarde, o WhatsApp está carregando. Isso pode levar até 1 minuto.</p>`;
   }
 }
