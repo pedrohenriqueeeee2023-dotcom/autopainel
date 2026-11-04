@@ -32,7 +32,29 @@ function registrar(texto) {
 }
 
 const puppeteer = { args: ['--no-sandbox', '--disable-setuid-sandbox'] };
-if (process.env.CHROME_PATH) puppeteer.executablePath = process.env.CHROME_PATH;
+puppeteer.executablePath = acharNavegador();
+
+// Usa o navegador baixado pelo robô; se não existir, usa o Chrome/Edge do computador
+function acharNavegador() {
+  const fs = require('fs');
+  if (process.env.CHROME_PATH) return process.env.CHROME_PATH;
+  try {
+    const proprio = require('puppeteer').executablePath();
+    if (proprio && fs.existsSync(proprio)) return undefined; // usa o padrão
+  } catch {}
+  const candidatos = [
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+    (process.env.LOCALAPPDATA || '') + '\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+    'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+    '/usr/bin/google-chrome', '/usr/bin/chromium-browser', '/usr/bin/chromium',
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+  ];
+  const achado = candidatos.find((c) => { try { return fs.existsSync(c); } catch { return false; } });
+  if (achado) console.log('Usando o navegador:', achado);
+  return achado;
+}
 
 const client = new Client({
   authStrategy: new LocalAuth(), // salva o login, só precisa ler o QR uma vez
@@ -70,8 +92,25 @@ client.on('disconnected', async (motivo) => {
   estado.grupoEncontrado = false;
   registrar('WhatsApp desconectado (' + motivo + '). Reiniciando para gerar novo QR Code...');
   try { await client.destroy(); } catch {}
-  setTimeout(() => client.initialize().catch((e) => registrar('Erro ao reiniciar: ' + e.message)), 3000);
+  setTimeout(iniciarWhatsApp, 3000);
 });
+
+// Liga o WhatsApp; se der erro, espera e tenta de novo sozinho
+let tentativas = 0;
+async function iniciarWhatsApp() {
+  tentativas++;
+  registrar(tentativas === 1 ? 'Iniciando o WhatsApp...' : `Tentando conectar de novo (tentativa ${tentativas})...`);
+  try {
+    await client.initialize();
+    tentativas = 0;
+  } catch (e) {
+    registrar('Erro ao iniciar o WhatsApp: ' + e.message);
+    try { await client.destroy(); } catch {}
+    const espera = Math.min(60, 10 * tentativas); // 10s, 20s, ... até 60s
+    registrar(`Vou tentar de novo em ${espera} segundos.`);
+    setTimeout(iniciarWhatsApp, espera * 1000);
+  }
+}
 
 async function acharGrupo() {
   if (estado.whatsapp !== 'conectado') return null;
@@ -243,5 +282,4 @@ iniciarPainel({
   desconectar: () => client.logout(),
 });
 
-registrar('Iniciando o WhatsApp...');
-client.initialize().catch((e) => registrar('Erro ao iniciar o WhatsApp: ' + e.message));
+iniciarWhatsApp();
