@@ -3,142 +3,257 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Robô de Promoções</title>
+<meta name="theme-color" content="#0a0a0f">
+<title>Robô Laureta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --fundo: #fbf6f8; --cartao: #fff; --texto: #2b2230; --suave: #7b6f80; --borda: #eadfe5;
-    --rosa: #d63f7c; --rosa-claro: #fde7f0; --verde: #1f9d55; --verde-claro: #e3f6ec;
-    --amarelo: #b7791f; --amarelo-claro: #fdf3dc; --vermelho: #c53030; --vermelho-claro: #fde8e8;
-    --laranja: #ee4d2d; --ml: #2d3277; --ml-claro: #fff7c2;
+    --fundo: #0a0a0f; --cartao: #13131b; --cartao-2: #191923; --campo: #0e0e14;
+    --borda: #24242f; --borda-forte: #33333f;
+    --texto: #ecebf2; --suave: #8b8a99; --apagado: #5c5b6b;
+    --neon: #ff2e97; --neon-2: #ff5cb0; --neon-fundo: rgba(255, 46, 151, .12); --neon-brilho: rgba(255, 46, 151, .45);
+    --verde: #3ee08f; --verde-fundo: rgba(62, 224, 143, .12);
+    --amarelo: #ffc857; --amarelo-fundo: rgba(255, 200, 87, .12);
+    --vermelho: #ff5470; --vermelho-fundo: rgba(255, 84, 112, .12);
+    --laranja: #ff7a45; --ml: #ffe14d;
+    --raio: 16px;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--fundo); color: var(--texto); }
-  header { background: var(--rosa); color: #fff; padding: 18px 16px; }
-  header h1 { margin: 0; font-size: 1.35rem; }
-  header p { margin: 4px 0 0; opacity: .9; font-size: .92rem; }
-  main { max-width: 1100px; margin: 0 auto; padding: 16px; display: grid; gap: 16px; grid-template-columns: 1fr; }
-  @media (min-width: 900px) { main { grid-template-columns: 1fr 1fr; } .largo { grid-column: 1 / -1; } }
-  section { background: var(--cartao); border: 1px solid var(--borda); border-radius: 14px; padding: 16px; min-width: 0; }
-  h2 { margin: 0 0 12px; font-size: 1.05rem; display: flex; align-items: center; gap: 8px; }
-  .ajuda { color: var(--suave); font-size: .88rem; margin: 0 0 12px; }
-  .selo { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: .85rem; font-weight: 600; }
-  .selo.ok { background: var(--verde-claro); color: var(--verde); }
-  .selo.aviso { background: var(--amarelo-claro); color: var(--amarelo); }
-  .selo.erro { background: var(--vermelho-claro); color: var(--vermelho); }
-  button { font: inherit; border: 0; border-radius: 10px; padding: 10px 14px; cursor: pointer; background: var(--rosa); color: #fff; font-weight: 600; }
-  button:hover { filter: brightness(.95); }
-  button:disabled { opacity: .5; cursor: default; }
-  button.secundario { background: var(--rosa-claro); color: var(--rosa); }
-  button.perigo { background: var(--vermelho-claro); color: var(--vermelho); }
-  button.mini { padding: 6px 10px; font-size: .85rem; }
-  .botoes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-  label { display: block; font-size: .88rem; font-weight: 600; margin: 10px 0 4px; }
-  input, select, textarea { width: 100%; font: inherit; padding: 10px; border: 1px solid var(--borda); border-radius: 10px; background: #fff; color: var(--texto); }
-  textarea { min-height: 140px; resize: vertical; }
-  .linha { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
-  .qr { text-align: center; }
-  .qr img { width: 260px; max-width: 100%; border: 1px solid var(--borda); border-radius: 12px; }
-  .qr ol { text-align: left; margin: 12px auto 0; max-width: 360px; padding-left: 20px; }
-  .caixa-link { margin-top: 16px; padding: 14px; border-radius: 12px; background: var(--fundo); border: 1px dashed var(--borda); }
-  .caixa-link p { margin: 0 0 10px; }
-  .caixa-link .ajuda { margin: 10px 0 0; }
-  .botao-link { display: inline-block; text-decoration: none; border-radius: 10px; padding: 10px 14px; font-weight: 600; background: #25d366; color: #fff; }
-  .numeros { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .numero { background: var(--fundo); border-radius: 10px; padding: 10px; text-align: center; }
-  .numero b { display: block; font-size: 1.3rem; }
-  .numero span { font-size: .8rem; color: var(--suave); }
-  .chave { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px; border-radius: 10px; margin-bottom: 12px; }
-  .chave.on { background: var(--verde-claro); } .chave.off { background: var(--amarelo-claro); }
-  ul.lista { list-style: none; margin: 0; padding: 0; max-height: 460px; overflow-y: auto; }
-  ul.lista li { border-top: 1px solid var(--borda); padding: 10px 2px; display: flex; gap: 10px; align-items: flex-start; }
-  ul.lista li:first-child { border-top: 0; }
-  .thumb { width: 52px; height: 52px; border-radius: 8px; object-fit: cover; background: var(--fundo); flex: none; }
+  html { color-scheme: dark; }
+  body {
+    margin: 0; min-height: 100vh; color: var(--texto); font: 15px/1.5 "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background:
+      radial-gradient(900px 500px at 85% -10%, rgba(255, 46, 151, .14), transparent 60%),
+      radial-gradient(700px 400px at -10% 110%, rgba(255, 46, 151, .07), transparent 60%),
+      var(--fundo);
+    background-attachment: fixed;
+  }
+  ::selection { background: var(--neon); color: #fff; }
+
+  /* ---------- Topo ---------- */
+  header {
+    position: sticky; top: 0; z-index: 5;
+    background: rgba(10, 10, 15, .78); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--borda);
+  }
+  .topo { max-width: 1180px; margin: 0 auto; padding: 14px 16px; display: flex; align-items: center; gap: 14px; }
+  .marca { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .logo {
+    width: 34px; height: 34px; border-radius: 10px; flex: none; display: grid; place-items: center;
+    background: var(--neon); color: #fff; font-weight: 700; font-size: 1rem;
+    box-shadow: 0 0 18px var(--neon-brilho);
+  }
+  .marca h1 { margin: 0; font-size: 1.05rem; font-weight: 700; letter-spacing: -.01em; }
+  .marca p { margin: 0; font-size: .8rem; color: var(--suave); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .marca p b { color: var(--neon-2); font-weight: 600; }
+  .topo .selo { margin-left: auto; }
+
+  /* ---------- Layout ---------- */
+  main { max-width: 1180px; margin: 0 auto; padding: 20px 16px 48px; display: grid; gap: 16px; grid-template-columns: 1fr; }
+  @media (min-width: 920px) {
+    main { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .largo { grid-column: 1 / -1; }
+  }
+  section {
+    background: linear-gradient(180deg, var(--cartao-2), var(--cartao));
+    border: 1px solid var(--borda); border-radius: var(--raio); padding: 20px; min-width: 0;
+  }
+  h2 {
+    margin: 0 0 14px; font-size: .78rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase;
+    color: var(--suave); display: flex; align-items: center; gap: 10px;
+  }
+  h2::before { content: ""; width: 4px; height: 14px; border-radius: 4px; background: var(--neon); box-shadow: 0 0 10px var(--neon-brilho); }
+  h2 .selo { margin-left: auto; text-transform: none; letter-spacing: 0; }
+  h3 { margin: 22px 0 4px; font-size: .78rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--suave); }
+  p { margin: 0 0 12px; }
+  .ajuda { color: var(--suave); font-size: .86rem; margin: 0 0 14px; }
+  b { font-weight: 600; }
+
+  /* ---------- Selos ---------- */
+  .selo {
+    display: inline-flex; align-items: center; gap: 7px; padding: 4px 11px; border-radius: 999px;
+    font-size: .78rem; font-weight: 600; border: 1px solid transparent; white-space: nowrap;
+  }
+  .selo::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor; }
+  .selo.ok { background: var(--verde-fundo); color: var(--verde); border-color: rgba(62, 224, 143, .25); }
+  .selo.aviso { background: var(--amarelo-fundo); color: var(--amarelo); border-color: rgba(255, 200, 87, .25); }
+  .selo.erro { background: var(--vermelho-fundo); color: var(--vermelho); border-color: rgba(255, 84, 112, .25); }
+
+  /* ---------- Botões ---------- */
+  button, .botao-link {
+    font: inherit; font-size: .88rem; font-weight: 600; border-radius: 11px; padding: 10px 16px; cursor: pointer;
+    border: 1px solid var(--neon); background: var(--neon); color: #fff; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+    box-shadow: 0 0 0 0 var(--neon-brilho); transition: box-shadow .2s, background .2s, border-color .2s, color .2s, transform .1s;
+  }
+  button:hover, .botao-link:hover { box-shadow: 0 0 20px var(--neon-brilho); }
+  button:active { transform: translateY(1px); }
+  button:focus-visible, .botao-link:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--neon-2); outline-offset: 2px; }
+  button:disabled { opacity: .45; cursor: default; box-shadow: none; }
+  button.secundario { background: transparent; color: var(--neon-2); border-color: rgba(255, 46, 151, .45); }
+  button.secundario:hover { background: var(--neon-fundo); }
+  button.perigo { background: transparent; color: var(--vermelho); border-color: rgba(255, 84, 112, .4); }
+  button.perigo:hover { background: var(--vermelho-fundo); box-shadow: none; }
+  button.mini { padding: 6px 11px; font-size: .78rem; border-radius: 9px; }
+  .botao-link { background: transparent; border-color: rgba(62, 224, 143, .45); color: var(--verde); }
+  .botao-link:hover { background: var(--verde-fundo); box-shadow: none; }
+  .botoes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+
+  /* ---------- Campos ---------- */
+  label { display: block; font-size: .8rem; font-weight: 500; color: var(--suave); margin: 12px 0 6px; }
+  input, select, textarea {
+    width: 100%; font: inherit; font-size: .92rem; padding: 11px 12px; border-radius: 11px;
+    border: 1px solid var(--borda-forte); background: var(--campo); color: var(--texto); transition: border-color .2s, box-shadow .2s;
+  }
+  input::placeholder, textarea::placeholder { color: var(--apagado); }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--neon); box-shadow: 0 0 0 3px var(--neon-fundo); }
+  textarea { min-height: 150px; resize: vertical; }
+  .linha { display: grid; gap: 0 12px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+  /* ---------- WhatsApp / QR ---------- */
+  .qr { display: grid; gap: 18px; align-items: center; grid-template-columns: 1fr; }
+  @media (min-width: 560px) { .qr { grid-template-columns: auto 1fr; } }
+  .qr img { width: 220px; max-width: 100%; background: #fff; padding: 10px; border-radius: 14px; justify-self: center; box-shadow: 0 0 0 1px var(--neon), 0 0 28px var(--neon-brilho); }
+  .qr ol { margin: 0; padding-left: 18px; color: var(--suave); font-size: .88rem; }
+  .qr ol li { margin-bottom: 6px; } .qr ol b { color: var(--texto); }
+  .caixa-link { margin-top: 18px; padding: 16px; border-radius: 14px; background: var(--campo); border: 1px dashed rgba(255, 46, 151, .4); }
+  .caixa-link p { margin: 0 0 12px; font-size: .9rem; color: var(--suave); }
+  .caixa-link p b { color: var(--texto); }
+  .caixa-link input { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: .8rem; color: var(--neon-2); }
+  .caixa-link .ajuda { margin: 12px 0 0; font-size: .8rem; }
+  .conta { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .conta .avatar { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: var(--neon-fundo); color: var(--neon-2); font-weight: 700; border: 1px solid rgba(255, 46, 151, .4); }
+  .conta small { display: block; color: var(--suave); font-size: .78rem; }
+  .carregando { display: flex; align-items: center; gap: 12px; color: var(--suave); font-size: .9rem; }
+  .roda { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--borda-forte); border-top-color: var(--neon); animation: girar 1s linear infinite; flex: none; }
+  @keyframes girar { to { transform: rotate(360deg); } }
+
+  /* ---------- Envios ---------- */
+  .chave { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-radius: 14px; margin-bottom: 14px; border: 1px solid; }
+  .chave.on { background: var(--verde-fundo); border-color: rgba(62, 224, 143, .3); }
+  .chave.off { background: var(--amarelo-fundo); border-color: rgba(255, 200, 87, .3); }
+  .chave b { font-size: .95rem; }
+  .chave.on b { color: var(--verde); } .chave.off b { color: var(--amarelo); }
+  .numeros { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .numero { background: var(--campo); border: 1px solid var(--borda); border-radius: 13px; padding: 14px 10px; text-align: center; }
+  .numero b { display: block; font-size: 1.55rem; font-weight: 700; line-height: 1.1; color: var(--texto); font-variant-numeric: tabular-nums; }
+  .numero:first-child b { color: var(--neon-2); text-shadow: 0 0 16px var(--neon-brilho); }
+  .numero span { font-size: .74rem; color: var(--suave); text-transform: uppercase; letter-spacing: .05em; }
+
+  /* ---------- Fila ---------- */
+  ul.lista { list-style: none; margin: 0; padding: 0; max-height: 470px; overflow-y: auto; }
+  ul.lista li { border-top: 1px solid var(--borda); padding: 12px 2px; display: flex; gap: 12px; align-items: flex-start; }
+  ul.lista li:first-child { border-top: 0; padding-top: 2px; }
+  .thumb { width: 54px; height: 54px; border-radius: 10px; object-fit: cover; background: var(--campo); border: 1px solid var(--borda); flex: none; }
   .info { flex: 1; min-width: 0; }
-  .info .titulo { font-weight: 600; font-size: .92rem; overflow-wrap: anywhere; }
-  .info .detalhe { font-size: .82rem; color: var(--suave); overflow-wrap: anywhere; }
-  .loja { font-size: .72rem; font-weight: 700; padding: 2px 7px; border-radius: 6px; margin-right: 4px; }
-  .loja.shopee { background: #fff0ec; color: var(--laranja); }
-  .loja.ml { background: var(--ml-claro); color: var(--ml); }
-  .acoes { display: flex; flex-direction: column; gap: 4px; flex: none; }
-  .vazio { color: var(--suave); text-align: center; padding: 20px; }
-  .chat { background: #efe7de; border-radius: 10px; padding: 10px; max-height: 420px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
-  .bolha { background: #fff; border-radius: 10px; padding: 8px 10px; max-width: 88%; font-size: .88rem; white-space: pre-wrap; overflow-wrap: anywhere; }
-  .bolha.robo { background: #d9fdd3; align-self: flex-end; }
-  .bolha small { display: block; color: var(--suave); font-size: .72rem; margin-top: 4px; text-align: right; }
-  .log { font-family: ui-monospace, Consolas, monospace; font-size: .82rem; max-height: 300px; overflow-y: auto; background: var(--fundo); border-radius: 10px; padding: 10px; }
-  .log div { padding: 2px 0; } .log span { color: var(--suave); margin-right: 6px; }
-  #aviso { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--texto); color: #fff; padding: 12px 18px; border-radius: 10px; display: none; max-width: calc(100% - 32px); z-index: 10; }
+  .info .titulo { font-weight: 500; font-size: .9rem; overflow-wrap: anywhere; }
+  .info .detalhe { font-size: .8rem; color: var(--suave); overflow-wrap: anywhere; margin-top: 2px; }
+  .loja { font-size: .68rem; font-weight: 700; padding: 2px 7px; border-radius: 6px; margin-right: 6px; letter-spacing: .02em; vertical-align: 1px; }
+  .loja.shopee { background: rgba(255, 122, 69, .14); color: var(--laranja); }
+  .loja.ml { background: rgba(255, 225, 77, .12); color: var(--ml); }
+  .proxima { color: var(--neon-2); font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-right: 6px; }
+  .acoes { display: flex; flex-direction: column; gap: 5px; flex: none; }
+  .vazio { color: var(--apagado); text-align: center; padding: 26px 10px; font-size: .88rem; }
+
+  /* ---------- Conversa ---------- */
+  .chat { background: var(--campo); border: 1px solid var(--borda); border-radius: 13px; padding: 12px; max-height: 420px; min-height: 120px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+  .bolha { background: var(--cartao-2); border: 1px solid var(--borda); border-radius: 12px 12px 12px 4px; padding: 8px 11px; max-width: 88%; font-size: .86rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .bolha.robo { background: var(--neon-fundo); border-color: rgba(255, 46, 151, .35); border-radius: 12px 12px 4px 12px; align-self: flex-end; }
+  .bolha small { display: block; color: var(--apagado); font-size: .7rem; margin-top: 4px; text-align: right; }
+
+  /* ---------- Atividade ---------- */
+  .log { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: .78rem; max-height: 300px; min-height: 120px; overflow-y: auto; background: var(--campo); border: 1px solid var(--borda); border-radius: 13px; padding: 12px; color: #c9c8d4; }
+  .log div { padding: 3px 0; border-bottom: 1px solid rgba(255, 255, 255, .03); }
+  .log span { color: var(--neon-2); opacity: .75; margin-right: 8px; }
+
+  /* ---------- Rolagem e aviso ---------- */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: var(--borda-forte); border-radius: 10px; border: 3px solid transparent; background-clip: padding-box; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--neon); background-clip: padding-box; }
+  #aviso {
+    position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 10; display: none;
+    background: var(--cartao-2); color: var(--texto); border: 1px solid var(--neon); box-shadow: 0 0 24px var(--neon-brilho);
+    padding: 12px 18px; border-radius: 12px; max-width: calc(100% - 32px); font-size: .9rem; font-weight: 500;
+  }
+  .desligado { max-width: 480px; margin: 18vh auto 0; text-align: center; }
+  @media (max-width: 480px) {
+    section { padding: 16px; }
+    .numero b { font-size: 1.3rem; }
+    .topo .selo { display: none; } /* o quadro do WhatsApp já mostra o estado */
+  }
 </style>
 </head>
 <body>
 <header>
-  <h1>🌸 Robô de Promoções</h1>
-  <p>Painel de controle do grupo <b id="nomeGrupoTopo">…</b></p>
+  <div class="topo">
+    <div class="marca">
+      <div class="logo">L</div>
+      <div>
+        <h1>Robô Laureta</h1>
+        <p>Grupo <b id="nomeGrupoTopo">…</b></p>
+      </div>
+    </div>
+    <span id="seloTopo" class="selo aviso">…</span>
+  </div>
 </header>
 
 <main>
-  <!-- 1. WhatsApp -->
   <section>
-    <h2>📱 WhatsApp <span id="seloWpp" class="selo aviso">…</span></h2>
+    <h2>WhatsApp <span id="seloWpp" class="selo aviso">…</span></h2>
     <div id="areaWpp"></div>
   </section>
 
-  <!-- 2. Envios -->
   <section>
-    <h2>🚀 Envios</h2>
+    <h2>Envios</h2>
     <div id="chaveEnvios" class="chave off">
       <div><b id="textoEnvios">…</b><div class="ajuda" id="ajudaEnvios" style="margin:2px 0 0"></div></div>
       <button id="btnEnvios">…</button>
     </div>
     <div class="numeros">
       <div class="numero"><b id="nFila">0</b><span>na fila</span></div>
-      <div class="numero"><b id="nHoje">0</b><span>enviadas hoje</span></div>
-      <div class="numero"><b id="nProximo">—</b><span>próximo envio</span></div>
+      <div class="numero"><b id="nHoje">0</b><span>hoje</span></div>
+      <div class="numero"><b id="nProximo">—</b><span>próximo</span></div>
     </div>
     <div class="botoes">
-      <button id="btnAgora">📤 Enviar a próxima agora</button>
-      <button id="btnShopee" class="secundario">🔎 Buscar ofertas da Shopee</button>
+      <button id="btnAgora">Enviar a próxima agora</button>
+      <button id="btnShopee" class="secundario">Buscar ofertas da Shopee</button>
     </div>
   </section>
 
-  <!-- 3. Adicionar ML -->
   <section>
-    <h2>🛍️ Adicionar oferta do Mercado Livre</h2>
-    <p class="ajuda">Gere o link de afiliado no Mercado Livre, cole aqui e escreva o texto. Ela vai para a frente da fila.</p>
-    <form id="formML">
-      <label for="mlTitulo">Texto da oferta</label>
-      <input id="mlTitulo" placeholder="Ex.: Sérum Vitamina C de R$89 por R$49" required>
-      <label for="mlLink">Link de afiliado</label>
-      <input id="mlLink" type="url" placeholder="https://meli.la/..." required>
-      <div class="botoes"><button type="submit">➕ Colocar na fila</button></div>
-    </form>
-  </section>
-
-  <!-- 4. Fila -->
-  <section>
-    <h2>📋 Fila de ofertas</h2>
-    <p class="ajuda">A de cima é a próxima a ser enviada.</p>
+    <h2>Fila de ofertas</h2>
+    <p class="ajuda">A primeira da lista é a próxima a ser enviada.</p>
     <ul id="fila" class="lista"></ul>
   </section>
 
-  <!-- 5. Conversa do grupo -->
   <section>
-    <h2>💬 Conversa do grupo</h2>
-    <p class="ajuda">Últimas mensagens do grupo. As verdes foram enviadas pelo robô.</p>
-    <div id="chat" class="chat"><div class="vazio">Clique em "Atualizar" para ver.</div></div>
-    <div class="botoes"><button id="btnChat" class="secundario">🔄 Atualizar conversa</button></div>
+    <h2>Adicionar do Mercado Livre</h2>
+    <p class="ajuda">Cole o link de afiliado e escreva o texto. A oferta entra na frente da fila.</p>
+    <form id="formML">
+      <label for="mlTitulo">Texto da oferta</label>
+      <input id="mlTitulo" placeholder="Sérum Vitamina C de R$ 89 por R$ 49" required>
+      <label for="mlLink">Link de afiliado</label>
+      <input id="mlLink" type="url" placeholder="https://meli.la/..." required>
+      <div class="botoes"><button type="submit">Colocar na fila</button></div>
+    </form>
   </section>
 
-  <!-- 6. Atividade -->
   <section>
-    <h2>🧾 O que o robô está fazendo</h2>
+    <h2>Conversa do grupo</h2>
+    <p class="ajuda">Últimas mensagens. As em rosa foram enviadas pelo robô.</p>
+    <div id="chat" class="chat"><div class="vazio">Clique em “Atualizar” para ver.</div></div>
+    <div class="botoes"><button id="btnChat" class="secundario">Atualizar conversa</button></div>
+  </section>
+
+  <section>
+    <h2>Atividade</h2>
     <div id="log" class="log"></div>
-    <div class="botoes"><button id="btnDesligar" class="perigo">⏻ Desligar robô</button></div>
+    <div class="botoes"><button id="btnDesligar" class="perigo">Desligar robô</button></div>
   </section>
 
-  <!-- 7. Configurações -->
   <section class="largo">
-    <h2>⚙️ Configurações</h2>
+    <h2>Configurações</h2>
     <form id="formConfig">
       <label for="cfgGrupo">Grupo onde enviar</label>
       <select id="cfgGrupo"></select>
@@ -147,7 +262,7 @@
         <div><label for="cfgInicio">Começa às (hora)</label><input id="cfgInicio" type="number" min="0" max="23"></div>
         <div><label for="cfgFim">Para às (hora)</label><input id="cfgFim" type="number" min="1" max="24"></div>
       </div>
-      <h2 style="margin-top:18px">🧡 Filtros da Shopee</h2>
+      <h3>Filtros da Shopee</h3>
       <div class="linha">
         <div><label for="cfgDesconto">Desconto mínimo (%)</label><input id="cfgDesconto" type="number" min="0" max="99"></div>
         <div><label for="cfgNota">Nota mínima (0 a 5)</label><input id="cfgNota" type="number" step="0.1" min="0" max="5"></div>
@@ -156,7 +271,7 @@
       </div>
       <label for="cfgPalavras">Palavras buscadas (uma por linha)</label>
       <textarea id="cfgPalavras"></textarea>
-      <div class="botoes"><button type="submit">💾 Salvar configurações</button></div>
+      <div class="botoes"><button type="submit">Salvar configurações</button></div>
     </form>
   </section>
 </main>
@@ -189,16 +304,16 @@ function urlLink(e) { return `${location.origin}/conectar/${e.linkConexao}`; }
 function caixaLink(e) {
   if (!e.linkConexao) return '';
   return `<div class="caixa-link">
-    <p><b>🔗 O celular do robô está com outra pessoa?</b><br>
-    Mande este link. Ela abre no celular dela e conecta pelo número, sem precisar desta senha.</p>
+    <p><b>O celular do robô está com outra pessoa?</b><br>
+    Mande este link. Ela abre no celular dela e conecta pelo número, sem precisar da senha do painel.</p>
     <input id="campoLink" readonly value="${esc(urlLink(e))}" onclick="this.select()">
     <div class="botoes">
-      <button id="btnCopiarLink">📋 Copiar link</button>
+      <button id="btnCopiarLink">Copiar link</button>
       <a class="botao-link" target="_blank" rel="noopener"
-         href="https://wa.me/?text=${encodeURIComponent('Abra este link para conectar seu WhatsApp ao robô de ofertas: ' + urlLink(e))}">💬 Mandar pelo WhatsApp</a>
-      <button id="btnNovoLink" class="secundario">♻️ Trocar link</button>
+         href="https://wa.me/?text=${encodeURIComponent('Abra este link para conectar seu WhatsApp ao robô de ofertas: ' + urlLink(e))}">Mandar pelo WhatsApp</a>
+      <button id="btnNovoLink" class="secundario">Trocar link</button>
     </div>
-    <p class="ajuda">Quem tiver o link consegue conectar o WhatsApp dele ao robô. Se mandou para a pessoa errada, clique em <b>Trocar link</b>.</p>
+    <p class="ajuda">Quem tiver o link consegue conectar um WhatsApp ao robô. Mandou para a pessoa errada? Clique em <b>Trocar link</b>.</p>
   </div>`;
 }
 function ligarCaixaLink() {
@@ -224,6 +339,7 @@ function desenharWhatsapp(e) {
     qr: ['erro', 'Desconectado'], desconectado: ['erro', 'Desconectado'], conectado: ['ok', 'Conectado'],
   }[e.whatsapp] || ['aviso', e.whatsapp];
   selo.className = 'selo ' + s[0]; selo.textContent = s[1];
+  $('seloTopo').className = 'selo ' + s[0]; $('seloTopo').textContent = 'WhatsApp ' + s[1].toLowerCase();
 
   if (e.whatsapp === 'qr' && e.qr) {
     // Só redesenha quando o QR ou o link mudam (senão o clique nos botões se perde)
@@ -232,17 +348,18 @@ function desenharWhatsapp(e) {
     ultimoLink = chave;
     area.innerHTML = `<div class="qr"><img src="${e.qr}" alt="QR Code do WhatsApp">
       <ol><li>Pegue o celular com o <b>chip do robô</b>.</li>
-      <li>Abra o WhatsApp &gt; <b>⋮</b> ou <b>Configurações</b> &gt; <b>Aparelhos conectados</b>.</li>
-      <li>Toque em <b>Conectar um aparelho</b> e aponte para este QR Code.</li></ol></div>
+      <li>No WhatsApp, abra <b>Aparelhos conectados</b>.</li>
+      <li>Toque em <b>Conectar um aparelho</b> e aponte para o QR Code.</li></ol></div>
       ${caixaLink(e)}`;
     ligarCaixaLink();
   } else if (e.whatsapp === 'conectado') {
     ultimoLink = null;
     const g = e.grupoEncontrado
-      ? `<span class="selo ok">✔ Grupo "${esc(e.config.nomeDoGrupo)}" encontrado</span>`
-      : `<span class="selo erro">✖ Grupo "${esc(e.config.nomeDoGrupo)}" não encontrado</span><p class="ajuda" style="margin-top:8px">Confira se o número do robô está no grupo e escolha o grupo em Configurações.</p>`;
-    area.innerHTML = `<p>Número do robô: <b>${esc(e.numero || '—')}</b></p>${g}
-      <div class="botoes"><button class="secundario" id="btnGrupo">🔄 Procurar grupo de novo</button>
+      ? `<span class="selo ok">Grupo “${esc(e.config.nomeDoGrupo)}” encontrado</span>`
+      : `<span class="selo erro">Grupo “${esc(e.config.nomeDoGrupo)}” não encontrado</span><p class="ajuda" style="margin-top:10px">Confira se o número do robô está no grupo e escolha o grupo em Configurações.</p>`;
+    area.innerHTML = `<div class="conta"><div class="avatar">${esc(String(e.numero || '?').slice(-2))}</div>
+      <div><b>+${esc(e.numero || '—')}</b><small>número do robô</small></div></div>${g}
+      <div class="botoes"><button class="secundario" id="btnGrupo">Procurar grupo de novo</button>
       <button class="perigo" id="btnSair">Desconectar / trocar número</button></div>`;
     $('btnGrupo').onclick = async () => { await api('POST', '/api/grupo/atualizar'); atualizar(); };
     $('btnSair').onclick = async () => {
@@ -251,14 +368,14 @@ function desenharWhatsapp(e) {
     };
   } else {
     ultimoLink = null;
-    area.innerHTML = `<p class="ajuda">Aguarde, o WhatsApp está carregando. Isso pode levar até 1 minuto.</p>`;
+    area.innerHTML = `<div class="carregando"><div class="roda"></div>O WhatsApp está carregando. Pode levar até 1 minuto.</div>`;
   }
 }
 
 function desenharEnvios(e) {
   const on = e.config.enviosAtivos;
   $('chaveEnvios').className = 'chave ' + (on ? 'on' : 'off');
-  $('textoEnvios').textContent = on ? '✅ Envios LIGADOS' : '⏸️ Envios PAUSADOS';
+  $('textoEnvios').textContent = on ? 'Envios ligados' : 'Envios pausados';
   $('ajudaEnvios').textContent = `1 oferta a cada ${e.config.intervaloMinutos} min, das ${e.config.horaInicio}h às ${e.config.horaFim}h`;
   $('btnEnvios').textContent = on ? 'Pausar' : 'Ligar';
   $('btnEnvios').className = on ? 'secundario' : '';
@@ -271,7 +388,7 @@ function desenharEnvios(e) {
   $('btnShopee').disabled = e.buscandoShopee;
   // No servidor o robô fica sempre ligado; o botão de desligar só faz sentido no PC
   $('btnDesligar').style.display = e.noServidor ? 'none' : '';
-  $('btnShopee').textContent = e.buscandoShopee ? '⏳ Buscando…' : '🔎 Buscar ofertas da Shopee';
+  $('btnShopee').textContent = e.buscandoShopee ? 'Buscando…' : 'Buscar ofertas da Shopee';
   $('nomeGrupoTopo').textContent = e.config.nomeDoGrupo;
 }
 
@@ -283,11 +400,11 @@ function desenharFila(lista) {
     const detalhe = shopee ? `${reais(o.preco)} · ${o.desconto}% OFF` : esc(o.link);
     const foto = o.foto ? `<img class="thumb" src="${esc(o.foto)}" alt="">` : `<div class="thumb"></div>`;
     return `<li>${foto}<div class="info">
-        <div class="titulo"><span class="loja ${shopee ? 'shopee' : 'ml'}">${shopee ? 'Shopee' : 'Mercado Livre'}</span>${i === 0 ? '⭐ ' : ''}${esc(o.titulo)}</div>
+        <div class="titulo"><span class="loja ${shopee ? 'shopee' : 'ml'}">${shopee ? 'Shopee' : 'Mercado Livre'}</span>${i === 0 ? '<span class="proxima">Próxima</span>' : ''}${esc(o.titulo)}</div>
         <div class="detalhe">${detalhe}</div></div>
       <div class="acoes">
         <button class="mini" data-acao="enviar" data-id="${esc(o.id)}">Enviar já</button>
-        ${i > 0 ? `<button class="mini secundario" data-acao="subir" data-id="${esc(o.id)}">⬆ Topo</button>` : ''}
+        ${i > 0 ? `<button class="mini secundario" data-acao="subir" data-id="${esc(o.id)}">Subir</button>` : ''}
         <button class="mini perigo" data-acao="remover" data-id="${esc(o.id)}">Remover</button>
       </div></li>`;
   }).join('');
@@ -318,6 +435,7 @@ async function atualizar() {
     }
   } catch {
     $('seloWpp').className = 'selo erro'; $('seloWpp').textContent = 'Robô desligado';
+    $('seloTopo').className = 'selo erro'; $('seloTopo').textContent = 'Robô desligado';
   }
 }
 
@@ -337,7 +455,7 @@ $('btnShopee').onclick = async () => {
 $('btnDesligar').onclick = async () => {
   if (!confirm('Desligar o robô? Ele para de enviar ofertas até você abrir o atalho de novo.')) return;
   const r = await api('POST', '/api/desligar');
-  if (r.ok) document.body.innerHTML = '<main><section><h2>⏻ Robô desligado</h2><p>Para ligar de novo, abra o atalho <b>Robô Laureta</b> na Área de Trabalho.</p></section></main>';
+  if (r.ok) document.body.innerHTML = '<section class="desligado"><h2>Robô desligado</h2><p class="ajuda">Para ligar de novo, abra o atalho <b>Robô Laureta</b> na Área de Trabalho.</p></section>';
 };
 $('formML').onsubmit = async (ev) => {
   ev.preventDefault();
