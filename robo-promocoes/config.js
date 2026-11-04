@@ -1,7 +1,7 @@
 // Tudo o que você pode ajustar sem mexer no resto do código.
 module.exports = {
   // Nome EXATO do grupo de WhatsApp onde as ofertas serão enviadas
-  nomeDoGrupo: 'Promoções do Pedro',
+  nomeDoGrupo: 'Achadinhos da Laureta',
 
   // Minutos entre um envio e outro (menos que 15 aumenta o risco de banimento)
   intervaloMinutos: 20,
