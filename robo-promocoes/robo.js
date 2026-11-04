@@ -152,11 +152,39 @@ async function acharGrupo() {
   return null;
 }
 
+// Lista os grupos direto do WhatsApp Web, só com id e nome.
+// (O client.getChats() da biblioteca quebra em algumas versões do WhatsApp
+// porque tenta carregar os detalhes de todos os grupos de uma vez.)
+async function listarGrupos() {
+  const lista = await client.pupPage.evaluate(() => {
+    const chats = window.require('WAWebCollections').Chat.getModelsArray();
+    return chats
+      .filter((c) => c && c.id && c.id.server === 'g.us')
+      .map((c) => ({
+        id: c.id._serialized,
+        name: c.formattedTitle || c.name || (c.groupMetadata && c.groupMetadata.subject) || '',
+      }));
+  });
+  return lista.filter((g) => g.name);
+}
+
+// Um "grupo" simples: manda mensagem pelo id, sem precisar do objeto completo
+function grupoPorId({ id, name }) {
+  return {
+    id,
+    name,
+    sendMessage: (conteudo, opcoes) => client.sendMessage(id, conteudo, opcoes),
+    fetchMessages: async (opcoes) => (await client.getChatById(id)).fetchMessages(opcoes),
+  };
+}
+
 async function procurarGrupo() {
-  const chats = await client.getChats();
-  const grupos = chats.filter((c) => c.isGroup);
-  estado.grupos = grupos.map((c) => c.name).sort();
-  grupo = grupos.find((c) => c.name === config.nomeDoGrupo) || null;
+  const grupos = await listarGrupos();
+  if (!grupos.length) throw new Error('as conversas ainda não carregaram');
+  estado.grupos = [...new Set(grupos.map((g) => g.name))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  const achado = grupos.find((g) => g.name === config.nomeDoGrupo)
+    || grupos.find((g) => g.name.trim().toLowerCase() === String(config.nomeDoGrupo).trim().toLowerCase());
+  grupo = achado ? grupoPorId(achado) : null;
   estado.grupoEncontrado = Boolean(grupo);
   if (grupo) registrar(`Grupo "${config.nomeDoGrupo}" encontrado.`);
   else registrar(`Grupo "${config.nomeDoGrupo}" NÃO encontrado. Escolha o grupo nas configurações.`);
@@ -275,7 +303,12 @@ function adicionarML(titulo, link) {
 
 async function mensagensDoGrupo() {
   if (!grupo) return [];
-  const msgs = await grupo.fetchMessages({ limit: 25 });
+  let msgs;
+  try {
+    msgs = await grupo.fetchMessages({ limit: 25 });
+  } catch (e) {
+    throw new Error('Não consegui ler a conversa agora (o envio de ofertas não é afetado).');
+  }
   return msgs.map((m) => ({
     hora: new Date(m.timestamp * 1000).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }),
     texto: m.body || (m.hasMedia ? '[imagem]' : '[mensagem]'),
