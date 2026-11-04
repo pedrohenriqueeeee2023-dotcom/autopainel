@@ -48,6 +48,9 @@ async function ciclo() {
 }
 
 async function atualizarShopee() {
+  if (!process.env.SHOPEE_APP_ID || !process.env.SHOPEE_SECRET) {
+    return console.log('Sem chaves da Shopee no .env: usando só as ofertas do Mercado Livre.');
+  }
   try {
     console.log('Buscando ofertas na Shopee...');
     fila.limparShopee(); // troca as de ontem pelas de hoje
