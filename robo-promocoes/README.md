@@ -1,48 +1,47 @@
-# Robô de Promoções (beleza e moda feminina)
+# Robô de Promoções: Achadinhos da Laureta
 
 O que ele faz:
 - **Shopee (automático):** todo dia de manhã busca ofertas de beleza, estética e moda feminina, filtra (desconto, nota, vendas) e já usa o **seu link de afiliado**.
-- **Mercado Livre (semiautomático):** você manda o link de afiliado no privado do robô e ele entra na frente da fila.
+- **Mercado Livre (semiautomático):** você cola o link de afiliado no painel e ele entra na frente da fila.
 - Envia uma oferta (com foto) a cada 20 min, das 8h às 22h, sem repetir produto.
+- **Painel no navegador** pra controlar tudo sem mexer em código.
 
-## 1. Pegar as chaves da Shopee
-1. Entre em **affiliate.shopee.com.br** com a sua conta de afiliado.
-2. Vá em **Open API** e peça acesso (a aprovação pode levar alguns dias).
-3. Copie o **AppID** e a **Secret**.
+## Primeira vez (Windows)
+1. Instale o **Node.js LTS** (nodejs.org).
+2. Copie `.env.example` para `.env` e preencha (pode deixar a Shopee em branco por enquanto).
+3. Dê **dois cliques em `Iniciar robo.bat`**. Na primeira vez ele instala tudo (demora alguns minutos).
+4. O painel abre sozinho no navegador: **http://localhost:3000**
+5. No painel, leia o **QR Code** com o WhatsApp do chip do robô (Aparelhos conectados > Conectar um aparelho).
 
-## 2. Instalar
-Precisa do Node.js 18 ou mais novo. Dentro desta pasta:
+Pronto. Nas próximas vezes, só dois cliques no `Iniciar robo.bat`.
+**Não feche a janela preta**: fechando, o robô desliga.
+
+## O que dá pra fazer no painel
+| Parte | Pra quê |
+|---|---|
+| 📱 WhatsApp | Ver se está conectado, ler o QR Code, trocar de número |
+| 🚀 Envios | Ligar/pausar, enviar na hora, buscar ofertas da Shopee |
+| 🛍️ Mercado Livre | Colar texto + link de afiliado e pôr na fila |
+| 📋 Fila | Ver o que vai ser enviado, enviar já, subir pro topo, remover |
+| 💬 Conversa | Ver as últimas mensagens do grupo |
+| 🧾 Atividade | O que o robô fez (envios, erros) |
+| ⚙️ Configurações | Grupo, intervalo, horário, filtros e palavras da Shopee |
+
+## Comandos pelo WhatsApp (opcional)
+Do seu número (`DONO` no `.env`), no privado do robô:
+- `ml Texto da oferta | https://meli.la/xxxx`: coloca oferta do ML na fila
+- `fila`: quantas ofertas estão esperando
+- `agora`: envia a próxima na hora
+
+## Chaves da Shopee
+Painel em **affiliate.shopee.com.br** > Open API (se não aparecer, peça ao suporte de afiliados).
+Coloque `SHOPEE_APP_ID` e `SHOPEE_SECRET` no `.env` e reinicie o robô.
+
+## Rodar 24h numa VPS (Linux)
 ```bash
 npm install
-```
-Copie `.env.example` para `.env` e preencha as chaves e o seu número pessoal (`DONO`).
-
-## 3. Ajustar
-Em `config.js`: nome exato do grupo, intervalo, horários, palavras buscadas e filtros.
-
-## 4. Testar a Shopee (sem WhatsApp)
-```bash
-npm run testar-shopee
-```
-
-## 5. Ligar o robô
-```bash
-npm start
-```
-Leia o QR Code com o WhatsApp **do chip do robô** (Aparelhos conectados > Conectar).
-
-## Comandos (mande do seu número no privado do robô)
-| Comando | O que faz |
-|---|---|
-| `ml Sérum Vitamina C de R$89 por R$49 \| https://meli.la/xxxx` | Coloca oferta do ML na frente da fila |
-| `fila` | Mostra quantas ofertas estão esperando |
-| `agora` | Envia a próxima oferta na hora |
-
-Dica para achar ofertas do ML de beleza: `mercadolivre.com.br/ofertas` e filtre a categoria **Beleza e Cuidado Pessoal**.
-
-## Deixar ligado 24h (VPS)
-```bash
 npm install -g pm2
 pm2 start robo.js --name robo
-pm2 logs robo
 ```
+Na VPS, **coloque uma senha** em `PAINEL_SENHA` no `.env`. Sem senha, o painel só abre no próprio computador.
+Acesse `http://IP-DA-VPS:3000` e entre com qualquer usuário + a senha.

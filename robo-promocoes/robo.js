@@ -1,66 +1,142 @@
 require('dotenv').config();
 const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
-const qrcode = require('qrcode-terminal');
+const qrcodeTerminal = require('qrcode-terminal');
+const QRCode = require('qrcode');
 const config = require('./config');
 const fila = require('./fila');
 const { buscarOfertas } = require('./shopee');
+const { iniciarPainel } = require('./painel');
 
 const DONO = (process.env.DONO || '').replace(/\D/g, '');
 const reais = (n) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
+// Tudo o que o painel mostra
+const estado = {
+  whatsapp: 'iniciando', // iniciando | qr | conectando | conectado | desconectado
+  qr: null,
+  numero: null,
+  grupoEncontrado: false,
+  grupos: [],
+  buscandoShopee: false,
+  temChavesShopee: Boolean(process.env.SHOPEE_APP_ID && process.env.SHOPEE_SECRET),
+  proximoEnvio: null,
+  enviadasHoje: 0,
+  log: [],
+};
+
+function registrar(texto) {
+  const item = { hora: new Date().toLocaleTimeString('pt-BR'), texto };
+  estado.log.unshift(item);
+  if (estado.log.length > 200) estado.log.length = 200;
+  console.log(item.hora, texto);
+}
+
+const puppeteer = { args: ['--no-sandbox', '--disable-setuid-sandbox'] };
+if (process.env.CHROME_PATH) puppeteer.executablePath = process.env.CHROME_PATH;
+
 const client = new Client({
   authStrategy: new LocalAuth(), // salva o login, só precisa ler o QR uma vez
-  puppeteer: { args: ['--no-sandbox', '--disable-setuid-sandbox'] },
+  puppeteer,
 });
 
 let grupo = null;
-let ultimoDiaBusca = null;
 
-client.on('qr', (qr) => {
-  console.log('Leia o QR Code com o WhatsApp do robô (Aparelhos conectados):');
-  qrcode.generate(qr, { small: true });
+// ---------- Conexão com o WhatsApp ----------
+
+client.on('qr', async (qr) => {
+  estado.whatsapp = 'qr';
+  estado.qr = await QRCode.toDataURL(qr, { margin: 1, width: 280 });
+  registrar('Aguardando leitura do QR Code.');
+  qrcodeTerminal.generate(qr, { small: true });
+});
+
+client.on('authenticated', () => {
+  estado.whatsapp = 'conectando';
+  estado.qr = null;
+  registrar('QR Code lido! Carregando conversas...');
 });
 
 client.on('ready', async () => {
-  const chats = await client.getChats();
-  grupo = chats.find((c) => c.isGroup && c.name === config.nomeDoGrupo);
-  if (!grupo) {
-    console.log(`Grupo "${config.nomeDoGrupo}" não encontrado. Confira o nome em config.js.`);
-    process.exit(1);
-  }
-  console.log('Robô ligado! Fila atual:', fila.tamanho());
-  ciclo();
-  setInterval(ciclo, config.intervaloMinutos * 60 * 1000);
+  estado.whatsapp = 'conectado';
+  estado.numero = client.info?.wid?.user || null;
+  registrar('WhatsApp conectado.');
+  await acharGrupo();
 });
 
-// Roda a cada intervalo: busca ofertas novas uma vez por dia e envia a próxima
-async function ciclo() {
+client.on('disconnected', async (motivo) => {
+  estado.whatsapp = 'desconectado';
+  estado.numero = null;
+  grupo = null;
+  estado.grupoEncontrado = false;
+  registrar('WhatsApp desconectado (' + motivo + '). Reiniciando para gerar novo QR Code...');
+  try { await client.destroy(); } catch {}
+  setTimeout(() => client.initialize().catch((e) => registrar('Erro ao reiniciar: ' + e.message)), 3000);
+});
+
+async function acharGrupo() {
+  if (estado.whatsapp !== 'conectado') return null;
+  const chats = await client.getChats();
+  const grupos = chats.filter((c) => c.isGroup);
+  estado.grupos = grupos.map((c) => c.name).sort();
+  grupo = grupos.find((c) => c.name === config.nomeDoGrupo) || null;
+  estado.grupoEncontrado = Boolean(grupo);
+  if (grupo) registrar(`Grupo "${config.nomeDoGrupo}" encontrado.`);
+  else registrar(`Grupo "${config.nomeDoGrupo}" NÃO encontrado. Escolha o grupo nas configurações.`);
+  return grupo;
+}
+
+// ---------- Relógio: roda a cada 30 segundos ----------
+
+let ultimoDiaBusca = null;
+let diaContagem = new Date().toDateString();
+
+setInterval(tick, 30 * 1000);
+
+async function tick() {
+  if (estado.whatsapp !== 'conectado') return;
   const agora = new Date();
   const hoje = agora.toDateString();
+
+  if (diaContagem !== hoje) { diaContagem = hoje; estado.enviadasHoje = 0; }
 
   if (ultimoDiaBusca !== hoje && agora.getHours() >= config.horaInicio - 1) {
     ultimoDiaBusca = hoje;
     await atualizarShopee();
   }
 
-  if (agora.getHours() < config.horaInicio || agora.getHours() >= config.horaFim) return;
-  await enviarProxima();
+  const dentroDoHorario = agora.getHours() >= config.horaInicio && agora.getHours() < config.horaFim;
+  if (!config.enviosAtivos || !dentroDoHorario) { estado.proximoEnvio = null; return; }
+
+  if (!estado.proximoEnvio) estado.proximoEnvio = Date.now();
+  if (Date.now() < estado.proximoEnvio) return;
+
+  estado.proximoEnvio = Date.now() + config.intervaloMinutos * 60 * 1000;
+  if (fila.tamanho() > 0) await enviarProxima();
 }
 
+// ---------- Shopee ----------
+
 async function atualizarShopee() {
-  if (!process.env.SHOPEE_APP_ID || !process.env.SHOPEE_SECRET) {
-    return console.log('Sem chaves da Shopee no .env: usando só as ofertas do Mercado Livre.');
+  if (!estado.temChavesShopee) {
+    registrar('Sem chaves da Shopee no .env: usando só as ofertas do Mercado Livre.');
+    return;
   }
+  if (estado.buscandoShopee) return;
+  estado.buscandoShopee = true;
   try {
-    console.log('Buscando ofertas na Shopee...');
-    fila.limparShopee(); // troca as de ontem pelas de hoje
+    registrar('Buscando ofertas na Shopee...');
+    fila.limparShopee(); // troca as antigas pelas novas
     const ofertas = await buscarOfertas(fila.idsEnviados());
     fila.adicionarNoFim(ofertas);
-    console.log(`${ofertas.length} ofertas da Shopee na fila.`);
+    registrar(`${ofertas.length} ofertas da Shopee colocadas na fila.`);
   } catch (erro) {
-    console.log('Erro ao buscar na Shopee:', erro.message);
+    registrar('Erro ao buscar na Shopee: ' + erro.message);
+  } finally {
+    estado.buscandoShopee = false;
   }
 }
+
+// ---------- Envio ----------
 
 function montarTexto(o) {
   if (o.loja === 'Mercado Livre') {
@@ -74,31 +150,62 @@ function montarTexto(o) {
   );
 }
 
-async function enviarProxima() {
-  const oferta = fila.tirarPrimeira();
-  if (!oferta) return console.log('Fila vazia.');
+let enviando = false;
+
+// Envia a primeira da fila (ou a de um id específico). Devolve { ok, erro }
+async function enviarProxima(id) {
+  if (enviando) return { ok: false, erro: 'Já estou enviando uma oferta, aguarde.' };
+  if (estado.whatsapp !== 'conectado') return { ok: false, erro: 'WhatsApp não está conectado.' };
+  if (!grupo && !(await acharGrupo())) return { ok: false, erro: 'Grupo não encontrado.' };
+
+  const oferta = id ? fila.tirarPorId(id) : fila.tirarPrimeira();
+  if (!oferta) return { ok: false, erro: 'A fila está vazia.' };
+
+  enviando = true;
   const texto = montarTexto(oferta);
   try {
-    if (oferta.foto) {
+    try {
+      if (!oferta.foto) throw new Error('sem foto');
       const foto = await MessageMedia.fromUrl(oferta.foto, { unsafeMime: true });
       await grupo.sendMessage(foto, { caption: texto });
-    } else {
-      await grupo.sendMessage(texto);
+    } catch {
+      await grupo.sendMessage(texto); // sem foto
     }
     fila.marcarEnviado(oferta.id);
-    console.log('Enviada:', oferta.titulo);
+    estado.enviadasHoje++;
+    registrar('Enviada no grupo: ' + oferta.titulo);
+    return { ok: true };
   } catch (erro) {
-    console.log('Falha ao enviar, tentando sem foto:', erro.message);
-    try {
-      await grupo.sendMessage(texto);
-      fila.marcarEnviado(oferta.id);
-    } catch (e) {
-      console.log('Não enviou:', e.message);
-    }
+    fila.adicionarNaFrente(oferta); // devolve pra fila
+    registrar('Falha ao enviar: ' + erro.message);
+    return { ok: false, erro: erro.message };
+  } finally {
+    enviando = false;
   }
 }
 
-// Comandos que VOCÊ manda no privado do robô (só o número DONO é aceito)
+function adicionarML(titulo, link) {
+  titulo = String(titulo || '').trim();
+  link = String(link || '').trim();
+  if (!titulo || !/^https?:\/\//.test(link)) {
+    return { ok: false, erro: 'Preencha o texto e um link que comece com http.' };
+  }
+  fila.adicionarNaFrente({ id: 'ml-' + Date.now(), loja: 'Mercado Livre', titulo, link });
+  registrar('Oferta do Mercado Livre adicionada: ' + titulo);
+  return { ok: true };
+}
+
+async function mensagensDoGrupo() {
+  if (!grupo) return [];
+  const msgs = await grupo.fetchMessages({ limit: 25 });
+  return msgs.map((m) => ({
+    hora: new Date(m.timestamp * 1000).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }),
+    texto: m.body || (m.hasMedia ? '[imagem]' : '[mensagem]'),
+    doRobo: m.fromMe,
+  }));
+}
+
+// ---------- Comandos pelo WhatsApp (só o número DONO) ----------
 //   ml Sérum Vitamina C de R$89 por R$49 | https://meli.la/xxxx
 //   fila
 //   agora
@@ -110,20 +217,31 @@ client.on('message', async (msg) => {
   const texto = msg.body.trim();
 
   if (/^ml\s/i.test(texto)) {
-    const [titulo, link] = texto.slice(3).split('|').map((s) => s.trim());
-    if (!titulo || !link || !link.startsWith('http')) {
-      return msg.reply('Formato: ml Texto da oferta | link de afiliado');
-    }
-    fila.adicionarNaFrente({ id: 'ml-' + Date.now(), loja: 'Mercado Livre', titulo, link });
-    return msg.reply(`✅ Adicionada na frente da fila. Fila: ${fila.tamanho()}`);
+    const [titulo, link] = texto.slice(3).split('|');
+    const r = adicionarML(titulo, link);
+    return msg.reply(r.ok ? `✅ Adicionada na frente da fila. Fila: ${fila.tamanho()}` : '❌ ' + r.erro);
   }
-
   if (/^fila$/i.test(texto)) return msg.reply(`📋 Ofertas na fila: ${fila.tamanho()}`);
-
   if (/^agora$/i.test(texto)) {
-    await enviarProxima();
-    return msg.reply('📤 Enviei a próxima oferta.');
+    const r = await enviarProxima();
+    return msg.reply(r.ok ? '📤 Enviei a próxima oferta.' : '❌ ' + r.erro);
   }
 });
 
-client.initialize();
+// ---------- Liga tudo ----------
+
+iniciarPainel({
+  estado,
+  config,
+  fila,
+  enviarProxima,
+  adicionarML,
+  atualizarShopee,
+  acharGrupo,
+  mensagensDoGrupo,
+  registrar,
+  desconectar: () => client.logout(),
+});
+
+registrar('Iniciando o WhatsApp...');
+client.initialize().catch((e) => registrar('Erro ao iniciar o WhatsApp: ' + e.message));

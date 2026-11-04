@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Robô de Promoções</title>
+<style>
+  :root {
+    --fundo: #fbf6f8; --cartao: #fff; --texto: #2b2230; --suave: #7b6f80; --borda: #eadfe5;
+    --rosa: #d63f7c; --rosa-claro: #fde7f0; --verde: #1f9d55; --verde-claro: #e3f6ec;
+    --amarelo: #b7791f; --amarelo-claro: #fdf3dc; --vermelho: #c53030; --vermelho-claro: #fde8e8;
+    --laranja: #ee4d2d; --ml: #2d3277; --ml-claro: #fff7c2;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--fundo); color: var(--texto); }
+  header { background: var(--rosa); color: #fff; padding: 18px 16px; }
+  header h1 { margin: 0; font-size: 1.35rem; }
+  header p { margin: 4px 0 0; opacity: .9; font-size: .92rem; }
+  main { max-width: 1100px; margin: 0 auto; padding: 16px; display: grid; gap: 16px; grid-template-columns: 1fr; }
+  @media (min-width: 900px) { main { grid-template-columns: 1fr 1fr; } .largo { grid-column: 1 / -1; } }
+  section { background: var(--cartao); border: 1px solid var(--borda); border-radius: 14px; padding: 16px; min-width: 0; }
+  h2 { margin: 0 0 12px; font-size: 1.05rem; display: flex; align-items: center; gap: 8px; }
+  .ajuda { color: var(--suave); font-size: .88rem; margin: 0 0 12px; }
+  .selo { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: .85rem; font-weight: 600; }
+  .selo.ok { background: var(--verde-claro); color: var(--verde); }
+  .selo.aviso { background: var(--amarelo-claro); color: var(--amarelo); }
+  .selo.erro { background: var(--vermelho-claro); color: var(--vermelho); }
+  button { font: inherit; border: 0; border-radius: 10px; padding: 10px 14px; cursor: pointer; background: var(--rosa); color: #fff; font-weight: 600; }
+  button:hover { filter: brightness(.95); }
+  button:disabled { opacity: .5; cursor: default; }
+  button.secundario { background: var(--rosa-claro); color: var(--rosa); }
+  button.perigo { background: var(--vermelho-claro); color: var(--vermelho); }
+  button.mini { padding: 6px 10px; font-size: .85rem; }
+  .botoes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  label { display: block; font-size: .88rem; font-weight: 600; margin: 10px 0 4px; }
+  input, select, textarea { width: 100%; font: inherit; padding: 10px; border: 1px solid var(--borda); border-radius: 10px; background: #fff; color: var(--texto); }
+  textarea { min-height: 140px; resize: vertical; }
+  .linha { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+  .qr { text-align: center; }
+  .qr img { width: 260px; max-width: 100%; border: 1px solid var(--borda); border-radius: 12px; }
+  .qr ol { text-align: left; margin: 12px auto 0; max-width: 360px; padding-left: 20px; }
+  .numeros { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .numero { background: var(--fundo); border-radius: 10px; padding: 10px; text-align: center; }
+  .numero b { display: block; font-size: 1.3rem; }
+  .numero span { font-size: .8rem; color: var(--suave); }
+  .chave { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px; border-radius: 10px; margin-bottom: 12px; }
+  .chave.on { background: var(--verde-claro); } .chave.off { background: var(--amarelo-claro); }
+  ul.lista { list-style: none; margin: 0; padding: 0; max-height: 460px; overflow-y: auto; }
+  ul.lista li { border-top: 1px solid var(--borda); padding: 10px 2px; display: flex; gap: 10px; align-items: flex-start; }
+  ul.lista li:first-child { border-top: 0; }
+  .thumb { width: 52px; height: 52px; border-radius: 8px; object-fit: cover; background: var(--fundo); flex: none; }
+  .info { flex: 1; min-width: 0; }
+  .info .titulo { font-weight: 600; font-size: .92rem; overflow-wrap: anywhere; }
+  .info .detalhe { font-size: .82rem; color: var(--suave); overflow-wrap: anywhere; }
+  .loja { font-size: .72rem; font-weight: 700; padding: 2px 7px; border-radius: 6px; margin-right: 4px; }
+  .loja.shopee { background: #fff0ec; color: var(--laranja); }
+  .loja.ml { background: var(--ml-claro); color: var(--ml); }
+  .acoes { display: flex; flex-direction: column; gap: 4px; flex: none; }
+  .vazio { color: var(--suave); text-align: center; padding: 20px; }
+  .chat { background: #efe7de; border-radius: 10px; padding: 10px; max-height: 420px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+  .bolha { background: #fff; border-radius: 10px; padding: 8px 10px; max-width: 88%; font-size: .88rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .bolha.robo { background: #d9fdd3; align-self: flex-end; }
+  .bolha small { display: block; color: var(--suave); font-size: .72rem; margin-top: 4px; text-align: right; }
+  .log { font-family: ui-monospace, Consolas, monospace; font-size: .82rem; max-height: 300px; overflow-y: auto; background: var(--fundo); border-radius: 10px; padding: 10px; }
+  .log div { padding: 2px 0; } .log span { color: var(--suave); margin-right: 6px; }
+  #aviso { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--texto); color: #fff; padding: 12px 18px; border-radius: 10px; display: none; max-width: calc(100% - 32px); z-index: 10; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🌸 Robô de Promoções</h1>
+  <p>Painel de controle do grupo <b id="nomeGrupoTopo">…</b></p>
+</header>
+
+<main>
+  <!-- 1. WhatsApp -->
+  <section>
+    <h2>📱 WhatsApp <span id="seloWpp" class="selo aviso">…</span></h2>
+    <div id="areaWpp"></div>
+  </section>
+
+  <!-- 2. Envios -->
+  <section>
+    <h2>🚀 Envios</h2>
+    <div id="chaveEnvios" class="chave off">
+      <div><b id="textoEnvios">…</b><div class="ajuda" id="ajudaEnvios" style="margin:2px 0 0"></div></div>
+      <button id="btnEnvios">…</button>
+    </div>
+    <div class="numeros">
+      <div class="numero"><b id="nFila">0</b><span>na fila</span></div>
+      <div class="numero"><b id="nHoje">0</b><span>enviadas hoje</span></div>
+      <div class="numero"><b id="nProximo">—</b><span>próximo envio</span></div>
+    </div>
+    <div class="botoes">
+      <button id="btnAgora">📤 Enviar a próxima agora</button>
+      <button id="btnShopee" class="secundario">🔎 Buscar ofertas da Shopee</button>
+    </div>
+  </section>
+
+  <!-- 3. Adicionar ML -->
+  <section>
+    <h2>🛍️ Adicionar oferta do Mercado Livre</h2>
+    <p class="ajuda">Gere o link de afiliado no Mercado Livre, cole aqui e escreva o texto. Ela vai para a frente da fila.</p>
+    <form id="formML">
+      <label for="mlTitulo">Texto da oferta</label>
+      <input id="mlTitulo" placeholder="Ex.: Sérum Vitamina C de R$89 por R$49" required>
+      <label for="mlLink">Link de afiliado</label>
+      <input id="mlLink" type="url" placeholder="https://meli.la/..." required>
+      <div class="botoes"><button type="submit">➕ Colocar na fila</button></div>
+    </form>
+  </section>
+
+  <!-- 4. Fila -->
+  <section>
+    <h2>📋 Fila de ofertas</h2>
+    <p class="ajuda">A de cima é a próxima a ser enviada.</p>
+    <ul id="fila" class="lista"></ul>
+  </section>
+
+  <!-- 5. Conversa do grupo -->
+  <section>
+    <h2>💬 Conversa do grupo</h2>
+    <p class="ajuda">Últimas mensagens do grupo. As verdes foram enviadas pelo robô.</p>
+    <div id="chat" class="chat"><div class="vazio">Clique em "Atualizar" para ver.</div></div>
+    <div class="botoes"><button id="btnChat" class="secundario">🔄 Atualizar conversa</button></div>
+  </section>
+
+  <!-- 6. Atividade -->
+  <section>
+    <h2>🧾 O que o robô está fazendo</h2>
+    <div id="log" class="log"></div>
+  </section>
+
+  <!-- 7. Configurações -->
+  <section class="largo">
+    <h2>⚙️ Configurações</h2>
+    <form id="formConfig">
+      <label for="cfgGrupo">Grupo onde enviar</label>
+      <select id="cfgGrupo"></select>
+      <div class="linha">
+        <div><label for="cfgIntervalo">Minutos entre envios</label><input id="cfgIntervalo" type="number" min="5"></div>
+        <div><label for="cfgInicio">Começa às (hora)</label><input id="cfgInicio" type="number" min="0" max="23"></div>
+        <div><label for="cfgFim">Para às (hora)</label><input id="cfgFim" type="number" min="1" max="24"></div>
+      </div>
+      <h2 style="margin-top:18px">🧡 Filtros da Shopee</h2>
+      <div class="linha">
+        <div><label for="cfgDesconto">Desconto mínimo (%)</label><input id="cfgDesconto" type="number" min="0" max="99"></div>
+        <div><label for="cfgNota">Nota mínima (0 a 5)</label><input id="cfgNota" type="number" step="0.1" min="0" max="5"></div>
+        <div><label for="cfgVendas">Vendas mínimas</label><input id="cfgVendas" type="number" min="0"></div>
+        <div><label for="cfgPorDia">Ofertas por dia</label><input id="cfgPorDia" type="number" min="1"></div>
+      </div>
+      <label for="cfgPalavras">Palavras buscadas (uma por linha)</label>
+      <textarea id="cfgPalavras"></textarea>
+      <div class="botoes"><button type="submit">💾 Salvar configurações</button></div>
+    </form>
+  </section>
+</main>
+
+<div id="aviso"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const reais = (n) => Number(n).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+let ultimo = null;
+let configPreenchida = false;
+
+function avisar(texto) {
+  const a = $('aviso'); a.textContent = texto; a.style.display = 'block';
+  clearTimeout(avisar.t); avisar.t = setTimeout(() => (a.style.display = 'none'), 3500);
+}
+
+async function api(metodo, url, corpo) {
+  try {
+    const r = await fetch(url, { method: metodo, headers: { 'Content-Type': 'application/json' }, body: corpo ? JSON.stringify(corpo) : undefined });
+    const j = await r.json();
+    if (j.ok === false) avisar('⚠️ ' + j.erro);
+    return j;
+  } catch { avisar('⚠️ Não consegui falar com o robô. Ele está ligado?'); return { ok: false }; }
+}
+
+// ---------- Desenha a tela ----------
+function desenharWhatsapp(e) {
+  const selo = $('seloWpp'), area = $('areaWpp');
+  const s = {
+    iniciando: ['aviso', 'Iniciando…'], conectando: ['aviso', 'Conectando…'],
+    qr: ['erro', 'Desconectado'], desconectado: ['erro', 'Desconectado'], conectado: ['ok', 'Conectado'],
+  }[e.whatsapp] || ['aviso', e.whatsapp];
+  selo.className = 'selo ' + s[0]; selo.textContent = s[1];
+
+  if (e.whatsapp === 'qr' && e.qr) {
+    area.innerHTML = `<div class="qr"><img src="${e.qr}" alt="QR Code do WhatsApp">
+      <ol><li>Pegue o celular com o <b>chip do robô</b>.</li>
+      <li>Abra o WhatsApp &gt; <b>⋮</b> ou <b>Configurações</b> &gt; <b>Aparelhos conectados</b>.</li>
+      <li>Toque em <b>Conectar um aparelho</b> e aponte para este QR Code.</li></ol></div>`;
+  } else if (e.whatsapp === 'conectado') {
+    const g = e.grupoEncontrado
+      ? `<span class="selo ok">✔ Grupo "${esc(e.config.nomeDoGrupo)}" encontrado</span>`
+      : `<span class="selo erro">✖ Grupo "${esc(e.config.nomeDoGrupo)}" não encontrado</span><p class="ajuda" style="margin-top:8px">Confira se o número do robô está no grupo e escolha o grupo em Configurações.</p>`;
+    area.innerHTML = `<p>Número do robô: <b>${esc(e.numero || '—')}</b></p>${g}
+      <div class="botoes"><button class="secundario" id="btnGrupo">🔄 Procurar grupo de novo</button>
+      <button class="perigo" id="btnSair">Desconectar / trocar número</button></div>`;
+    $('btnGrupo').onclick = async () => { await api('POST', '/api/grupo/atualizar'); atualizar(); };
+    $('btnSair').onclick = async () => {
+      if (!confirm('Desconectar o WhatsApp do robô? Vai precisar ler o QR Code de novo.')) return;
+      await api('POST', '/api/whatsapp/desconectar'); avisar('Desconectando…');
+    };
+  } else {
+    area.innerHTML = `<p class="ajuda">Aguarde, o WhatsApp está carregando. Isso pode levar até 1 minuto.</p>`;
+  }
+}
+
+function desenharEnvios(e) {
+  const on = e.config.enviosAtivos;
+  $('chaveEnvios').className = 'chave ' + (on ? 'on' : 'off');
+  $('textoEnvios').textContent = on ? '✅ Envios LIGADOS' : '⏸️ Envios PAUSADOS';
+  $('ajudaEnvios').textContent = `1 oferta a cada ${e.config.intervaloMinutos} min, das ${e.config.horaInicio}h às ${e.config.horaFim}h`;
+  $('btnEnvios').textContent = on ? 'Pausar' : 'Ligar';
+  $('btnEnvios').className = on ? 'secundario' : '';
+  $('nFila').textContent = e.fila.length;
+  $('nHoje').textContent = e.enviadasHoje;
+  if (e.proximoEnvio && on) {
+    const min = Math.max(0, Math.round((e.proximoEnvio - Date.now()) / 60000));
+    $('nProximo').textContent = min === 0 ? 'agora' : min + ' min';
+  } else $('nProximo').textContent = on ? 'fora do horário' : '—';
+  $('btnShopee').disabled = e.buscandoShopee;
+  $('btnShopee').textContent = e.buscandoShopee ? '⏳ Buscando…' : '🔎 Buscar ofertas da Shopee';
+  $('nomeGrupoTopo').textContent = e.config.nomeDoGrupo;
+}
+
+function desenharFila(lista) {
+  const ul = $('fila');
+  if (!lista.length) { ul.innerHTML = '<li class="vazio">A fila está vazia. Adicione ofertas do Mercado Livre ou busque na Shopee.</li>'; return; }
+  ul.innerHTML = lista.map((o, i) => {
+    const shopee = o.loja === 'Shopee';
+    const detalhe = shopee ? `${reais(o.preco)} · ${o.desconto}% OFF` : esc(o.link);
+    const foto = o.foto ? `<img class="thumb" src="${esc(o.foto)}" alt="">` : `<div class="thumb"></div>`;
+    return `<li>${foto}<div class="info">
+        <div class="titulo"><span class="loja ${shopee ? 'shopee' : 'ml'}">${shopee ? 'Shopee' : 'Mercado Livre'}</span>${i === 0 ? '⭐ ' : ''}${esc(o.titulo)}</div>
+        <div class="detalhe">${detalhe}</div></div>
+      <div class="acoes">
+        <button class="mini" data-acao="enviar" data-id="${esc(o.id)}">Enviar já</button>
+        ${i > 0 ? `<button class="mini secundario" data-acao="subir" data-id="${esc(o.id)}">⬆ Topo</button>` : ''}
+        <button class="mini perigo" data-acao="remover" data-id="${esc(o.id)}">Remover</button>
+      </div></li>`;
+  }).join('');
+}
+
+function desenharLog(log) {
+  $('log').innerHTML = log.length ? log.map((l) => `<div><span>${esc(l.hora)}</span>${esc(l.texto)}</div>`).join('') : '<div class="vazio">Nada ainda.</div>';
+}
+
+function preencherConfig(e) {
+  const c = e.config;
+  const grupos = new Set([...(e.grupos || []), c.nomeDoGrupo]);
+  $('cfgGrupo').innerHTML = [...grupos].map((g) => `<option ${g === c.nomeDoGrupo ? 'selected' : ''}>${esc(g)}</option>`).join('');
+  $('cfgIntervalo').value = c.intervaloMinutos; $('cfgInicio').value = c.horaInicio; $('cfgFim').value = c.horaFim;
+  $('cfgDesconto').value = c.descontoMinimo; $('cfgNota').value = c.notaMinima;
+  $('cfgVendas').value = c.vendasMinimas; $('cfgPorDia').value = c.ofertasPorDia;
+  $('cfgPalavras').value = c.palavras.join('\n');
+}
+
+async function atualizar() {
+  try {
+    const e = await (await fetch('/api/estado')).json();
+    const gruposMudaram = ultimo && JSON.stringify(ultimo.grupos) !== JSON.stringify(e.grupos);
+    ultimo = e;
+    desenharWhatsapp(e); desenharEnvios(e); desenharFila(e.fila); desenharLog(e.log);
+    if (!configPreenchida || (gruposMudaram && !$('formConfig').contains(document.activeElement))) {
+      preencherConfig(e); configPreenchida = true;
+    }
+  } catch {
+    $('seloWpp').className = 'selo erro'; $('seloWpp').textContent = 'Robô desligado';
+  }
+}
+
+// ---------- Botões ----------
+$('btnEnvios').onclick = async () => {
+  await api('POST', '/api/config', { enviosAtivos: !ultimo.config.enviosAtivos }); atualizar();
+};
+$('btnAgora').onclick = async () => {
+  $('btnAgora').disabled = true;
+  const r = await api('POST', '/api/enviar', {});
+  if (r.ok) avisar('✅ Oferta enviada no grupo!');
+  $('btnAgora').disabled = false; atualizar();
+};
+$('btnShopee').onclick = async () => {
+  const r = await api('POST', '/api/shopee/buscar'); if (r.ok) avisar('🔎 Buscando… leva cerca de 1 minuto.'); atualizar();
+};
+$('formML').onsubmit = async (ev) => {
+  ev.preventDefault();
+  const r = await api('POST', '/api/fila', { titulo: $('mlTitulo').value, link: $('mlLink').value });
+  if (r.ok) { avisar('✅ Oferta colocada na frente da fila!'); $('formML').reset(); }
+  atualizar();
+};
+$('fila').onclick = async (ev) => {
+  const b = ev.target.closest('button'); if (!b) return;
+  const id = b.dataset.id;
+  if (b.dataset.acao === 'enviar') { b.disabled = true; const r = await api('POST', '/api/enviar', { id }); if (r.ok) avisar('✅ Enviada!'); }
+  if (b.dataset.acao === 'subir') await api('POST', `/api/fila/${encodeURIComponent(id)}/subir`);
+  if (b.dataset.acao === 'remover' && confirm('Remover esta oferta da fila?')) await api('DELETE', `/api/fila/${encodeURIComponent(id)}`);
+  atualizar();
+};
+$('btnChat').onclick = async () => {
+  const r = await api('GET', '/api/grupo/mensagens');
+  if (!r.ok) return;
+  $('chat').innerHTML = r.mensagens.length
+    ? r.mensagens.map((m) => `<div class="bolha ${m.doRobo ? 'robo' : ''}">${esc(m.texto)}<small>${esc(m.hora)}</small></div>`).join('')
+    : '<div class="vazio">Sem mensagens (ou grupo não encontrado).</div>';
+  $('chat').scrollTop = $('chat').scrollHeight;
+};
+$('formConfig').onsubmit = async (ev) => {
+  ev.preventDefault();
+  const r = await api('POST', '/api/config', {
+    nomeDoGrupo: $('cfgGrupo').value, intervaloMinutos: $('cfgIntervalo').value,
+    horaInicio: $('cfgInicio').value, horaFim: $('cfgFim').value,
+    descontoMinimo: $('cfgDesconto').value, notaMinima: $('cfgNota').value,
+    vendasMinimas: $('cfgVendas').value, ofertasPorDia: $('cfgPorDia').value,
+    palavras: $('cfgPalavras').value,
+  });
+  if (r.ok) avisar('💾 Configurações salvas!');
+  configPreenchida = false; atualizar();
+};
+
+atualizar();
+setInterval(atualizar, 3000);
+</script>
+</body>
+</html>
