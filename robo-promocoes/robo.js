@@ -22,6 +22,7 @@ const estado = {
   proximoEnvio: null,
   enviadasHoje: 0,
   log: [],
+  noServidor: 'pm_id' in process.env, // rodando pelo pm2 (servidor 24h)
 };
 
 function registrar(texto) {
@@ -280,6 +281,11 @@ iniciarPainel({
   mensagensDoGrupo,
   registrar,
   desconectar: () => client.logout(),
+  desligar: async () => {
+    registrar('Desligando o robô a pedido do painel...');
+    try { await client.destroy(); } catch {}
+    process.exit(0);
+  },
 });
 
 iniciarWhatsApp();

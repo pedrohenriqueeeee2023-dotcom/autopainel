@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Ligando o robô…</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #fff5f8; color: #333; display: grid; place-items: center; min-height: 100vh; margin: 0; }
+  .caixa { background: #fff; padding: 32px 40px; border-radius: 16px; box-shadow: 0 4px 20px #0001; text-align: center; max-width: 420px; }
+  .roda { width: 42px; height: 42px; border: 4px solid #f3c; border-top-color: transparent; border-radius: 50%; margin: 0 auto 16px; animation: g 1s linear infinite; }
+  @keyframes g { to { transform: rotate(360deg); } }
+  small { color: #888; }
+</style>
+</head>
+<body>
+<div class="caixa">
+  <div class="roda"></div>
+  <h2>Ligando o robô…</h2>
+  <p id="msg">Isso leva uns segundos. O painel abre sozinho.</p>
+  <small>Pode deixar esta aba aberta.</small>
+</div>
+<script>
+  const inicio = Date.now();
+  async function tentar() {
+    try {
+      await fetch('http://localhost:3000/api/estado', { mode: 'no-cors', cache: 'no-store' });
+      location.href = 'http://localhost:3000';
+      return;
+    } catch {}
+    const seg = (Date.now() - inicio) / 1000;
+    if (seg > 120) {
+      document.getElementById('msg').innerHTML =
+        'Está demorando mais que o normal. Confira o arquivo <b>dados\\robo.log</b> na pasta do robô para ver o erro.';
+    }
+    setTimeout(tentar, 1500);
+  }
+  tentar();
+</script>
+</body>
+</html>

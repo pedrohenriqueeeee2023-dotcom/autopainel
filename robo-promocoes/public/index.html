@@ -129,6 +129,7 @@
   <section>
     <h2>🧾 O que o robô está fazendo</h2>
     <div id="log" class="log"></div>
+    <div class="botoes"><button id="btnDesligar" class="perigo">⏻ Desligar robô</button></div>
   </section>
 
   <!-- 7. Configurações -->
@@ -224,6 +225,8 @@ function desenharEnvios(e) {
     $('nProximo').textContent = min === 0 ? 'agora' : min + ' min';
   } else $('nProximo').textContent = on ? 'fora do horário' : '—';
   $('btnShopee').disabled = e.buscandoShopee;
+  // No servidor o robô fica sempre ligado; o botão de desligar só faz sentido no PC
+  $('btnDesligar').style.display = e.noServidor ? 'none' : '';
   $('btnShopee').textContent = e.buscandoShopee ? '⏳ Buscando…' : '🔎 Buscar ofertas da Shopee';
   $('nomeGrupoTopo').textContent = e.config.nomeDoGrupo;
 }
@@ -286,6 +289,11 @@ $('btnAgora').onclick = async () => {
 };
 $('btnShopee').onclick = async () => {
   const r = await api('POST', '/api/shopee/buscar'); if (r.ok) avisar('🔎 Buscando… leva cerca de 1 minuto.'); atualizar();
+};
+$('btnDesligar').onclick = async () => {
+  if (!confirm('Desligar o robô? Ele para de enviar ofertas até você abrir o atalho de novo.')) return;
+  const r = await api('POST', '/api/desligar');
+  if (r.ok) document.body.innerHTML = '<main><section><h2>⏻ Robô desligado</h2><p>Para ligar de novo, abra o atalho <b>Robô Laureta</b> na Área de Trabalho.</p></section></main>';
 };
 $('formML').onsubmit = async (ev) => {
   ev.preventDefault();

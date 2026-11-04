@@ -37,7 +37,11 @@ Do seu número (`DONO` no `.env`), no privado do robô:
 Painel em **affiliate.shopee.com.br** > Open API (se não aparecer, peça ao suporte de afiliados).
 Coloque `SHOPEE_APP_ID` e `SHOPEE_SECRET` no `.env` e reinicie o robô.
 
-## Rodar 24h numa VPS (Linux)
+## Rodar 24h sem o PC ligado
+Passo a passo para a Oracle Cloud grátis: veja **[SERVIDOR-ORACLE.md](SERVIDOR-ORACLE.md)**.
+O script `instalar-servidor.sh` faz tudo sozinho em qualquer servidor Ubuntu.
+
+## Rodar 24h numa VPS (Linux), do jeito manual
 ```bash
 npm install
 npm install -g pm2

@@ -53,6 +53,11 @@ function iniciarPainel(robo) {
     await robo.desconectar();
   }));
 
+  app.post('/api/desligar', (req, res) => {
+    res.json({ ok: true });
+    setTimeout(() => robo.desligar(), 500); // responde antes de desligar
+  });
+
   const porta = Number(process.env.PORTA) || 3000;
   // Sem senha, o painel só abre neste computador. Com senha, abre de qualquer lugar.
   const host = senha ? '0.0.0.0' : '127.0.0.1';
