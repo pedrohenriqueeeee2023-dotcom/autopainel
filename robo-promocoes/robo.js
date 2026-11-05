@@ -120,6 +120,29 @@ client.on('disconnected', async (motivo) => {
   setTimeout(iniciarWhatsApp, 3000);
 });
 
+// Erros que querem dizer "a página do WhatsApp Web recarregou e o robô perdeu
+// o controle dela". Continuar tentando não adianta: só reiniciando.
+const PAGINA_QUEBRADA = /detached Frame|Session closed|Target closed|Execution context was destroyed/i;
+let reiniciando = false;
+function verificarPaginaQuebrada(erro) {
+  const msg = (erro && erro.message) || String(erro);
+  if (!PAGINA_QUEBRADA.test(msg) || reiniciando) return false;
+  reiniciando = true;
+  estado.whatsapp = 'iniciando';
+  registrar('A página do WhatsApp travou. Reiniciando para reconectar (o login continua salvo)...');
+  if (estado.noServidor) {
+    setTimeout(() => process.exit(1), 1500); // o pm2 liga de novo na hora
+  } else {
+    (async () => {
+      try { await client.destroy(); } catch {}
+      reiniciando = false;
+      tentativas = 0;
+      setTimeout(iniciarWhatsApp, 3000);
+    })();
+  }
+  return true;
+}
+
 // Liga o WhatsApp; se der erro, espera e tenta de novo sozinho
 let tentativas = 0;
 async function iniciarWhatsApp() {
@@ -130,6 +153,12 @@ async function iniciarWhatsApp() {
     tentativas = 0;
   } catch (e) {
     registrar('Erro ao iniciar o WhatsApp: ' + e.message);
+    if (estado.noServidor) {
+      // No servidor é mais seguro começar do zero: o pm2 liga o robô de novo
+      registrar('Reiniciando o robô em 10 segundos para tentar de novo do zero...');
+      setTimeout(() => process.exit(1), 10000);
+      return;
+    }
     try { await client.destroy(); } catch {}
     const espera = Math.min(60, 10 * tentativas); // 10s, 20s, ... até 60s
     registrar(`Vou tentar de novo em ${espera} segundos.`);
@@ -317,6 +346,9 @@ async function enviarProxima(id) {
   } catch (erro) {
     fila.adicionarNaFrente(oferta); // devolve pra fila
     registrar('Falha ao enviar: ' + erro.message);
+    if (verificarPaginaQuebrada(erro)) {
+      return { ok: false, erro: 'O WhatsApp travou e o robô está reconectando. Tente de novo em 1 minuto.' };
+    }
     return { ok: false, erro: erro.message };
   } finally {
     enviando = false;
@@ -376,6 +408,7 @@ client.on('message', async (msg) => {
 
 // Um erro inesperado vira aviso no painel em vez de desligar o robô
 process.on('unhandledRejection', (erro) => {
+  if (verificarPaginaQuebrada(erro)) return;
   registrar('Erro inesperado (o robô continua ligado): ' + ((erro && erro.message) || erro));
 });
 
