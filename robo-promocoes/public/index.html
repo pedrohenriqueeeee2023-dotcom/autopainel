@@ -13,7 +13,7 @@
     --fundo: #0a0a0f; --cartao: #13131b; --cartao-2: #191923; --campo: #0e0e14;
     --borda: #24242f; --borda-forte: #33333f;
     --texto: #ecebf2; --suave: #8b8a99; --apagado: #5c5b6b;
-    --neon: #ff2e97; --neon-2: #ff5cb0; --neon-fundo: rgba(255, 46, 151, .12); --neon-brilho: rgba(255, 46, 151, .45);
+    --neon-rgb: 255, 46, 151; --neon: #ff2e97; --neon-2: #ff5cb0; --neon-fundo: rgba(var(--neon-rgb), .12); --neon-brilho: rgba(var(--neon-rgb), .45);
     --verde: #3ee08f; --verde-fundo: rgba(62, 224, 143, .12);
     --amarelo: #ffc857; --amarelo-fundo: rgba(255, 200, 87, .12);
     --vermelho: #ff5470; --vermelho-fundo: rgba(255, 84, 112, .12);
@@ -25,8 +25,8 @@
   body {
     margin: 0; min-height: 100vh; color: var(--texto); font: 15px/1.5 "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     background:
-      radial-gradient(900px 500px at 85% -10%, rgba(255, 46, 151, .14), transparent 60%),
-      radial-gradient(700px 400px at -10% 110%, rgba(255, 46, 151, .07), transparent 60%),
+      radial-gradient(900px 500px at 85% -10%, rgba(var(--neon-rgb), .14), transparent 60%),
+      radial-gradient(700px 400px at -10% 110%, rgba(var(--neon-rgb), .07), transparent 60%),
       var(--fundo);
     background-attachment: fixed;
   }
@@ -91,7 +91,7 @@
   button:active { transform: translateY(1px); }
   button:focus-visible, .botao-link:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--neon-2); outline-offset: 2px; }
   button:disabled { opacity: .45; cursor: default; box-shadow: none; }
-  button.secundario { background: transparent; color: var(--neon-2); border-color: rgba(255, 46, 151, .45); }
+  button.secundario { background: transparent; color: var(--neon-2); border-color: rgba(var(--neon-rgb), .45); }
   button.secundario:hover { background: var(--neon-fundo); }
   button.perigo { background: transparent; color: var(--vermelho); border-color: rgba(255, 84, 112, .4); }
   button.perigo:hover { background: var(--vermelho-fundo); box-shadow: none; }
@@ -117,13 +117,13 @@
   .qr img { width: 220px; max-width: 100%; background: #fff; padding: 10px; border-radius: 14px; justify-self: center; box-shadow: 0 0 0 1px var(--neon), 0 0 28px var(--neon-brilho); }
   .qr ol { margin: 0; padding-left: 18px; color: var(--suave); font-size: .88rem; }
   .qr ol li { margin-bottom: 6px; } .qr ol b { color: var(--texto); }
-  .caixa-link { margin-top: 18px; padding: 16px; border-radius: 14px; background: var(--campo); border: 1px dashed rgba(255, 46, 151, .4); }
+  .caixa-link { margin-top: 18px; padding: 16px; border-radius: 14px; background: var(--campo); border: 1px dashed rgba(var(--neon-rgb), .4); }
   .caixa-link p { margin: 0 0 12px; font-size: .9rem; color: var(--suave); }
   .caixa-link p b { color: var(--texto); }
   .caixa-link input { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: .8rem; color: var(--neon-2); }
   .caixa-link .ajuda { margin: 12px 0 0; font-size: .8rem; }
   .conta { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
-  .conta .avatar { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: var(--neon-fundo); color: var(--neon-2); font-weight: 700; border: 1px solid rgba(255, 46, 151, .4); }
+  .conta .avatar { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: var(--neon-fundo); color: var(--neon-2); font-weight: 700; border: 1px solid rgba(var(--neon-rgb), .4); }
   .conta small { display: block; color: var(--suave); font-size: .78rem; }
   .carregando { display: flex; align-items: center; gap: 12px; color: var(--suave); font-size: .9rem; }
   .roda { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--borda-forte); border-top-color: var(--neon); animation: girar 1s linear infinite; flex: none; }
@@ -163,7 +163,7 @@
   /* ---------- Conversa ---------- */
   .chat { background: var(--campo); border: 1px solid var(--borda); border-radius: 13px; padding: 12px; max-height: 420px; min-height: 120px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
   .bolha { background: var(--cartao-2); border: 1px solid var(--borda); border-radius: 12px 12px 12px 4px; padding: 8px 11px; max-width: 88%; font-size: .86rem; white-space: pre-wrap; overflow-wrap: anywhere; }
-  .bolha.robo { background: var(--neon-fundo); border-color: rgba(255, 46, 151, .35); border-radius: 12px 12px 4px 12px; align-self: flex-end; }
+  .bolha.robo { background: var(--neon-fundo); border-color: rgba(var(--neon-rgb), .35); border-radius: 12px 12px 4px 12px; align-self: flex-end; }
   .bolha small { display: block; color: var(--apagado); font-size: .7rem; margin-top: 4px; text-align: right; }
 
   /* ---------- Atividade ---------- */
@@ -187,6 +187,7 @@
     .topo .selo { display: none; } /* o quadro do WhatsApp já mostra o estado */
   }
 </style>
+<link rel="stylesheet" href="/tema.css">
 </head>
 <body>
 <header>

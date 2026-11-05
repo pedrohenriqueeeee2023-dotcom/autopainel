@@ -24,9 +24,24 @@ const linkValido = (t) =>
 // Nome que aparece no painel (muda por robô: NOME_ROBO no .env)
 const NOME_ROBO = process.env.NOME_ROBO || 'Robô Laureta';
 
+// Cor de destaque do painel (muda por robô: COR_NEON=#ff2a3d no .env). Padrão: rosa neon.
+function temaCss() {
+  const hex = String(process.env.COR_NEON || '').trim();
+  if (!/^#[0-9a-f]{6}$/i.test(hex)) return '/* cor padrão */\n';
+  const n = parseInt(hex.slice(1), 16);
+  const r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+  const clarear = (c) => Math.round(c + (255 - c) * 0.3); // tom mais claro para textos
+  const claro = '#' + [r, g, b].map((c) => clarear(c).toString(16).padStart(2, '0')).join('');
+  return `:root { --neon-rgb: ${r}, ${g}, ${b}; --neon: ${hex}; --neon-2: ${claro}; }\n`;
+}
+
 function iniciarPainel(robo) {
   const app = express();
   app.use(express.json());
+
+  // Cores do robô (público: a página de conexão também usa)
+  const css = temaCss();
+  app.get('/tema.css', (req, res) => res.type('text/css').set('Cache-Control', 'no-cache').send(css));
 
   // ---- Página pública de conexão (só com o link secreto; vem antes da senha) ----
   const soComLink = (req, res, next) =>
@@ -40,7 +55,7 @@ function iniciarPainel(robo) {
     const e = robo.estado;
     const esperando = e.whatsapp === 'qr';
     res.set('Cache-Control', 'no-store');
-    res.json({ whatsapp: e.whatsapp, qr: esperando ? e.qr : null, codigo: esperando ? e.codigo : null });
+    res.json({ whatsapp: e.whatsapp, qr: esperando ? e.qr : null, codigo: esperando ? e.codigo : null, nome: NOME_ROBO });
   });
   // Limita a 1 código a cada 15s (o WhatsApp não gosta de muitos pedidos seguidos)
   let ultimoPedido = 0;
