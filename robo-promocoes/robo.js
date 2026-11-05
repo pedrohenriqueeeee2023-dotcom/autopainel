@@ -270,7 +270,7 @@ async function tick() {
   if (Date.now() < estado.proximoEnvio) return;
 
   estado.proximoEnvio = Date.now() + config.intervaloMinutos * 60 * 1000;
-  if (fila.prontas() > 0) await enviarProxima();
+  if (fila.prontas(filtroDaVez()) > 0) await enviarProxima();
 }
 
 // ---------- Shopee ----------
@@ -295,6 +295,37 @@ async function atualizarShopee() {
   }
 }
 
+// ---------- Destaques: no máximo N por dia, em horários separados ----------
+// Guarda em dados/ quantos destaques já foram hoje (para não repetir se o robô reiniciar)
+const ARQ_DESTAQUES = require('path').join(__dirname, 'dados', 'destaques-hoje.json');
+function destaquesHoje() {
+  const dia = new Date().toDateString();
+  try {
+    const d = JSON.parse(require('fs').readFileSync(ARQ_DESTAQUES, 'utf8'));
+    if (d.dia === dia) return d;
+  } catch {}
+  return { dia, enviados: 0 };
+}
+function marcarDestaqueEnviado() {
+  const d = destaquesHoje();
+  d.enviados++;
+  try { require('fs').writeFileSync(ARQ_DESTAQUES, JSON.stringify(d)); } catch {}
+}
+// É hora de um destaque? (ainda não bateu o limite e já passou do próximo horário)
+function horaDeDestaque() {
+  if (!config.destaqueAtivo) return false;
+  const { enviados } = destaquesHoje();
+  const horarios = config.destaqueHorarios || [];
+  if (enviados >= Math.min(config.destaquesPorDia || 0, horarios.length)) return false;
+  return new Date().getHours() >= horarios[enviados];
+}
+// Qual tipo de oferta mandar agora: destaque (se for a hora e tiver um pronto) ou as normais
+function filtroDaVez() {
+  const soDestaque = (o) => Boolean(o.destaque);
+  if (horaDeDestaque() && fila.prontas(soDestaque) > 0) return soDestaque;
+  return (o) => !o.destaque;
+}
+
 // ---------- Mercado Livre automático ----------
 
 async function atualizarML() {
@@ -306,12 +337,20 @@ async function atualizarML() {
   if (estado.buscandoML) return;
   estado.buscandoML = true;
   try {
-    registrar('Buscando ofertas no Mercado Livre (mais vendidos de beleza)...');
+    registrar('Buscando ofertas no Mercado Livre...');
     fila.limparMLAutomatico(); // troca as que ainda esperam link pelas novas
     const pular = new Set([...fila.idsEnviados(), ...fila.ids()]); // não repete o que já foi ou já está na fila
     const ofertas = await ml.buscarOfertasML(pular, registrar);
     fila.adicionarNoFim(ofertas);
     registrar(`${ofertas.length} ofertas do Mercado Livre colocadas na fila.`);
+
+    if (config.destaqueAtivo) {
+      registrar('Buscando destaques (celulares, eletrodomésticos)...');
+      for (const o of ofertas) pular.add(o.id);
+      const destaques = await ml.buscarDestaquesML(pular, registrar);
+      fila.adicionarNoFim(destaques);
+      registrar(`${destaques.length} destaques colocados na fila (vão no máximo ${config.destaquesPorDia} por dia).`);
+    }
   } catch (erro) {
     registrar('Erro ao buscar no Mercado Livre: ' + erro.message);
   } finally {
@@ -349,7 +388,7 @@ async function enviarProxima(id) {
   if (estado.whatsapp !== 'conectado') return { ok: false, erro: 'WhatsApp não está conectado.' };
   if (!grupo && !(await acharGrupo())) return { ok: false, erro: 'Grupo não encontrado.' };
 
-  const oferta = id ? fila.tirarPorId(id) : fila.tirarPrimeira();
+  const oferta = id ? fila.tirarPorId(id) : fila.tirarPrimeira(filtroDaVez());
   if (!oferta) {
     return { ok: false, erro: fila.tamanho() ? 'Nenhuma oferta com link pronto. Cole os links do Gerador do ML no painel.' : 'A fila está vazia.' };
   }
@@ -370,7 +409,8 @@ async function enviarProxima(id) {
     }
     fila.marcarEnviado(oferta.id);
     estado.enviadasHoje++;
-    registrar('Enviada no grupo: ' + oferta.titulo);
+    if (oferta.destaque) marcarDestaqueEnviado();
+    registrar((oferta.destaque ? 'Destaque enviado no grupo: ' : 'Enviada no grupo: ') + oferta.titulo);
     return { ok: true };
   } catch (erro) {
     fila.adicionarNaFrente(oferta); // devolve pra fila

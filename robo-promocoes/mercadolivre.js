@@ -52,8 +52,10 @@ function linkLimpo(produtoId, permalink) {
 // Transforma um produto de catálogo numa oferta.
 // "produto" pode vir pronto da busca (nome e fotos); senão é buscado aqui.
 // Devolve null se não passar nos filtros.
-async function montarOferta(produtoId, produto) {
-  const aceitarSemDesconto = Boolean(config.mlAceitarSemDesconto);
+async function montarOferta(produtoId, produto, regras = {}) {
+  const aceitarSemDesconto = regras.aceitarSemDesconto ?? Boolean(config.mlAceitarSemDesconto);
+  const descontoMinimo = regras.descontoMinimo ?? config.mlDescontoMinimo;
+  const precoMinimo = regras.precoMinimo || 0;
   let melhor = null;
   try {
     const anuncios = await chamar(`/products/${produtoId}/items?limit=1`);
@@ -63,7 +65,8 @@ async function montarOferta(produtoId, produto) {
   }
   const temDesconto = melhor && melhor.original_price && melhor.original_price > melhor.price;
   const desconto = temDesconto ? Math.round(100 - (100 * melhor.price) / melhor.original_price) : 0;
-  if (!aceitarSemDesconto && (!temDesconto || desconto < config.mlDescontoMinimo)) return null;
+  if (!aceitarSemDesconto && (!temDesconto || desconto < descontoMinimo)) return null;
+  if (precoMinimo && !(melhor && melhor.price >= precoMinimo)) return null;
 
   if (!produto || !produto.pictures) produto = await chamar(`/products/${produtoId}`);
   const foto = produto.pictures && produto.pictures[0] && (produto.pictures[0].url || produto.pictures[0].secure_url);
@@ -134,4 +137,46 @@ async function buscarOfertasML(jaEnviados, registrar = console.log) {
   return ofertas.sort((a, b) => nota(b) - nota(a)).slice(0, config.mlOfertasPorDia);
 }
 
-module.exports = { buscarOfertasML, temChaves };
+// ---------- Destaques: produtos de ticket mais alto (ex.: celulares, eletrodomésticos) ----------
+// Pega os mais vendidos das categorias de destaque (e das subcategorias delas), fica com
+// os acima do preço mínimo e com desconto, e ordena pelo valor economizado em reais
+// (quanto mais caro e com mais desconto, melhor).
+async function buscarDestaquesML(jaEnviados, registrar = console.log) {
+  const categorias = new Set(config.destaqueCategorias || []);
+  for (const c of [...categorias]) {
+    try {
+      const info = await chamar(`/categories/${c}`);
+      for (const f of info.children_categories || []) categorias.add(f.id);
+    } catch {}
+    await esperar(200);
+  }
+  const candidatos = new Set();
+  for (const categoria of categorias) {
+    try {
+      const destaques = await chamar(`/highlights/MLB/category/${categoria}`);
+      for (const c of destaques.content || []) if (c.type === 'PRODUCT') candidatos.add(c.id);
+    } catch {
+      // subcategoria sem "mais vendidos": pula
+    }
+    await esperar(250);
+  }
+  const ofertas = [];
+  for (const id of candidatos) {
+    if (jaEnviados.has('ml-' + id)) continue;
+    try {
+      const o = await montarOferta(id, null, {
+        aceitarSemDesconto: false,
+        descontoMinimo: config.destaqueDescontoMinimo || 1,
+        precoMinimo: config.destaquePrecoMinimo || 200,
+      });
+      if (o) ofertas.push({ ...o, destaque: true });
+    } catch {}
+    await esperar(250);
+  }
+  const economia = (o) => (o.precoAntes || o.preco) - o.preco;
+  registrar(`Destaques: ${ofertas.length} produtos acima de R$ ${config.destaquePrecoMinimo || 200} com desconto.`);
+  // guarda alguns a mais que o limite do dia, caso você não gere o link de todos
+  return ofertas.sort((a, b) => economia(b) - economia(a)).slice(0, (config.destaquesPorDia || 2) * 3);
+}
+
+module.exports = { buscarOfertasML, buscarDestaquesML, temChaves };

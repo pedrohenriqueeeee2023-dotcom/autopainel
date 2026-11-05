@@ -49,6 +49,14 @@ const padrao = {
   mlPorPalavra: 30,
   // Aceitar produtos sem desconto (ou que o ML não mostra o preço)
   mlAceitarSemDesconto: false,
+  // Destaques: produtos de ticket mais alto (ex.: celulares e eletrodomésticos),
+  // no máximo "destaquesPorDia" por dia, nos horários de "destaqueHorarios"
+  destaqueAtivo: false,
+  destaqueCategorias: ['MLB1055', 'MLB5726'], // Celulares e Smartphones, Eletrodomésticos
+  destaquePrecoMinimo: 200,
+  destaqueDescontoMinimo: 5,
+  destaquesPorDia: 2,
+  destaqueHorarios: [11, 19],
   mlCategorias: ['MLB199407', 'MLB1263', 'MLB1248', 'MLB6284', 'MLB29884', 'MLB5383', 'MLB278194', 'MLB455174'],
 };
 
@@ -71,9 +79,13 @@ Object.defineProperty(config, 'salvar', {
         config[chave] = lista.map((p) => p.trim()).filter(Boolean);
       } else if (chave === 'nomeDoGrupo') {
         config.nomeDoGrupo = String(valor).trim();
-      } else if (chave === 'enviosAtivos' || chave === 'mlAtivo' || chave === 'mlAceitarSemDesconto') {
+      } else if (chave === 'enviosAtivos' || chave === 'mlAtivo' || chave === 'mlAceitarSemDesconto' || chave === 'destaqueAtivo') {
         config[chave] = Boolean(valor);
-      } else if (chave === 'mlCategorias') {
+      } else if (chave === 'destaqueHorarios') {
+        const horas = (Array.isArray(valor) ? valor : String(valor).split(/[^0-9]+/))
+          .map(Number).filter((h) => Number.isInteger(h) && h >= 0 && h <= 23);
+        if (horas.length) config.destaqueHorarios = [...new Set(horas)].sort((a, b) => a - b);
+      } else if (chave === 'mlCategorias' || chave === 'destaqueCategorias') {
         continue; // só muda pelo código
       } else if (!Number.isNaN(Number(valor)) && valor !== '') {
         config[chave] = Number(valor);

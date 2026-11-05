@@ -154,6 +154,7 @@
   .loja.ml { background: rgba(255, 225, 77, .12); color: var(--ml); }
   .proxima { color: var(--neon-2); font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-right: 6px; }
   .acoes { display: flex; flex-direction: column; gap: 5px; flex: none; }
+  .destaque-tag { color: #ffc857; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; margin-right: 6px; }
   .sem-link { color: var(--amarelo); font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; margin-right: 6px; }
   .passos { margin: 0 0 14px; padding-left: 18px; color: var(--suave); font-size: .86rem; } .passos b { color: var(--texto); }
   #mlLista { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: .78rem; min-height: 110px; color: var(--neon-2); }
@@ -304,6 +305,15 @@
       </div>
       <label for="cfgMlPalavras">Palavras buscadas no ML (uma por linha; em branco = mais vendidos de beleza)</label>
       <textarea id="cfgMlPalavras" style="min-height:90px"></textarea>
+      <h3>Destaques (ticket mais alto)</h3>
+      <p class="ajuda" style="margin:4px 0 0">Celulares e eletrodomésticos com desconto, do mais vantajoso para o menos. Vão no máximo o limite por dia, nos horários escolhidos.</p>
+      <div class="linha">
+        <div><label for="cfgDestAtivo">Destaques</label>
+          <select id="cfgDestAtivo"><option value="1">Ligados</option><option value="0">Desligados</option></select></div>
+        <div><label for="cfgDestPreco">Preço mínimo (R$)</label><input id="cfgDestPreco" type="number" min="0"></div>
+        <div><label for="cfgDestPorDia">Máximo por dia</label><input id="cfgDestPorDia" type="number" min="0" max="10"></div>
+        <div><label for="cfgDestHoras">Horários (ex.: 11, 19)</label><input id="cfgDestHoras" placeholder="11, 19"></div>
+      </div>
       <h3>Shopee: palavras buscadas</h3>
       <label for="cfgPalavras">Uma por linha</label>
       <textarea id="cfgPalavras"></textarea>
@@ -441,7 +451,7 @@ function desenharFila(lista) {
     const detalhe = (o.preco || o.automatica) ? `${precoTxt}${o.precisaLink ? ' · esperando link do Gerador' : ''}` : esc(o.link);
     const foto = o.foto ? `<img class="thumb" src="${esc(o.foto)}" alt="">` : `<div class="thumb"></div>`;
     return `<li>${foto}<div class="info">
-        <div class="titulo"><span class="loja ${shopee ? 'shopee' : 'ml'}">${shopee ? 'Shopee' : 'Mercado Livre'}</span>${o.precisaLink ? '<span class="sem-link">Sem link</span>' : (i === 0 ? '<span class="proxima">Próxima</span>' : '')}${esc(o.titulo)}</div>
+        <div class="titulo"><span class="loja ${shopee ? 'shopee' : 'ml'}">${shopee ? 'Shopee' : 'Mercado Livre'}</span>${o.destaque ? '<span class="destaque-tag">★ Destaque</span>' : ''}${o.precisaLink ? '<span class="sem-link">Sem link</span>' : (i === 0 ? '<span class="proxima">Próxima</span>' : '')}${esc(o.titulo)}</div>
         <div class="detalhe">${detalhe}</div></div>
       <div class="acoes">
         <button class="mini" data-acao="enviar" data-id="${esc(o.id)}">Enviar já</button>
@@ -477,6 +487,8 @@ function preencherConfig(e) {
   $('cfgMlAtivo').value = c.mlAtivo === false ? '0' : '1';
   $('cfgMlDesconto').value = c.mlDescontoMinimo; $('cfgMlPorDia').value = c.mlOfertasPorDia;
   $('cfgMlSemDesconto').value = c.mlAceitarSemDesconto ? '1' : '0';
+  $('cfgDestAtivo').value = c.destaqueAtivo ? '1' : '0'; $('cfgDestPreco').value = c.destaquePrecoMinimo;
+  $('cfgDestPorDia').value = c.destaquesPorDia; $('cfgDestHoras').value = (c.destaqueHorarios || []).join(', ');
   $('cfgMlPalavras').value = (c.mlPalavras || []).join('\n');
 }
 
@@ -555,6 +567,8 @@ $('formConfig').onsubmit = async (ev) => {
     palavras: $('cfgPalavras').value,
     mlAtivo: $('cfgMlAtivo').value === '1', mlDescontoMinimo: $('cfgMlDesconto').value, mlOfertasPorDia: $('cfgMlPorDia').value,
     mlAceitarSemDesconto: $('cfgMlSemDesconto').value === '1', mlPalavras: $('cfgMlPalavras').value,
+    destaqueAtivo: $('cfgDestAtivo').value === '1', destaquePrecoMinimo: $('cfgDestPreco').value,
+    destaquesPorDia: $('cfgDestPorDia').value, destaqueHorarios: $('cfgDestHoras').value,
   });
   if (r.ok) avisar('💾 Configurações salvas!');
   configPreenchida = false; atualizar();

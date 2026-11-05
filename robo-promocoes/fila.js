@@ -24,15 +24,16 @@ const fila = {
   adicionarNoFim(ofertas) { const f = ler(ARQ_FILA, []); f.push(...ofertas); salvar(ARQ_FILA, f); },
 
   // Próxima oferta que já pode ser enviada (as do ML sem link oficial esperam)
-  tirarPrimeira() {
+  // "filtro" escolhe o tipo (ex.: só destaques, ou tudo menos destaques)
+  tirarPrimeira(filtro = () => true) {
     const f = ler(ARQ_FILA, []);
-    const i = f.findIndex((o) => !o.precisaLink);
+    const i = f.findIndex((o) => !o.precisaLink && filtro(o));
     if (i === -1) return undefined;
     const [o] = f.splice(i, 1);
     salvar(ARQ_FILA, f);
     return o;
   },
-  prontas() { return ler(ARQ_FILA, []).filter((o) => !o.precisaLink).length; },
+  prontas(filtro = () => true) { return ler(ARQ_FILA, []).filter((o) => !o.precisaLink && filtro(o)).length; },
   esperandoLink() { return ler(ARQ_FILA, []).filter((o) => o.precisaLink); },
   // Recebe os links do Gerador do ML na mesma ordem da lista mostrada no painel
   colocarLinks(links) {
