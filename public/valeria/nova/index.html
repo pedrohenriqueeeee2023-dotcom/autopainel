@@ -78,7 +78,9 @@ p{margin:0}
 /* como funciona */
 .steps{list-style:none;margin:0;padding:0;display:grid;gap:14px;counter-reset:s}
 .step{display:flex;gap:16px;padding:22px;background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow)}
-.step::before{counter-increment:s;content:counter(s);flex:none;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:var(--soft);color:var(--pink);font-weight:800}
+.step-ico{flex:none;display:flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:16px;background:var(--soft);color:var(--pink)}
+.step-ico svg{width:30px;height:30px}
+.step-n{display:block;margin-bottom:2px;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--pink)}
 .step h3{font-size:19px;font-weight:800;margin-bottom:4px}
 .step p{color:var(--muted);font-size:16px}
 
@@ -258,9 +260,9 @@ footer a{font-weight:800;text-decoration:none}
         <h2 id="h-como" class="h2">Simples assim.</h2>
       </div>
       <ol class="steps">
-        <li class="step"><div><h3>Me chama no WhatsApp</h3><p>Me conte sua experiência e o que você quer treinar.</p></div></li>
-        <li class="step"><div><h3>Eu busco você</h3><p>No meu HB20 manual, em casa ou no trabalho, das 7h às 20h, em Betim, BH ou Contagem.</p></div></li>
-        <li class="step"><div><h3>Aula no seu ritmo</h3><p>50 minutos só você e eu no carro, focando no que você precisa.</p></div></li>
+        <li class="step"><span class="step-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 19z"/><path d="M9 10h6M9 13h4"/></svg></span><div><span class="step-n">Passo 1</span><h3>Me chama no WhatsApp</h3><p>Me conte sua experiência e o que você quer treinar.</p></div></li>
+        <li class="step"><span class="step-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 16V12l2-5h10l2 5v4"/><path d="M3 16h18v3H3z"/><circle cx="7.5" cy="19" r="1.5"/><circle cx="16.5" cy="19" r="1.5"/><path d="M5 12h14"/><path d="M12 2.5l-2 2h4z" fill="currentColor"/></svg></span><div><span class="step-n">Passo 2</span><h3>Eu busco você</h3><p>No meu HB20 manual, em casa ou no trabalho, das 7h às 20h, em Betim, BH ou Contagem.</p></div></li>
+        <li class="step"><span class="step-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/><path d="M3.5 10.5h6M14.5 10.5h6M12 14.5V21"/></svg></span><div><span class="step-n">Passo 3</span><h3>Aula no seu ritmo</h3><p>50 minutos só você e eu no carro, focando no que você precisa.</p></div></li>
       </ol>
     </div>
   </section>
