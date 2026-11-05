@@ -116,7 +116,7 @@ p{margin:0}
 .light .gallery figure:nth-child(even){transform:rotate(1.8deg)}
 .light .gallery figure:hover{transform:rotate(0) scale(1.02)}
 .light .gallery figure::after{left:10px;bottom:16px;width:40px;transform:none}
-.area{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;margin-top:clamp(32px,4vw,48px);padding:22px 24px;background:#fff;border-left:3px solid var(--pink);box-shadow:0 10px 28px rgba(196,0,95,.08)}
+.area{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;margin-top:clamp(32px,4vw,48px);padding:22px 24px;background:var(--card);border-left:3px solid var(--pink)}
 .area svg{width:36px;height:36px;flex:none}
 .area p{flex:1 1 280px;color:var(--muted)}
 .area p b{color:var(--white)}
@@ -277,9 +277,36 @@ p{margin:0}
 .hot p{color:#3d0a20 !important}
 .hot .speed span{background:#160008}
 
+
+/* ZONA ROSA (topo, preços e rodapé) */
+.rosa{--bg:#FF2E88;--bg2:#FF2E88;--white:#160008;--muted:#45081f;--dim:#5a1030;--pink:#160008;--pink2:#160008;--line:rgba(22,0,8,.2);--line2:rgba(22,0,8,.2);background:var(--bg);color:var(--white)}
+.rosa .pink{color:#fff}
+.rosa .plan,.rosa .perk,.rosa .ticket{--bg:#090909;--white:#fff;--muted:#B8B8B8;--dim:#8a8a8a;--pink:#FF2E88;--pink2:#FF65A5;--line:#262626;--line2:#2a2a2a;color:var(--white);box-shadow:0 18px 40px rgba(60,0,25,.28)}
+.rosa .plan-hl{background:#090909}
+.rosa .ticket{background:#090909}
+.rosa .ticket p{color:var(--muted)}
+.rosa .ticket .tag{color:var(--pink2)}
+.rosa .ticket-b{border-color:var(--pink)}
+.rosa .wa-num:hover{color:#fff}
+.fab{background:#090909 !important;box-shadow:0 6px 20px rgba(0,0,0,.35)}
+/* fotos distribuídas */
+.head-split{display:grid;gap:24px;align-items:end;margin-bottom:clamp(32px,5vw,64px)}
+.head-split .sec-head{margin-bottom:0}
+.snap{margin:0;justify-self:end;width:min(46vw,240px);padding:8px 8px 28px;background:#fff;box-shadow:0 16px 36px rgba(0,0,0,.35);transform:rotate(2.5deg)}
+.snap.l{transform:rotate(-2.5deg)}
+.snap img{width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;object-position:50% 30%}
+.ticket-a{gap:28px}
+.ticket-txt{display:flex;flex-direction:column;gap:16px}
+.ticket .snap{justify-self:start;align-self:flex-start;width:min(46vw,190px)}
+
 /* TABLET */
 @media (min-width:768px){
   .hero-cta{display:block}
+  .head-split{grid-template-columns:minmax(0,1fr) auto}
+  .snap{width:clamp(170px,17vw,230px)}
+  .dif-head .snap{grid-column:2;grid-row:1 / span 2;align-self:end}
+  .ticket-a{flex-direction:row;align-items:center;justify-content:space-between}
+  .ticket .snap{flex:none;width:clamp(140px,13vw,190px)}
   .gallery{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
   .gallery figure:nth-child(even){margin-top:48px}
   .tiles{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
@@ -299,7 +326,8 @@ p{margin:0}
   .step{flex-direction:column}
   .dot{width:56px;height:56px;font-size:24px}
   .step div{padding-top:0}
-  .dif-head{grid-template-columns:minmax(0,1fr) minmax(0,.4fr)}
+  .dif-head{grid-template-columns:minmax(0,1fr) auto;column-gap:48px}
+  .dif-head p{grid-column:1}
   .footer{flex-direction:row;justify-content:space-between;align-items:flex-start;padding-block:64px}
   .footer-wa{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
   .sticky{display:none}
@@ -324,6 +352,10 @@ p{margin:0}
   .perk{flex-direction:row;align-items:center;gap:32px;padding:36px 40px}
   .perk-body{display:flex;flex-direction:column;gap:12px}
   .ticket-a{padding:64px 72px}
+  .ticket h2{font-size:clamp(56px,5.2vw,80px)}
+  .rosa .hero-media{background:#090909}
+  .rosa .hero-media img{-webkit-mask-image:linear-gradient(180deg,transparent 17%,#000 30%,#000 64%,transparent 82%);mask-image:linear-gradient(180deg,transparent 17%,#000 30%,#000 64%,transparent 82%)}
+  .rosa .hero-media::after{height:12%}
   .ticket-b{padding:64px}
   .region{grid-template-columns:minmax(0,1fr) 440px;column-gap:80px}
   .pickup{padding:44px 40px}
@@ -341,7 +373,7 @@ p{margin:0}
 </style>
 </head>
 <body>
-<header id="topo" class="hero wrap">
+<header id="topo" class="hero wrap rosa">
   <div class="hero-copy">
     <div class="eyebrow ld a-wipe l1">Valéria Maria · 30 anos ensinando</div>
     <h1 class="display ld a-mask l2">Dirija com <span class="pink">confiança.</span></h1>
@@ -361,7 +393,7 @@ p{margin:0}
 
 <main>
   <!-- EXPERIÊNCIA -->
-  <section id="experiencia" class="sec light" aria-labelledby="h-exp">
+  <section id="experiencia" class="sec" aria-labelledby="h-exp">
     <div class="wrap exp">
       <div class="collage">
         <figure class="ph-a anim a-panel long">
@@ -387,29 +419,13 @@ p{margin:0}
     </div>
   </section>
 
-  <!-- ALUNOS -->
-  <section id="alunos" class="sec light tight" aria-labelledby="h-alunos">
-    <div class="wrap">
-      <div class="sec-head">
-        <div class="eyebrow anim a-wipe">Quem já passou por aqui</div>
-        <h2 id="h-alunos" class="display h2 anim a-mask s1">Cada aluno, <span class="pink">uma conquista.</span></h2>
-        <p class="muted anim a-up s2">Gente que chegou com medo do carro e saiu dirigindo. Pode ser você na próxima foto.</p>
-      </div>
-      <div class="gallery">
-        <figure class="anim a-up s1"><img src="/valeria/img/aluno-4.webp" alt="Valéria Maria com um aluno ao lado do carro de aula" loading="lazy" width="362" height="482"></figure>
-        <figure class="anim a-up s2"><img src="/valeria/img/aluno-5.webp" alt="Valéria Maria abraçada a um aluno ao lado do carro de aula" loading="lazy" width="379" height="514"></figure>
-        <figure class="anim a-up s1"><img src="/valeria/img/aluno-6.webp" alt="Valéria Maria com uma aluna segurando o documento do exame" loading="lazy" width="399" height="509"></figure>
-        <figure class="anim a-up s2"><img src="/valeria/img/aluno-7.webp" alt="Valéria Maria com um aluno ao lado do carro da autoescola" loading="lazy" width="461" height="566"></figure>
-      </div>
-    </div>
-  </section>
-
   <!-- DIFICULDADES -->
-  <section class="sec light tight" aria-labelledby="h-dif">
+  <section class="sec tight" aria-labelledby="h-dif">
     <div class="wrap">
       <div class="dif-head">
         <h2 id="h-dif" class="display anim a-mask s1">Se você ainda sente insegurança ao pegar o carro, podemos trabalhar isso juntos.</h2>
         <p class="muted anim a-r s2">Me conte o que te trava. A aula é montada em cima disso.</p>
+        <figure class="snap anim a-pop s2"><img src="/valeria/img/aluno-4.webp" alt="Valéria Maria com um aluno ao lado do carro de aula" loading="lazy" width="362" height="482"></figure>
       </div>
       <div class="tiles">
         <div class="tile anim a-l s1"><svg viewBox="0 0 24 24" fill="none" stroke="#FF2E88" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 12h11M16 8l4 4-4 4"/><path d="M3 9h3M2 12h4M3 15h3"/></svg><div><h3>Arrancadas</h3><p>Sair com o carro sem deixar morrer.</p></div></div>
@@ -426,11 +442,14 @@ p{margin:0}
   </section>
 
   <!-- COMO FUNCIONA -->
-  <section id="como-funciona" class="sec light tight" aria-labelledby="h-como">
+  <section id="como-funciona" class="sec tight" aria-labelledby="h-como">
     <div class="wrap">
-      <div class="sec-head">
-        <h2 id="h-como" class="display h2 anim a-mask s1">Como funciona</h2>
-        <p class="muted anim a-up s2">Do primeiro contato à primeira aula, em quatro passos.</p>
+      <div class="head-split">
+        <div class="sec-head">
+          <h2 id="h-como" class="display h2 anim a-mask s1">Como funciona</h2>
+          <p class="muted anim a-up s2">Do primeiro contato à primeira aula, em quatro passos.</p>
+        </div>
+        <figure class="snap l anim a-pop s2"><img src="/valeria/img/aluno-5.webp" alt="Valéria Maria abraçada a um aluno ao lado do carro de aula" loading="lazy" width="379" height="514"></figure>
       </div>
       <ol class="steps">
         <li class="track" aria-hidden="true"></li>
@@ -449,11 +468,14 @@ p{margin:0}
   </section>
 
   <!-- PROMOÇÕES -->
-  <section id="promocoes" class="sec" aria-labelledby="h-promo">
+  <section id="promocoes" class="sec rosa" aria-labelledby="h-promo">
     <div class="wrap">
-      <div class="sec-head">
-        <div class="eyebrow anim a-wipe">Condições especiais</div>
-        <h2 id="h-promo" class="display h2 anim a-mask s1">Comece pagando <span class="pink">menos.</span></h2>
+      <div class="head-split">
+        <div class="sec-head">
+          <div class="eyebrow anim a-wipe">Condições especiais</div>
+          <h2 id="h-promo" class="display h2 anim a-mask s1">Comece pagando <span class="pink">menos.</span></h2>
+        </div>
+        <figure class="snap anim a-pop s2"><img src="/valeria/img/aluno-6.webp" alt="Valéria Maria com uma aluna segurando o documento do exame" loading="lazy" width="399" height="509"></figure>
       </div>
       <div class="perks" style="margin-top:0">
         <article class="perk anim a-l s1">
@@ -477,7 +499,7 @@ p{margin:0}
   </section>
 
   <!-- PLANOS -->
-  <section id="planos" class="sec tight" aria-labelledby="h-planos">
+  <section id="planos" class="sec tight rosa" aria-labelledby="h-planos">
     <div class="wrap">
       <div class="sec-head">
         <div class="eyebrow anim a-wipe">Pacotes de aulas</div>
@@ -514,19 +536,22 @@ p{margin:0}
   </section>
 
   <!-- EXAME -->
-  <section id="exame" class="sec tight" aria-labelledby="h-exame">
+  <section id="exame" class="sec tight rosa" aria-labelledby="h-exame">
     <div class="wrap">
       <div class="ticket anim a-wipe long">
         <div class="ticket-a">
-          <div class="tag anim a-l s1">Exame prático</div>
-          <h2 id="h-exame" class="display anim a-mask s2">Vai fazer o exame?</h2>
-          <p class="anim a-up s3">Eu cuido da marcação do exame e do aluguel do carro para o dia da prova.</p>
+          <div class="ticket-txt">
+            <div class="tag anim a-l s1">Exame prático</div>
+            <h2 id="h-exame" class="display anim a-mask s2">Vai fazer o exame?</h2>
+            <p class="anim a-up s3">Eu cuido da marcação do exame e do aluguel do carro para o dia da prova.</p>
+          </div>
+          <figure class="snap l anim a-pop s2"><img src="/valeria/img/aluno-7.webp" alt="Valéria Maria com um aluno ao lado do carro da autoescola" loading="lazy" width="461" height="566"></figure>
         </div>
         <div class="ticket-b">
           <h3 class="anim a-r s1">Marcação do exame<br>+ aluguel do carro</h3>
           <div class="price anim a-pop s2" style="transform-origin:0 100%"><small>R$</small><strong>400</strong></div>
           <div class="anim a-up s3">
-            <a class="btn btn-dark btn-block" href="https://wa.me/5531996294794?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Gostaria%20de%20saber%20mais%20sobre%20a%20marca%C3%A7%C3%A3o%20do%20exame%20e%20aluguel%20do%20carro." target="_blank" rel="noopener">Quero marcar meu exame <span class="arr" aria-hidden="true">→</span></a>
+            <a class="btn btn-pink btn-block" href="https://wa.me/5531996294794?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Gostaria%20de%20saber%20mais%20sobre%20a%20marca%C3%A7%C3%A3o%20do%20exame%20e%20aluguel%20do%20carro." target="_blank" rel="noopener">Quero marcar meu exame <span class="arr" aria-hidden="true">→</span></a>
           </div>
         </div>
       </div>
@@ -534,7 +559,7 @@ p{margin:0}
   </section>
 </main>
 
-<footer class="wrap footer">
+<div class="rosa"><footer class="wrap footer">
   <div class="anim a-l" style="display:flex;flex-direction:column;gap:6px">
     <span class="brand"><b>VALÉRIA MARIA</b></span>
     <span class="muted" style="font-size:14px">Instrutora de direção</span>
@@ -545,10 +570,10 @@ p{margin:0}
     <a class="wa-num" href="https://wa.me/5531996294794?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Vi%20seu%20site%20e%20gostaria%20de%20saber%20mais%20sobre%20as%20aulas%20de%20dire%C3%A7%C3%A3o." target="_blank" rel="noopener">(31) 99629-4794</a>
     <span class="copy">© 2026 Valéria Maria</span>
   </div>
-</footer>
+</footer></div>
 
 <a class="fab" href="https://wa.me/5531996294794?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Vi%20seu%20site%20e%20gostaria%20de%20saber%20mais%20sobre%20as%20aulas%20de%20dire%C3%A7%C3%A3o." target="_blank" rel="noopener" aria-label="Conversar com a Valéria no WhatsApp">
-  <svg viewBox="0 0 24 24" fill="none" stroke="#090909" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 19z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .8a4 4 0 0 1-1.8-1.8l.8-1-1-2z"/></svg>
+  <svg viewBox="0 0 24 24" fill="none" stroke="#FF2E88" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 19z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 .8a4 4 0 0 1-1.8-1.8l.8-1-1-2z"/></svg>
 </a>
 <div class="sticky">
   <a class="btn btn-pink btn-block" style="min-height:56px" href="https://wa.me/5531996294794?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Gostaria%20de%20agendar%20minhas%20aulas%20de%20dire%C3%A7%C3%A3o." target="_blank" rel="noopener">Agendar pelo WhatsApp <span class="arr" aria-hidden="true">→</span></a>
