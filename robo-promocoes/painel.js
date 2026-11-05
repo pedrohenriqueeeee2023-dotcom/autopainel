@@ -26,7 +26,8 @@ const NOME_ROBO = process.env.NOME_ROBO || 'Robô Laureta';
 
 // Cor de destaque do painel (muda por robô: COR_NEON=#ff2a3d no .env). Padrão: rosa neon.
 function temaCss() {
-  const hex = String(process.env.COR_NEON || '').trim();
+  // Aceita com ou sem # (no .env o # sem aspas vira comentário, então use COR_NEON=ff2a3d)
+  const hex = '#' + String(process.env.COR_NEON || '').trim().replace(/^["']?#?|["']$/g, '');
   if (!/^#[0-9a-f]{6}$/i.test(hex)) return '/* cor padrão */\n';
   const n = parseInt(hex.slice(1), 16);
   const r = n >> 16, g = (n >> 8) & 255, b = n & 255;
