@@ -70,7 +70,9 @@ let grupo = null;
 
 // ---------- Conexão com o WhatsApp ----------
 
+let ultimoQr = 0;
 client.on('qr', async (qr) => {
+  ultimoQr = Date.now();
   estado.whatsapp = 'qr';
   estado.qr = await QRCode.toDataURL(qr, { margin: 1, width: 280 });
   registrar('Aguardando leitura do QR Code.');
@@ -143,9 +145,14 @@ function verificarPaginaQuebrada(erro) {
   return true;
 }
 
-// A cada 3 minutos confere se a página do WhatsApp ainda responde.
+// A cada minuto confere se a página do WhatsApp ainda responde.
 // Assim o robô se recupera sozinho antes da hora de enviar.
 setInterval(async () => {
+  // QR Code parado há mais de 2 min = página travada (o WhatsApp troca o QR a cada ~20s)
+  if (estado.whatsapp === 'qr' && ultimoQr && Date.now() - ultimoQr > 2 * 60 * 1000 && !reiniciando) {
+    verificarPaginaQuebrada(new Error('Session closed: o QR Code parou de atualizar'));
+    return;
+  }
   if (estado.whatsapp !== 'conectado' || reiniciando || !client.pupPage) return;
   try {
     await Promise.race([
@@ -155,7 +162,7 @@ setInterval(async () => {
   } catch (erro) {
     verificarPaginaQuebrada(erro);
   }
-}, 3 * 60 * 1000);
+}, 60 * 1000);
 
 // Liga o WhatsApp; se der erro, espera e tenta de novo sozinho
 let tentativas = 0;
