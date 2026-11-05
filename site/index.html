@@ -156,6 +156,7 @@ footer a{font-weight:800;text-decoration:none}
 .bf .row .val .bf-only{display:block;margin-top:2px;font-size:15px;color:var(--ink)}
 .bf-only s{color:var(--muted);font-weight:600}
 .bf-only b{color:var(--pink);font-weight:800}
+.bf .tot{text-decoration:line-through}
 /* depoimentos */
 .quotes{display:grid;grid-auto-flow:column;grid-auto-columns:min(80vw,320px);gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:10px}
 .quote{margin:0;display:flex;flex-direction:column;background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;scroll-snap-align:start}
@@ -309,9 +310,9 @@ footer a{font-weight:800;text-decoration:none}
         <div class="bf-end">Termina em <span class="bf-timer" aria-live="off"><b data-u="d">00</b>d <b data-u="h">00</b>h <b data-u="m">00</b>m <b data-u="s">00</b>s</span></div>
       </div>
       <div class="prices">
-        <div class="row"><h3>3 aulas</h3><p>Para relembrar o básico ou treinar um ponto específico.</p><div class="val">R$80<small>por aula · R$240</small><small class="bf-only">Black: <s>R$240</s> <b>R$216</b></small></div></div>
-        <div class="row"><h3>10 aulas</h3><p>Tempo para trabalhar arrancada, morro, baliza e trânsito com calma.</p><div class="val">R$75<small>por aula · R$750</small><small class="bf-only">Black: <s>R$750</s> <b>R$675</b></small></div></div>
-        <div class="row"><h3>20 aulas</h3><p>Para quem está começando do zero.</p><div class="val">R$70<small>por aula · R$1.400</small><small class="bf-only">Black: <s>R$1.400</s> <b>R$1.260</b></small></div></div>
+        <div class="row"><h3>3 aulas</h3><p>Para relembrar o básico ou treinar um ponto específico.</p><div class="val">R$80<small>por aula</small><small>Total: <span class="tot">R$240</span></small><small class="bf-only">Black: <b>R$216</b></small></div></div>
+        <div class="row"><h3>10 aulas</h3><p>Tempo para trabalhar arrancada, morro, baliza e trânsito com calma.</p><div class="val">R$75<small>por aula</small><small>Total: <span class="tot">R$750</span></small><small class="bf-only">Black: <b>R$675</b></small></div></div>
+        <div class="row"><h3>20 aulas</h3><p>Para quem está começando do zero.</p><div class="val">R$70<small>por aula</small><small>Total: <span class="tot">R$1.400</span></small><small class="bf-only">Black: <b>R$1.260</b></small></div></div>
         <div class="row"><h3>Exame prático</h3><p>Eu cuido da marcação e do aluguel do carro para o dia da prova.</p><div class="val">R$400</div></div>
         <div class="price-foot">
           <p><span>Indicou, ganhou:</span> 1 aula grátis a cada amigo que fechar com a Valéria.</p>
