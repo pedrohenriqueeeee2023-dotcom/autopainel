@@ -23,7 +23,30 @@ const fila = {
   adicionarNaFrente(oferta) { const f = ler(ARQ_FILA, []); f.unshift(oferta); salvar(ARQ_FILA, f); },
   adicionarNoFim(ofertas) { const f = ler(ARQ_FILA, []); f.push(...ofertas); salvar(ARQ_FILA, f); },
 
-  tirarPrimeira() { const f = ler(ARQ_FILA, []); const o = f.shift(); salvar(ARQ_FILA, f); return o; },
+  // Próxima oferta que já pode ser enviada (as do ML sem link oficial esperam)
+  tirarPrimeira() {
+    const f = ler(ARQ_FILA, []);
+    const i = f.findIndex((o) => !o.precisaLink);
+    if (i === -1) return undefined;
+    const [o] = f.splice(i, 1);
+    salvar(ARQ_FILA, f);
+    return o;
+  },
+  prontas() { return ler(ARQ_FILA, []).filter((o) => !o.precisaLink).length; },
+  esperandoLink() { return ler(ARQ_FILA, []).filter((o) => o.precisaLink); },
+  // Recebe os links do Gerador do ML na mesma ordem da lista mostrada no painel
+  colocarLinks(links) {
+    const f = ler(ARQ_FILA, []);
+    const esperando = f.filter((o) => o.precisaLink);
+    let usados = 0;
+    for (let i = 0; i < esperando.length && i < links.length; i++) {
+      esperando[i].link = links[i];
+      esperando[i].precisaLink = false;
+      usados++;
+    }
+    salvar(ARQ_FILA, f);
+    return usados;
+  },
   tirarPorId(id) {
     const f = ler(ARQ_FILA, []);
     const i = f.findIndex((o) => o.id === id);

@@ -21,7 +21,7 @@ const estado = {
   grupos: [],
   buscandoShopee: false,
   temChavesShopee: Boolean(process.env.SHOPEE_APP_ID && process.env.SHOPEE_SECRET),
-  temChavesML: ml.temChaves() && ml.temAfiliado(),
+  temChavesML: ml.temChaves(),
   buscandoML: false,
   proximoEnvio: null,
   enviadasHoje: 0,
@@ -270,7 +270,7 @@ async function tick() {
   if (Date.now() < estado.proximoEnvio) return;
 
   estado.proximoEnvio = Date.now() + config.intervaloMinutos * 60 * 1000;
-  if (fila.tamanho() > 0) await enviarProxima();
+  if (fila.prontas() > 0) await enviarProxima();
 }
 
 // ---------- Shopee ----------
@@ -348,7 +348,13 @@ async function enviarProxima(id) {
   if (!grupo && !(await acharGrupo())) return { ok: false, erro: 'Grupo não encontrado.' };
 
   const oferta = id ? fila.tirarPorId(id) : fila.tirarPrimeira();
-  if (!oferta) return { ok: false, erro: 'A fila está vazia.' };
+  if (!oferta) {
+    return { ok: false, erro: fila.tamanho() ? 'Nenhuma oferta com link pronto. Cole os links do Gerador do ML no painel.' : 'A fila está vazia.' };
+  }
+  if (oferta.precisaLink) {
+    fila.adicionarNaFrente(oferta);
+    return { ok: false, erro: 'Essa oferta ainda não tem o link de afiliado do ML. Cole os links do Gerador primeiro.' };
+  }
 
   enviando = true;
   const texto = montarTexto(oferta);

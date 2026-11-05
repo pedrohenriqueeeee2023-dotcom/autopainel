@@ -87,6 +87,20 @@ function iniciarPainel(robo) {
   }));
 
   app.post('/api/fila', responder((req) => robo.adicionarML(req.body.titulo, req.body.link)));
+  // Links que voltaram do Gerador do ML, na mesma ordem da lista do painel
+  app.post('/api/ml/links', responder(async (req) => {
+    const texto = String((req.body && req.body.texto) || '');
+    const links = (texto.match(/https?:\/\/[^\s"'<>]+/g) || [])
+      .filter((l) => /(^https?:\/\/)([a-z0-9-]+\.)*(mercadolivre\.com\.br|meli\.la)\//i.test(l));
+    if (!links.length) return { ok: false, erro: 'Não achei nenhum link do Mercado Livre no que você colou.' };
+    const esperando = robo.fila.esperandoLink().length;
+    const usados = robo.fila.colocarLinks(links);
+    robo.registrar(`${usados} links de afiliado do ML colocados nas ofertas.`);
+    const aviso = links.length !== esperando
+      ? ` Atenção: você colou ${links.length} links e havia ${esperando} ofertas esperando; usei na ordem.`
+      : '';
+    return { ok: true, usados, aviso };
+  }));
   app.delete('/api/fila/:id', responder((req) => robo.fila.remover(req.params.id)));
   app.post('/api/fila/:id/subir', responder((req) => robo.fila.subir(req.params.id)));
   app.post('/api/enviar', responder((req) => robo.enviarProxima(req.body.id)));

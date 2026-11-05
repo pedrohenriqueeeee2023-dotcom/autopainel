@@ -154,6 +154,10 @@
   .loja.ml { background: rgba(255, 225, 77, .12); color: var(--ml); }
   .proxima { color: var(--neon-2); font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-right: 6px; }
   .acoes { display: flex; flex-direction: column; gap: 5px; flex: none; }
+  .sem-link { color: var(--amarelo); font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; margin-right: 6px; }
+  .passos { margin: 0 0 14px; padding-left: 18px; color: var(--suave); font-size: .86rem; } .passos b { color: var(--texto); }
+  #mlLista { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: .78rem; min-height: 110px; color: var(--neon-2); }
+  #mlColados { min-height: 110px; font-size: .8rem; }
   .vazio { color: var(--apagado); text-align: center; padding: 26px 10px; font-size: .88rem; }
 
   /* ---------- Conversa ---------- */
@@ -225,6 +229,24 @@
     <h2>Fila de ofertas</h2>
     <p class="ajuda">A primeira da lista é a próxima a ser enviada.</p>
     <ul id="fila" class="lista"></ul>
+  </section>
+
+  <section id="secLinksML">
+    <h2>Links do Mercado Livre <span id="seloLinksML" class="selo ok">…</span></h2>
+    <div id="mlSemPendencia" class="ajuda">Nenhuma oferta esperando link agora.</div>
+    <div id="mlPendente" style="display:none">
+      <ol class="passos">
+        <li>Clique em <b>Copiar links</b>.</li>
+        <li>No painel de afiliados do ML, abra o <b>Gerador de produtos recomendados</b>, cole tudo e clique em <b>Gerar</b>.</li>
+        <li>Copie <b>todos</b> os links que ele devolver e cole no campo de baixo, <b>na mesma ordem</b>.</li>
+      </ol>
+      <label for="mlLista">Produtos esperando link (<span id="mlQtd">0</span>)</label>
+      <textarea id="mlLista" readonly></textarea>
+      <div class="botoes"><button id="btnCopiarML" class="secundario">Copiar links</button></div>
+      <label for="mlColados">Links que o Gerador devolveu</label>
+      <textarea id="mlColados" placeholder="https://www.mercadolivre.com.br/social/...&#10;https://www.mercadolivre.com.br/social/..."></textarea>
+      <div class="botoes"><button id="btnSalvarML">Salvar links</button></div>
+    </div>
   </section>
 
   <section>
@@ -406,10 +428,10 @@ function desenharFila(lista) {
   if (!lista.length) { ul.innerHTML = '<li class="vazio">A fila está vazia. Adicione ofertas do Mercado Livre ou busque na Shopee.</li>'; return; }
   ul.innerHTML = lista.map((o, i) => {
     const shopee = o.loja === 'Shopee';
-    const detalhe = o.preco ? `${reais(o.preco)} · ${o.desconto}% OFF` : esc(o.link);
+    const detalhe = o.preco ? `${reais(o.preco)} · ${o.desconto}% OFF${o.precisaLink ? ' · esperando link do Gerador' : ''}` : esc(o.link);
     const foto = o.foto ? `<img class="thumb" src="${esc(o.foto)}" alt="">` : `<div class="thumb"></div>`;
     return `<li>${foto}<div class="info">
-        <div class="titulo"><span class="loja ${shopee ? 'shopee' : 'ml'}">${shopee ? 'Shopee' : 'Mercado Livre'}</span>${i === 0 ? '<span class="proxima">Próxima</span>' : ''}${esc(o.titulo)}</div>
+        <div class="titulo"><span class="loja ${shopee ? 'shopee' : 'ml'}">${shopee ? 'Shopee' : 'Mercado Livre'}</span>${o.precisaLink ? '<span class="sem-link">Sem link</span>' : (i === 0 ? '<span class="proxima">Próxima</span>' : '')}${esc(o.titulo)}</div>
         <div class="detalhe">${detalhe}</div></div>
       <div class="acoes">
         <button class="mini" data-acao="enviar" data-id="${esc(o.id)}">Enviar já</button>
@@ -417,6 +439,17 @@ function desenharFila(lista) {
         <button class="mini perigo" data-acao="remover" data-id="${esc(o.id)}">Remover</button>
       </div></li>`;
   }).join('');
+}
+
+let ultimaListaML = null;
+function desenharLinksML(lista) {
+  const esperando = lista.filter((o) => o.precisaLink);
+  const texto = esperando.map((o) => o.linkProduto).join('\n');
+  $('seloLinksML').className = 'selo ' + (esperando.length ? 'aviso' : 'ok');
+  $('seloLinksML').textContent = esperando.length ? `${esperando.length} esperando` : 'em dia';
+  $('mlPendente').style.display = esperando.length ? '' : 'none';
+  $('mlSemPendencia').style.display = esperando.length ? 'none' : '';
+  if (texto !== ultimaListaML) { ultimaListaML = texto; $('mlLista').value = texto; $('mlQtd').textContent = esperando.length; }
 }
 
 function desenharLog(log) {
@@ -440,7 +473,7 @@ async function atualizar() {
     const e = await (await fetch('/api/estado')).json();
     const gruposMudaram = ultimo && JSON.stringify(ultimo.grupos) !== JSON.stringify(e.grupos);
     ultimo = e;
-    desenharWhatsapp(e); desenharEnvios(e); desenharFila(e.fila); desenharLog(e.log);
+    desenharWhatsapp(e); desenharEnvios(e); desenharFila(e.fila); desenharLog(e.log); desenharLinksML(e.fila);
     if (!configPreenchida || (gruposMudaram && !$('formConfig').contains(document.activeElement))) {
       preencherConfig(e); configPreenchida = true;
     }
@@ -467,6 +500,16 @@ $('btnDesligar').onclick = async () => {
   if (!confirm('Desligar o robô? Ele para de enviar ofertas até você abrir o atalho de novo.')) return;
   const r = await api('POST', '/api/desligar');
   if (r.ok) document.body.innerHTML = '<section class="desligado"><h2>Robô desligado</h2><p class="ajuda">Para ligar de novo, abra o atalho <b>Robô Laureta</b> na Área de Trabalho.</p></section>';
+};
+$('btnCopiarML').onclick = async () => {
+  try { await navigator.clipboard.writeText($('mlLista').value); }
+  catch { $('mlLista').select(); document.execCommand('copy'); }
+  avisar('Links copiados. Cole no Gerador do Mercado Livre.');
+};
+$('btnSalvarML').onclick = async () => {
+  const r = await api('POST', '/api/ml/links', { texto: $('mlColados').value });
+  if (r.ok) { avisar(`${r.usados} ofertas prontas para enviar.${r.aviso || ''}`); $('mlColados').value = ''; }
+  atualizar();
 };
 $('formML').onsubmit = async (ev) => {
   ev.preventDefault();

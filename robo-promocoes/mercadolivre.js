@@ -1,7 +1,7 @@
 // Busca ofertas no Mercado Livre pela API oficial (app de desenvolvedor).
 // A busca livre do ML é bloqueada, então usamos os MAIS VENDIDOS de cada
 // subcategoria e ficamos só com os que estão com desconto.
-// O link de afiliado é montado com os seus códigos (ML_MATT_WORD / ML_MATT_TOOL).
+// O link de afiliado vem do Gerador de links do ML (você cola no painel).
 const config = require('./config');
 
 const API = 'https://api.mercadolibre.com';
@@ -9,7 +9,6 @@ let token = null;
 let tokenExpira = 0;
 
 const temChaves = () => Boolean(process.env.ML_CLIENT_ID && process.env.ML_CLIENT_SECRET);
-const temAfiliado = () => Boolean(process.env.ML_MATT_WORD && process.env.ML_MATT_TOOL);
 const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function pegarToken() {
@@ -40,13 +39,14 @@ async function chamar(caminho) {
   return r.json();
 }
 
-// Link do produto com os seus códigos de afiliado
-function linkAfiliado(produtoId, permalink) {
-  const base = permalink || `https://www.mercadolivre.com.br/p/${produtoId}`;
-  const u = new URL(base);
-  u.searchParams.set('matt_word', process.env.ML_MATT_WORD);
-  u.searchParams.set('matt_tool', process.env.ML_MATT_TOOL);
-  return u.toString();
+// Endereço do produto sem nada extra (é o que você cola no Gerador de links do ML)
+function linkLimpo(produtoId, permalink) {
+  try {
+    const u = new URL(permalink || `https://www.mercadolivre.com.br/p/${produtoId}`);
+    return u.origin + u.pathname;
+  } catch {
+    return `https://www.mercadolivre.com.br/p/${produtoId}`;
+  }
 }
 
 // Transforma um produto de catálogo numa oferta (ou null se não tiver desconto bom)
@@ -68,13 +68,17 @@ async function montarOferta(produtoId) {
     precoAntes: melhor.original_price,
     desconto,
     foto: foto ? foto.replace(/^http:/, 'https:') : null,
-    link: linkAfiliado(produtoId, produto.permalink),
+    // O link de afiliado do ML tem um código (ref) criado pelo próprio ML para cada
+    // produto, então ele precisa sair do "Gerador de links" do ML. Até lá a oferta
+    // fica na fila esperando e não é enviada.
+    linkProduto: linkLimpo(produtoId, produto.permalink),
+    link: null,
+    precisaLink: true,
   };
 }
 
 // Passa pelas subcategorias e devolve as melhores ofertas (maior desconto primeiro)
 async function buscarOfertasML(jaEnviados, registrar = console.log) {
-  if (!temAfiliado()) throw new Error('Faltam ML_MATT_WORD e ML_MATT_TOOL no .env (seus códigos de afiliado)');
   const candidatos = new Set();
   for (const categoria of config.mlCategorias) {
     try {
@@ -100,4 +104,4 @@ async function buscarOfertasML(jaEnviados, registrar = console.log) {
   return ofertas.sort((a, b) => b.desconto - a.desconto).slice(0, config.mlOfertasPorDia);
 }
 
-module.exports = { buscarOfertasML, temChaves, temAfiliado };
+module.exports = { buscarOfertasML, temChaves };
