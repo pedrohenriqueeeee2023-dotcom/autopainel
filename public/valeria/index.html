@@ -245,6 +245,28 @@ p{margin:0}
 .fab svg{width:28px;height:28px}
 .sticky{position:fixed;z-index:19;left:0;right:0;bottom:0;padding:12px 16px calc(14px + env(safe-area-inset-bottom,0px));background:var(--bg);border-top:1px solid #222}
 
+
+/* SEÇÕES CLARAS (mais leves e humanas) */
+.light,.blush{--bg:#FBF7F4;--bg2:#FFFFFF;--white:#161214;--muted:#5b5357;--dim:#7a7075;--line:#ecdfe4;--line2:#e5d5dc;--pink2:#C4005F;background:var(--bg);color:var(--white)}
+.blush{--bg:#FFEAF2;--line:#f3cfe0;--line2:#efc4d8}
+.light .tile,.blush .tile{background:#fff;box-shadow:0 1px 2px rgba(60,20,40,.06)}
+.light .tile:hover,.blush .tile:hover{background:#fff;box-shadow:0 10px 28px rgba(196,0,95,.12)}
+.light .cities li,.blush .cities li{border-color:var(--line2)}
+.light .dot,.blush .dot{color:#fff}
+.blush .pickup,.light .pickup{background:#fff !important;box-shadow:0 18px 40px rgba(196,0,95,.10)}
+.light .collage figure{box-shadow:0 18px 40px rgba(60,20,40,.14)}
+.light .ph-b{border-color:#fff}
+/* galeria estilo foto revelada */
+.blush .gallery figure{padding:10px 10px 34px;background:#fff;box-shadow:0 14px 34px rgba(120,20,70,.16);transform:rotate(-1.6deg);transition:transform .4s var(--ease)}
+.blush .gallery figure:nth-child(even){transform:rotate(1.8deg)}
+.blush .gallery figure:hover{transform:rotate(0) scale(1.02)}
+.blush .gallery figure::after{left:10px;bottom:16px;width:40px;transform:none}
+/* CTA final rosa */
+.hot{background:var(--pink);color:#160008}
+.hot .pink{color:#fff}
+.hot p{color:#3d0a20 !important}
+.hot .speed span{background:#160008}
+
 /* TABLET */
 @media (min-width:768px){
   .hero-cta{display:block}
@@ -329,7 +351,7 @@ p{margin:0}
 
 <main>
   <!-- EXPERIÊNCIA -->
-  <section id="experiencia" class="sec" aria-labelledby="h-exp" style="border-top:1px solid #1a1a1a">
+  <section id="experiencia" class="sec light" aria-labelledby="h-exp">
     <div class="wrap exp">
       <div class="collage">
         <figure class="ph-a anim a-panel long">
@@ -356,7 +378,7 @@ p{margin:0}
   </section>
 
   <!-- ALUNOS -->
-  <section id="alunos" class="sec sec-alt" aria-labelledby="h-alunos">
+  <section id="alunos" class="sec blush" aria-labelledby="h-alunos">
     <div class="wrap">
       <div class="sec-head">
         <div class="eyebrow anim a-wipe">Quem já passou por aqui</div>
@@ -373,7 +395,7 @@ p{margin:0}
   </section>
 
   <!-- DIFICULDADES -->
-  <section class="sec anim a-panel" aria-labelledby="h-dif">
+  <section class="sec light anim a-panel" aria-labelledby="h-dif">
     <div class="wrap">
       <div class="dif-head">
         <h2 id="h-dif" class="display anim a-mask s1">Se você ainda sente insegurança ao pegar o carro, podemos trabalhar isso juntos.</h2>
@@ -394,7 +416,7 @@ p{margin:0}
   </section>
 
   <!-- PLANOS -->
-  <section id="planos" class="sec sec-alt" aria-labelledby="h-planos">
+  <section id="planos" class="sec" aria-labelledby="h-planos">
     <div class="wrap">
       <div class="sec-head">
         <div class="eyebrow anim a-wipe">Pacotes de aulas</div>
@@ -450,7 +472,7 @@ p{margin:0}
   </section>
 
   <!-- EXAME -->
-  <section id="exame" class="sec sec-alt" aria-labelledby="h-exame" style="padding-top:0">
+  <section id="exame" class="sec" aria-labelledby="h-exame" style="padding-top:0">
     <div class="wrap">
       <div class="ticket anim a-wipe long">
         <div class="ticket-a">
@@ -470,7 +492,7 @@ p{margin:0}
   </section>
 
   <!-- COMO FUNCIONA -->
-  <section id="como-funciona" class="sec anim a-panel" aria-labelledby="h-como">
+  <section id="como-funciona" class="sec light anim a-panel" aria-labelledby="h-como">
     <div class="wrap">
       <div class="sec-head">
         <h2 id="h-como" class="display h2 anim a-mask s1">Como funciona</h2>
@@ -488,7 +510,7 @@ p{margin:0}
   </section>
 
   <!-- REGIÃO -->
-  <section id="regiao" class="sec sec-alt overflow-clip" aria-labelledby="h-regiao">
+  <section id="regiao" class="sec blush overflow-clip" aria-labelledby="h-regiao">
     <div class="wrap region">
       <div>
         <h2 id="h-regiao" class="anim a-wipe">Aulas perto de você.</h2>
@@ -498,7 +520,7 @@ p{margin:0}
           <li class="anim a-l s3"><span class="num">03</span><span class="display">Contagem</span></li>
         </ul>
       </div>
-      <div class="pickup anim a-tr s2" style="background:var(--bg)">
+      <div class="pickup anim a-tr s2">
         <svg viewBox="0 0 24 24" fill="none" stroke="#FF2E88" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg>
         <h3 class="display">Eu busco você em casa ou no trabalho.</h3>
         <p>Atendo em Betim, Belo Horizonte e Contagem. Você não precisa se deslocar: a aula começa na sua porta.</p>
@@ -508,13 +530,13 @@ p{margin:0}
   </section>
 
   <!-- CTA FINAL -->
-  <section class="sec final anim a-panel" aria-labelledby="h-final">
+  <section class="sec final hot anim a-panel" aria-labelledby="h-final">
     <div class="speed anim a-wipe long" aria-hidden="true"><span style="width:280px"></span><span style="width:160px;opacity:.5"></span></div>
     <div class="wrap final-inner">
       <h2 id="h-final" class="display anim a-mask s1">Não deixe a insegurança impedir você de <span class="pink">dirigir.</span></h2>
       <p class="anim a-up s2">Ganhe prática no seu ritmo, com acompanhamento individual e 30 anos de experiência.</p>
       <div class="anim a-pop s3">
-        <a class="btn btn-pink" style="min-height:68px;font-size:18px" href="https://wa.me/5531996294794?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Gostaria%20de%20agendar%20minhas%20aulas%20de%20dire%C3%A7%C3%A3o." target="_blank" rel="noopener">Chamar Valéria no WhatsApp <span class="arr" aria-hidden="true">→</span></a>
+        <a class="btn btn-dark" style="min-height:68px;font-size:18px" href="https://wa.me/5531996294794?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Gostaria%20de%20agendar%20minhas%20aulas%20de%20dire%C3%A7%C3%A3o." target="_blank" rel="noopener">Chamar Valéria no WhatsApp <span class="arr" aria-hidden="true">→</span></a>
       </div>
     </div>
   </section>
