@@ -142,6 +142,20 @@ footer a{font-weight:800;text-decoration:none}
 .promo-price b{font-size:clamp(56px,6vw,76px);font-weight:800;line-height:1;letter-spacing:-.03em}
 .btn-white{background:#fff;color:var(--pink)}
 .btn-white:hover{background:var(--ink);color:#fff}
+
+/* black friday (some sozinha quando o prazo acaba) */
+.bf-bar,.bf-box,.bf-only{display:none}
+.bf .bf-bar{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:4px 18px;padding:10px 16px;background:#0B0B0B;color:#fff;font-size:14px;font-weight:600;text-align:center;text-decoration:none}
+.bf-bar strong{color:#FFD23F;letter-spacing:.06em}
+.bf-timer{font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+.bf-timer b{display:inline-block;min-width:2ch;padding:1px 5px;border-radius:6px;background:rgba(255,255,255,.14);font-weight:800}
+.bf .bf-box{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:14px 24px;margin-bottom:16px;padding:20px clamp(20px,3vw,32px);border-radius:var(--r);background:#0B0B0B;color:#fff}
+.bf-tag{display:inline-block;margin-bottom:6px;padding:3px 10px;border-radius:999px;background:#FFD23F;color:#0B0B0B;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.bf-box .bf-end{font-weight:700}
+.bf-box .bf-timer b{font-size:20px;padding:4px 8px}
+.bf .row .val .bf-only{display:block;margin-top:2px;font-size:15px;color:var(--ink)}
+.bf-only s{color:var(--muted);font-weight:600}
+.bf-only b{color:var(--pink);font-weight:800}
 /* depoimentos */
 .quotes{display:grid;grid-auto-flow:column;grid-auto-columns:min(80vw,320px);gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:10px}
 .quote{margin:0;display:flex;flex-direction:column;background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;scroll-snap-align:start}
@@ -183,6 +197,10 @@ footer a{font-weight:800;text-decoration:none}
 </style>
 </head>
 <body>
+<a class="bf-bar" href="#precos">
+  <span><strong>BLACK FRIDAY</strong> · 10% OFF em todos os pacotes</span>
+  <span class="bf-end">Termina em <span class="bf-timer" aria-live="off"><b data-u="d">00</b>d <b data-u="h">00</b>h <b data-u="m">00</b>m <b data-u="s">00</b>s</span></span>
+</a>
 <header class="wrap top">
   <a class="brand" href="#topo"><b>Valéria Maria</b><small>Instrutora de direção</small></a>
 </header>
@@ -286,10 +304,14 @@ footer a{font-weight:800;text-decoration:none}
           <a class="btn btn-white" href="https://wa.me/5531996294794?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Quero%20agendar%20minha%20aula%20experimental%20por%20R%2440." target="_blank" rel="noopener">Quero minha aula experimental</a>
         </div>
       </div>
+      <div class="bf-box">
+        <div><span class="bf-tag">Black Friday</span><p><b>10% OFF em todos os pacotes</b> fechados até 30/11.</p></div>
+        <div class="bf-end">Termina em <span class="bf-timer" aria-live="off"><b data-u="d">00</b>d <b data-u="h">00</b>h <b data-u="m">00</b>m <b data-u="s">00</b>s</span></div>
+      </div>
       <div class="prices">
-        <div class="row"><h3>3 aulas</h3><p>Para relembrar o básico ou treinar um ponto específico.</p><div class="val">R$80<small>por aula · R$240</small></div></div>
-        <div class="row"><h3>10 aulas</h3><p>Tempo para trabalhar arrancada, morro, baliza e trânsito com calma.</p><div class="val">R$75<small>por aula · R$750</small></div></div>
-        <div class="row"><h3>20 aulas</h3><p>Para quem está começando do zero.</p><div class="val">R$70<small>por aula · R$1.400</small></div></div>
+        <div class="row"><h3>3 aulas</h3><p>Para relembrar o básico ou treinar um ponto específico.</p><div class="val">R$80<small>por aula · R$240</small><small class="bf-only">Black: <s>R$240</s> <b>R$216</b></small></div></div>
+        <div class="row"><h3>10 aulas</h3><p>Tempo para trabalhar arrancada, morro, baliza e trânsito com calma.</p><div class="val">R$75<small>por aula · R$750</small><small class="bf-only">Black: <s>R$750</s> <b>R$675</b></small></div></div>
+        <div class="row"><h3>20 aulas</h3><p>Para quem está começando do zero.</p><div class="val">R$70<small>por aula · R$1.400</small><small class="bf-only">Black: <s>R$1.400</s> <b>R$1.260</b></small></div></div>
         <div class="row"><h3>Exame prático</h3><p>Eu cuido da marcação e do aluguel do carro para o dia da prova.</p><div class="val">R$400</div></div>
         <div class="price-foot">
           <p><span>Indicou, ganhou:</span> 1 aula grátis a cada amigo que fechar com a Valéria.</p>
@@ -350,5 +372,20 @@ footer a{font-weight:800;text-decoration:none}
     Agendar aula por R$40
   </a>
 </div>
+<script>
+(function(){
+  var FIM = new Date('2026-11-30T23:59:59-03:00').getTime(); // fim da Black Friday
+  var root = document.documentElement, timers = document.querySelectorAll('.bf-timer');
+  function pad(n){ return (n < 10 ? '0' : '') + n; }
+  function tick(){
+    var t = FIM - Date.now();
+    if (t <= 0){ root.classList.remove('bf'); clearInterval(id); return; }
+    root.classList.add('bf');
+    var v = { d: Math.floor(t / 864e5), h: Math.floor(t / 36e5) % 24, m: Math.floor(t / 6e4) % 60, s: Math.floor(t / 1e3) % 60 };
+    timers.forEach(function(el){ el.querySelectorAll('b').forEach(function(b){ b.textContent = pad(v[b.dataset.u]); }); });
+  }
+  var id = setInterval(tick, 1000); tick();
+})();
+</script>
 </body>
 </html>
