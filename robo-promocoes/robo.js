@@ -5,6 +5,7 @@ const QRCode = require('qrcode');
 const config = require('./config');
 const fila = require('./fila');
 const { buscarOfertas } = require('./shopee');
+const ml = require('./mercadolivre');
 const { iniciarPainel } = require('./painel');
 
 const DONO = (process.env.DONO || '').replace(/\D/g, '');
@@ -20,6 +21,8 @@ const estado = {
   grupos: [],
   buscandoShopee: false,
   temChavesShopee: Boolean(process.env.SHOPEE_APP_ID && process.env.SHOPEE_SECRET),
+  temChavesML: ml.temChaves() && ml.temAfiliado(),
+  buscandoML: false,
   proximoEnvio: null,
   enviadasHoje: 0,
   log: [],
@@ -207,7 +210,7 @@ async function tick() {
 
   if (ultimoDiaBusca !== hoje && agora.getHours() >= config.horaInicio - 1) {
     ultimoDiaBusca = hoje;
-    await atualizarShopee();
+    await atualizarOfertas();
   }
 
   const dentroDoHorario = agora.getHours() >= config.horaInicio && agora.getHours() < config.horaFim;
@@ -242,17 +245,47 @@ async function atualizarShopee() {
   }
 }
 
+// ---------- Mercado Livre automático ----------
+
+async function atualizarML() {
+  if (!config.mlAtivo) return;
+  if (!estado.temChavesML) {
+    registrar('Mercado Livre automático desligado: faltam as chaves do app ou os códigos de afiliado no .env.');
+    return;
+  }
+  if (estado.buscandoML) return;
+  estado.buscandoML = true;
+  try {
+    registrar('Buscando ofertas no Mercado Livre (mais vendidos de beleza)...');
+    const ofertas = await ml.buscarOfertasML(fila.idsEnviados(), registrar);
+    fila.limparMLAutomatico(); // troca as antigas pelas novas
+    fila.adicionarNoFim(ofertas);
+    registrar(`${ofertas.length} ofertas do Mercado Livre colocadas na fila.`);
+  } catch (erro) {
+    registrar('Erro ao buscar no Mercado Livre: ' + erro.message);
+  } finally {
+    estado.buscandoML = false;
+  }
+}
+
+// Busca nas duas lojas (uma depois da outra)
+async function atualizarOfertas() {
+  await atualizarShopee();
+  await atualizarML();
+}
+
 // ---------- Envio ----------
 
 function montarTexto(o) {
-  if (o.loja === 'Mercado Livre') {
+  // Oferta do ML colada à mão: só tem texto e link
+  if (o.loja === 'Mercado Livre' && !o.preco) {
     return `🛍️ *${o.titulo}*\n\n🛒 Mercado Livre\n👉 ${o.link}`;
   }
   return (
     `🌸 *${o.titulo}*\n\n` +
     `~De ${reais(o.precoAntes)}~\n` +
     `🔥 *Por ${reais(o.preco)}* (${o.desconto}% OFF)\n\n` +
-    `🛒 Shopee\n👉 ${o.link}`
+    `🛒 ${o.loja}\n👉 ${o.link}`
   );
 }
 
@@ -353,6 +386,8 @@ iniciarPainel({
   enviarProxima,
   adicionarML,
   atualizarShopee,
+  atualizarML,
+  atualizarOfertas,
   acharGrupo,
   mensagensDoGrupo,
   registrar,

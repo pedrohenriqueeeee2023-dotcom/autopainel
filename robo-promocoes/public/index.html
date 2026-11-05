@@ -217,7 +217,7 @@
     </div>
     <div class="botoes">
       <button id="btnAgora">Enviar a próxima agora</button>
-      <button id="btnShopee" class="secundario">Buscar ofertas da Shopee</button>
+      <button id="btnShopee" class="secundario">Buscar ofertas agora</button>
     </div>
   </section>
 
@@ -228,7 +228,7 @@
   </section>
 
   <section>
-    <h2>Adicionar do Mercado Livre</h2>
+    <h2>Mercado Livre à mão</h2>
     <p class="ajuda">Cole o link de afiliado e escreva o texto. A oferta entra na frente da fila.</p>
     <form id="formML">
       <label for="mlTitulo">Texto da oferta</label>
@@ -269,7 +269,16 @@
         <div><label for="cfgVendas">Vendas mínimas</label><input id="cfgVendas" type="number" min="0"></div>
         <div><label for="cfgPorDia">Ofertas por dia</label><input id="cfgPorDia" type="number" min="1"></div>
       </div>
-      <label for="cfgPalavras">Palavras buscadas (uma por linha)</label>
+      <h3>Mercado Livre automático</h3>
+      <p class="ajuda" style="margin:4px 0 0">Todo dia de manhã pega os mais vendidos de beleza que estão com desconto.</p>
+      <div class="linha">
+        <div><label for="cfgMlAtivo">Busca automática</label>
+          <select id="cfgMlAtivo"><option value="1">Ligada</option><option value="0">Desligada</option></select></div>
+        <div><label for="cfgMlDesconto">Desconto mínimo (%)</label><input id="cfgMlDesconto" type="number" min="0" max="99"></div>
+        <div><label for="cfgMlPorDia">Ofertas por dia</label><input id="cfgMlPorDia" type="number" min="1"></div>
+      </div>
+      <h3>Shopee: palavras buscadas</h3>
+      <label for="cfgPalavras">Uma por linha</label>
       <textarea id="cfgPalavras"></textarea>
       <div class="botoes"><button type="submit">Salvar configurações</button></div>
     </form>
@@ -385,10 +394,10 @@ function desenharEnvios(e) {
     const min = Math.max(0, Math.round((e.proximoEnvio - Date.now()) / 60000));
     $('nProximo').textContent = min === 0 ? 'agora' : min + ' min';
   } else $('nProximo').textContent = on ? 'fora do horário' : '—';
-  $('btnShopee').disabled = e.buscandoShopee;
+  $('btnShopee').disabled = e.buscandoShopee || e.buscandoML;
   // No servidor o robô fica sempre ligado; o botão de desligar só faz sentido no PC
   $('btnDesligar').style.display = e.noServidor ? 'none' : '';
-  $('btnShopee').textContent = e.buscandoShopee ? 'Buscando…' : 'Buscar ofertas da Shopee';
+  $('btnShopee').textContent = (e.buscandoShopee || e.buscandoML) ? 'Buscando…' : 'Buscar ofertas agora';
   $('nomeGrupoTopo').textContent = e.config.nomeDoGrupo;
 }
 
@@ -397,7 +406,7 @@ function desenharFila(lista) {
   if (!lista.length) { ul.innerHTML = '<li class="vazio">A fila está vazia. Adicione ofertas do Mercado Livre ou busque na Shopee.</li>'; return; }
   ul.innerHTML = lista.map((o, i) => {
     const shopee = o.loja === 'Shopee';
-    const detalhe = shopee ? `${reais(o.preco)} · ${o.desconto}% OFF` : esc(o.link);
+    const detalhe = o.preco ? `${reais(o.preco)} · ${o.desconto}% OFF` : esc(o.link);
     const foto = o.foto ? `<img class="thumb" src="${esc(o.foto)}" alt="">` : `<div class="thumb"></div>`;
     return `<li>${foto}<div class="info">
         <div class="titulo"><span class="loja ${shopee ? 'shopee' : 'ml'}">${shopee ? 'Shopee' : 'Mercado Livre'}</span>${i === 0 ? '<span class="proxima">Próxima</span>' : ''}${esc(o.titulo)}</div>
@@ -422,6 +431,8 @@ function preencherConfig(e) {
   $('cfgDesconto').value = c.descontoMinimo; $('cfgNota').value = c.notaMinima;
   $('cfgVendas').value = c.vendasMinimas; $('cfgPorDia').value = c.ofertasPorDia;
   $('cfgPalavras').value = c.palavras.join('\n');
+  $('cfgMlAtivo').value = c.mlAtivo === false ? '0' : '1';
+  $('cfgMlDesconto').value = c.mlDescontoMinimo; $('cfgMlPorDia').value = c.mlOfertasPorDia;
 }
 
 async function atualizar() {
@@ -450,7 +461,7 @@ $('btnAgora').onclick = async () => {
   $('btnAgora').disabled = false; atualizar();
 };
 $('btnShopee').onclick = async () => {
-  const r = await api('POST', '/api/shopee/buscar'); if (r.ok) avisar('🔎 Buscando… leva cerca de 1 minuto.'); atualizar();
+  const r = await api('POST', '/api/shopee/buscar'); if (r.ok) avisar('Buscando ofertas… leva alguns minutos.'); atualizar();
 };
 $('btnDesligar').onclick = async () => {
   if (!confirm('Desligar o robô? Ele para de enviar ofertas até você abrir o atalho de novo.')) return;
@@ -487,6 +498,7 @@ $('formConfig').onsubmit = async (ev) => {
     descontoMinimo: $('cfgDesconto').value, notaMinima: $('cfgNota').value,
     vendasMinimas: $('cfgVendas').value, ofertasPorDia: $('cfgPorDia').value,
     palavras: $('cfgPalavras').value,
+    mlAtivo: $('cfgMlAtivo').value === '1', mlDescontoMinimo: $('cfgMlDesconto').value, mlOfertasPorDia: $('cfgMlPorDia').value,
   });
   if (r.ok) avisar('💾 Configurações salvas!');
   configPreenchida = false; atualizar();

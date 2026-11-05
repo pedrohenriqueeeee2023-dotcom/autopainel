@@ -38,6 +38,8 @@ const fila = {
     if (o) fila.adicionarNaFrente(o);
   },
   limparShopee() { salvar(ARQ_FILA, ler(ARQ_FILA, []).filter((o) => o.loja !== 'Shopee')); },
+  // Tira só as do ML que vieram da busca automática (as coladas à mão ficam)
+  limparMLAutomatico() { salvar(ARQ_FILA, ler(ARQ_FILA, []).filter((o) => !(o.loja === 'Mercado Livre' && o.automatica))); },
 
   idsEnviados() { return new Set(ler(ARQ_ENVIADOS, [])); },
   marcarEnviado(id) {

@@ -91,8 +91,11 @@ function iniciarPainel(robo) {
   app.post('/api/fila/:id/subir', responder((req) => robo.fila.subir(req.params.id)));
   app.post('/api/enviar', responder((req) => robo.enviarProxima(req.body.id)));
   app.post('/api/shopee/buscar', responder(async () => {
-    if (!robo.estado.temChavesShopee) return { ok: false, erro: 'Coloque as chaves da Shopee no arquivo .env.' };
-    robo.atualizarShopee(); // roda em segundo plano
+    const { temChavesShopee, temChavesML } = robo.estado;
+    if (!temChavesShopee && !(temChavesML && robo.config.mlAtivo)) {
+      return { ok: false, erro: 'Nenhuma loja automática configurada (faltam as chaves da Shopee e do Mercado Livre).' };
+    }
+    robo.atualizarOfertas(); // roda em segundo plano
     return { ok: true };
   }));
   app.post('/api/config', responder(async (req) => {

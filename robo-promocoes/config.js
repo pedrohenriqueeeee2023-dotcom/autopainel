@@ -36,6 +36,14 @@ const padrao = {
 
   // Quantas ofertas da Shopee buscar por dia
   ofertasPorDia: 30,
+
+  // Mercado Livre automático (mais vendidos com desconto, via app de desenvolvedor)
+  mlAtivo: true,
+  mlDescontoMinimo: 20, // % de desconto
+  mlOfertasPorDia: 20,
+  // Subcategorias de Beleza: pele, cabelo, maquiagem, perfumes, unhas, depilação,
+  // tratamentos e artefatos para cabelo (chapinha, secador...)
+  mlCategorias: ['MLB199407', 'MLB1263', 'MLB1248', 'MLB6284', 'MLB29884', 'MLB5383', 'MLB278194', 'MLB455174'],
 };
 
 const config = { ...padrao };
@@ -57,8 +65,10 @@ Object.defineProperty(config, 'salvar', {
         config.palavras = lista.map((p) => p.trim()).filter(Boolean);
       } else if (chave === 'nomeDoGrupo') {
         config.nomeDoGrupo = String(valor).trim();
-      } else if (chave === 'enviosAtivos') {
-        config.enviosAtivos = Boolean(valor);
+      } else if (chave === 'enviosAtivos' || chave === 'mlAtivo') {
+        config[chave] = Boolean(valor);
+      } else if (chave === 'mlCategorias') {
+        continue; // só muda pelo código
       } else if (!Number.isNaN(Number(valor)) && valor !== '') {
         config[chave] = Number(valor);
       }
