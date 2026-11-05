@@ -36,7 +36,14 @@ function registrar(texto) {
   console.log(item.hora, texto);
 }
 
-const puppeteer = { args: ['--no-sandbox', '--disable-setuid-sandbox'] };
+// Flags para o Chrome gastar menos processador/memória (o servidor é dividido com outros sistemas)
+const puppeteer = {
+  args: [
+    '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu',
+    '--disable-extensions', '--mute-audio', '--no-first-run', '--disable-background-networking',
+  ],
+  protocolTimeout: 120000, // servidor ocupado: dá mais tempo antes de considerar que travou
+};
 puppeteer.executablePath = acharNavegador();
 
 // Usa o navegador baixado pelo robô; se não existir, usa o Chrome/Edge do computador
@@ -147,20 +154,35 @@ function verificarPaginaQuebrada(erro) {
 
 // A cada minuto confere se a página do WhatsApp ainda responde.
 // Assim o robô se recupera sozinho antes da hora de enviar.
+// Quando o servidor está ocupado a página pode demorar a responder sem estar travada,
+// então só reinicia depois de 3 falhas seguidas (≈3 min), e nunca logo depois de ligar.
+let falhasSeguidas = 0;
+let iniciouEm = Date.now();
 setInterval(async () => {
-  // QR Code parado há mais de 2 min = página travada (o WhatsApp troca o QR a cada ~20s)
-  if (estado.whatsapp === 'qr' && ultimoQr && Date.now() - ultimoQr > 2 * 60 * 1000 && !reiniciando) {
+  if (reiniciando) return;
+  // Preso ligando (sem QR e sem conectar) por mais de 5 min
+  if (estado.whatsapp === 'iniciando' && Date.now() - iniciouEm > 5 * 60 * 1000) {
+    verificarPaginaQuebrada(new Error('Session closed: o WhatsApp não terminou de ligar'));
+    return;
+  }
+  // QR Code parado há mais de 3 min = página travada (o WhatsApp troca o QR a cada ~20s)
+  if (estado.whatsapp === 'qr' && ultimoQr && Date.now() - ultimoQr > 3 * 60 * 1000) {
     verificarPaginaQuebrada(new Error('Session closed: o QR Code parou de atualizar'));
     return;
   }
-  if (estado.whatsapp !== 'conectado' || reiniciando || !client.pupPage) return;
+  if (estado.whatsapp !== 'conectado' || !client.pupPage) { falhasSeguidas = 0; return; }
   try {
     await Promise.race([
       client.pupPage.evaluate(() => Boolean(window.WWebJS)),
-      new Promise((_, falhar) => setTimeout(() => falhar(new Error('Session closed: página não respondeu')), 20000)),
+      new Promise((_, falhar) => setTimeout(() => falhar(new Error('sem resposta')), 45000)),
     ]);
+    falhasSeguidas = 0;
   } catch (erro) {
-    verificarPaginaQuebrada(erro);
+    const msg = (erro && erro.message) || '';
+    // página realmente quebrada: reinicia na hora; só lenta: espera repetir
+    if (PAGINA_QUEBRADA.test(msg)) { verificarPaginaQuebrada(erro); return; }
+    falhasSeguidas++;
+    if (falhasSeguidas >= 3) verificarPaginaQuebrada(new Error('Session closed: página parou de responder'));
   }
 }, 60 * 1000);
 
@@ -168,6 +190,7 @@ setInterval(async () => {
 let tentativas = 0;
 async function iniciarWhatsApp() {
   tentativas++;
+  iniciouEm = Date.now();
   registrar(tentativas === 1 ? 'Iniciando o WhatsApp...' : `Tentando conectar de novo (tentativa ${tentativas})...`);
   try {
     await client.initialize();
