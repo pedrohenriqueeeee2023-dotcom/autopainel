@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Valéria Maria | Aulas de direção em BH, Betim e Contagem</title>
+<meta name="description" content="Aulas particulares de direção em carro manual com a Valéria, 30 anos de experiência. Busca em casa em Belo Horizonte, Betim e Contagem. Primeira aula por R$40.">
+<meta name="theme-color" content="#FFF8F3">
+<meta property="og:title" content="Valéria Maria | Aulas de direção em BH, Betim e Contagem">
+<meta property="og:description" content="Perca o medo de dirigir com quem ensina há 30 anos. Primeira aula por R$40.">
+<meta property="og:image" content="/valeria/img/valeria-alunas.jpg">
+<meta property="og:locale" content="pt_BR">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  --bg:#FFF8F3;--surface:#FFFFFF;--soft:#FFE6F0;--ink:#1D1519;--muted:#66595F;--line:#EFE2E7;
+  --pink:#D6006B;--pink-hover:#B8005C;--green:#1F9D55;
+  --gut:clamp(16px,5vw,64px);--r:20px;
+  --shadow:0 1px 2px rgba(60,20,40,.05),0 12px 32px rgba(60,20,40,.08);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
+img{max-width:100%;height:auto;display:block}
+a{color:var(--pink)}
+a:focus-visible,summary:focus-visible{outline:3px solid var(--pink);outline-offset:3px;border-radius:6px}
+h1,h2,h3{margin:0;line-height:1.1;letter-spacing:-.025em;text-wrap:balance}
+p{margin:0}
+.wrap{max-width:1160px;margin:0 auto;padding-inline:var(--gut)}
+.sec{padding-block:clamp(56px,7vw,88px)}
+.kicker{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--pink)}
+.h2{font-size:clamp(30px,3.6vw,44px);font-weight:800}
+.lead{font-size:clamp(17px,1.5vw,19px);color:var(--muted);max-width:34em}
+.head{display:flex;flex-direction:column;gap:12px;margin-bottom:clamp(28px,4vw,44px)}
+
+/* botões */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:56px;padding:0 26px;border-radius:999px;font-weight:800;font-size:17px;text-decoration:none;transition:background-color .2s ease,transform .2s ease}
+.btn:hover{transform:translateY(-1px)}
+.btn-main{background:var(--pink);color:#fff}
+.btn-main:hover{background:var(--pink-hover);color:#fff}
+.btn-line{border:2px solid var(--ink);color:var(--ink);min-height:52px}
+.btn-line:hover{background:var(--ink);color:#fff}
+.btn svg{width:22px;height:22px;flex:none}
+
+/* topo */
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;height:72px}
+.brand{display:flex;flex-direction:column;line-height:1.15;color:var(--ink);text-decoration:none}
+.brand b{font-size:19px;font-weight:800;letter-spacing:-.01em}
+.brand small{font-size:13px;color:var(--muted)}
+.top .btn{min-height:44px;padding:0 18px;font-size:15px}
+
+/* hero */
+.hero{display:grid;gap:36px;padding-block:16px clamp(48px,6vw,80px)}
+.hero-copy{display:flex;flex-direction:column;gap:22px;align-items:flex-start}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:var(--soft);color:var(--pink);font-size:14px;font-weight:700}
+.hero h1{font-size:clamp(42px,6.2vw,76px);font-weight:800}
+.hero h1 span{color:var(--pink)}
+.hero-cta{display:flex;flex-wrap:wrap;gap:12px}
+.trust{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:10px 22px;font-size:15px;font-weight:700}
+.trust li{display:flex;align-items:center;gap:8px}
+.trust svg{width:20px;height:20px;color:var(--green);flex:none}
+.hero-photo{position:relative}
+.hero-photo img{width:100%;aspect-ratio:4/5;object-fit:cover;object-position:50% 30%;border-radius:28px;box-shadow:var(--shadow)}
+.promo-card{position:absolute;left:-12px;bottom:24px;display:flex;flex-direction:column;padding:14px 18px;background:var(--surface);border-radius:16px;box-shadow:var(--shadow)}
+.promo-card small{font-size:13px;font-weight:700;color:var(--muted)}
+.promo-card b{font-size:26px;font-weight:800;color:var(--pink);line-height:1.1}
+
+/* alunos */
+.students{display:grid;grid-auto-flow:column;grid-auto-columns:min(62vw,230px);gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px;scrollbar-width:thin}
+.students img{width:100%;aspect-ratio:4/5;object-fit:cover;object-position:50% 30%;border-radius:var(--r);scroll-snap-align:start}
+
+/* para quem é */
+.tags{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:10px}
+.tags li{padding:12px 18px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-weight:700;font-size:16px}
+
+/* como funciona */
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:14px;counter-reset:s}
+.step{display:flex;gap:16px;padding:22px;background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow)}
+.step::before{counter-increment:s;content:counter(s);flex:none;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:var(--soft);color:var(--pink);font-weight:800}
+.step h3{font-size:19px;font-weight:800;margin-bottom:4px}
+.step p{color:var(--muted);font-size:16px}
+
+/* preços */
+.prices{background:var(--surface);border-radius:28px;box-shadow:var(--shadow);overflow:hidden}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 16px;padding:20px clamp(18px,3vw,32px);border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row h3{font-size:19px;font-weight:800}
+.row p{grid-column:1;font-size:15px;color:var(--muted)}
+.row .val{grid-column:2;grid-row:1 / span 2;text-align:right;font-weight:800;font-size:clamp(24px,2.6vw,30px);font-variant-numeric:tabular-nums;line-height:1.1}
+.row .val small{display:block;font-size:14px;font-weight:600;color:var(--muted)}
+.row-hl{background:var(--soft)}
+.row-hl .val{color:var(--pink)}
+.badge{display:inline-block;margin-left:8px;padding:2px 10px;border-radius:999px;background:var(--pink);color:#fff;font-size:12px;font-weight:800;vertical-align:3px}
+.price-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding:22px clamp(18px,3vw,32px);background:var(--ink);color:#fff}
+.price-foot p{font-weight:700}
+.price-foot span{color:#FF8CBF}
+
+/* faq */
+.faq{display:grid;gap:10px;max-width:820px}
+.faq details{background:var(--surface);border-radius:16px;border:1px solid var(--line)}
+.faq summary{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px 22px;font-weight:800;font-size:17px;cursor:pointer;list-style:none}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font-size:24px;font-weight:600;color:var(--pink);line-height:1}
+.faq details[open] summary::after{content:"–"}
+.faq p{padding:0 22px 20px;color:var(--muted)}
+
+/* chamada final */
+.final{display:grid;gap:28px;align-items:center;padding:clamp(28px,4vw,48px);background:var(--soft);border-radius:28px}
+.final h2{font-size:clamp(30px,3.8vw,46px);font-weight:800}
+.final p{color:var(--muted);margin-top:10px}
+.final img{width:100%;aspect-ratio:1;object-fit:cover;object-position:50% 25%;border-radius:var(--r)}
+
+footer{padding-block:40px 120px;font-size:15px;color:var(--muted)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px}
+footer a{font-weight:800;text-decoration:none}
+
+.sticky{position:fixed;z-index:10;left:0;right:0;bottom:0;padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px));background:rgba(255,248,243,.94);backdrop-filter:blur(8px);border-top:1px solid var(--line)}
+.sticky .btn{width:100%}
+
+@media (min-width:760px){
+  .students{grid-auto-flow:initial;grid-template-columns:repeat(5,minmax(0,1fr));overflow:visible}
+  .steps{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .step{flex-direction:column}
+  .final{grid-template-columns:minmax(0,1fr) 260px}
+  footer{padding-block:40px}
+  .sticky{display:none}
+}
+@media (min-width:960px){
+  .hero{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);align-items:center;column-gap:56px}
+  .promo-card{left:-28px}
+}
+@media (max-width:480px){
+  .top .btn span{display:none}
+  .top .btn{width:44px;padding:0}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .btn:hover{transform:none}
+}
+</style>
+</head>
+<body>
+<header class="wrap top">
+  <a class="brand" href="#topo"><b>Valéria Maria</b><small>Instrutora de direção</small></a>
+  <a class="btn btn-main" href="https://wa.me/5531996294794?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Vi%20seu%20site%20e%20quero%20saber%20mais%20sobre%20as%20aulas." target="_blank" rel="noopener" aria-label="Falar no WhatsApp">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 19z"/></svg><span>WhatsApp</span>
+  </a>
+</header>
+
+<main id="topo">
+  <section class="wrap hero">
+    <div class="hero-copy">
+      <span class="chip">Betim · Belo Horizonte · Contagem</span>
+      <h1>Perca o medo <span>de dirigir.</span></h1>
+      <p class="lead">Aulas particulares em carro manual com quem ensina há 30 anos. Eu busco você em casa ou no trabalho e a gente vai no seu ritmo.</p>
+      <div class="hero-cta">
+        <a class="btn btn-main" href="https://wa.me/5531996294794?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Quero%20agendar%20minha%20primeira%20aula." target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 19z"/></svg>
+          Agendar pelo WhatsApp
+        </a>
+        <a class="btn btn-line" href="#precos">Ver preços</a>
+      </div>
+      <ul class="trust">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>30 anos de experiência</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>Aula individual</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>Busco você em casa</li>
+      </ul>
+    </div>
+    <div class="hero-photo">
+      <img src="/valeria/img/valeria-alunas.jpg" alt="Valéria Maria sorrindo, abraçada a duas alunas ao lado do carro de aula" width="1224" height="1500" fetchpriority="high">
+      <div class="promo-card"><small>Primeira aula</small><b>R$40</b></div>
+    </div>
+  </section>
+
+  <!-- ALUNOS -->
+  <section class="sec" style="padding-top:0" aria-labelledby="h-alunos">
+    <div class="wrap">
+      <div class="head">
+        <span class="kicker">Alunos da Valéria</span>
+        <h2 id="h-alunos" class="h2">Gente que chegou com medo e saiu dirigindo.</h2>
+      </div>
+      <div class="students">
+        <img src="/valeria/img/aluno-4.webp" alt="Valéria com um aluno ao lado do carro de aula" loading="lazy" width="362" height="482">
+        <img src="/valeria/img/aluno-5.webp" alt="Valéria abraçada a um aluno ao lado do carro de aula" loading="lazy" width="379" height="514">
+        <img src="/valeria/img/aluno-6.webp" alt="Valéria com uma aluna segurando o documento do exame" loading="lazy" width="399" height="509">
+        <img src="/valeria/img/aluno-7.webp" alt="Valéria com um aluno ao lado do carro" loading="lazy" width="461" height="566">
+        <img src="/valeria/img/valeria-alunos.jpg" alt="Valéria com um aluno e uma aluna ao lado do carro de aula" loading="lazy" width="1259" height="1500">
+      </div>
+    </div>
+  </section>
+
+  <!-- PARA QUEM É -->
+  <section class="sec" style="padding-top:0" aria-labelledby="h-quem">
+    <div class="wrap">
+      <div class="head">
+        <span class="kicker">Para quem é</span>
+        <h2 id="h-quem" class="h2">Me conte o que te trava. A aula é montada em cima disso.</h2>
+      </div>
+      <ul class="tags">
+        <li>Medo de dirigir</li><li>Arrancada</li><li>Morro</li><li>Baliza</li><li>Trânsito</li>
+        <li>Troca de marchas</li><li>Embreagem</li><li>Voltar a dirigir</li><li>Preparação para o exame</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- COMO FUNCIONA -->
+  <section class="sec" style="padding-top:0" aria-labelledby="h-como">
+    <div class="wrap">
+      <div class="head">
+        <span class="kicker">Como funciona</span>
+        <h2 id="h-como" class="h2">Simples assim.</h2>
+      </div>
+      <ol class="steps">
+        <li class="step"><div><h3>Me chama no WhatsApp</h3><p>Me conte sua experiência e o que você quer treinar.</p></div></li>
+        <li class="step"><div><h3>Eu busco você</h3><p>Em casa ou no trabalho, no horário combinado, em Betim, BH ou Contagem.</p></div></li>
+        <li class="step"><div><h3>Aula no seu ritmo</h3><p>Só você e eu no carro, focando no que você precisa.</p></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- PREÇOS -->
+  <section id="precos" class="sec" style="padding-top:0" aria-labelledby="h-precos">
+    <div class="wrap">
+      <div class="head">
+        <span class="kicker">Preços</span>
+        <h2 id="h-precos" class="h2">Comece com uma aula. Continue se gostar.</h2>
+      </div>
+      <div class="prices">
+        <div class="row row-hl"><h3>Aula experimental <span class="badge">50% OFF</span></h3><p>Sua primeira aula pela metade do valor.</p><div class="val">R$40</div></div>
+        <div class="row"><h3>3 aulas</h3><p>Para relembrar o básico ou treinar um ponto específico.</p><div class="val">R$80<small>por aula · R$240</small></div></div>
+        <div class="row"><h3>10 aulas</h3><p>Tempo para trabalhar arrancada, morro, baliza e trânsito com calma.</p><div class="val">R$75<small>por aula · R$750</small></div></div>
+        <div class="row"><h3>20 aulas</h3><p>Para quem está começando do zero.</p><div class="val">R$70<small>por aula · R$1.400</small></div></div>
+        <div class="row"><h3>Exame prático</h3><p>Eu cuido da marcação e do aluguel do carro para o dia da prova.</p><div class="val">R$400</div></div>
+        <div class="price-foot">
+          <p><span>Indicou, ganhou:</span> 1 aula grátis a cada amigo que fechar com a Valéria.</p>
+          <a class="btn btn-main" href="https://wa.me/5531996294794?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Quero%20saber%20qual%20pacote%20%C3%A9%20melhor%20para%20mim." target="_blank" rel="noopener">Escolher pelo WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DÚVIDAS -->
+  <section class="sec" style="padding-top:0" aria-labelledby="h-faq">
+    <div class="wrap">
+      <div class="head">
+        <span class="kicker">Dúvidas</span>
+        <h2 id="h-faq" class="h2">Perguntas frequentes</h2>
+      </div>
+      <div class="faq">
+        <details><summary>A aula é em carro manual?</summary><p>Sim. Todas as aulas são em carro manual, para você treinar embreagem, marchas e arrancada de verdade.</p></details>
+        <details><summary>Você me busca em casa?</summary><p>Sim. Busco você em casa ou no trabalho em Betim, Belo Horizonte e Contagem. Me mande seu bairro no WhatsApp para confirmar.</p></details>
+        <details><summary>Já tenho carteira, mas parei de dirigir. Serve para mim?</summary><p>Serve. As aulas são montadas em cima da sua dificuldade, seja voltar a dirigir, perder o medo do trânsito ou treinar baliza.</p></details>
+        <details><summary>Posso fazer só uma aula antes de fechar um pacote?</summary><p>Pode. A primeira aula sai por R$40, metade do valor normal.</p></details>
+        <details><summary>Como funciona a ajuda com o exame?</summary><p>Por R$400 eu cuido da marcação do exame e do aluguel do carro para o dia da prova.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHAMADA FINAL -->
+  <section class="sec" style="padding-top:0">
+    <div class="wrap">
+      <div class="final">
+        <div>
+          <h2>Sua primeira aula por R$40.</h2>
+          <p>Me chama no WhatsApp e a gente marca um horário.</p>
+          <a class="btn btn-main" style="margin-top:22px" href="https://wa.me/5531996294794?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Quero%20agendar%20minha%20primeira%20aula%20por%20R%2440." target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 19z"/></svg>
+            Agendar minha aula
+          </a>
+        </div>
+        <img src="/valeria/img/valeria-alunos.jpg" alt="Valéria com dois alunos ao lado do carro" loading="lazy" width="1259" height="1500">
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Valéria Maria · Instrutora de direção · Betim, BH e Contagem</span>
+    <a href="https://wa.me/5531996294794" target="_blank" rel="noopener">(31) 99629-4794</a>
+  </div>
+</footer>
+
+<div class="sticky">
+  <a class="btn btn-main" href="https://wa.me/5531996294794?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Quero%20agendar%20minha%20primeira%20aula." target="_blank" rel="noopener">Agendar pelo WhatsApp</a>
+</div>
+</body>
+</html>
