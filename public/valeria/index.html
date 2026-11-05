@@ -110,7 +110,17 @@ p{margin:0}
 .scroll-cue::after{content:"";width:48px;height:2px;background:var(--pink)}
 
 /* seções */
-.sec{padding-block:clamp(72px,9vw,120px)}
+.sec{padding-block:clamp(56px,7vw,96px)}
+.tight{padding-top:0}
+.light .gallery figure{padding:10px 10px 34px;background:#fff;box-shadow:0 14px 34px rgba(120,20,70,.16);transform:rotate(-1.6deg);transition:transform .4s var(--ease)}
+.light .gallery figure:nth-child(even){transform:rotate(1.8deg)}
+.light .gallery figure:hover{transform:rotate(0) scale(1.02)}
+.light .gallery figure::after{left:10px;bottom:16px;width:40px;transform:none}
+.area{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;margin-top:clamp(32px,4vw,48px);padding:22px 24px;background:#fff;border-left:3px solid var(--pink);box-shadow:0 10px 28px rgba(196,0,95,.08)}
+.area svg{width:36px;height:36px;flex:none}
+.area p{flex:1 1 280px;color:var(--muted)}
+.area p b{color:var(--white)}
+
 .sec-alt{background:var(--bg2)}
 .sec-head{display:flex;flex-direction:column;gap:16px;margin-bottom:clamp(32px,5vw,64px)}
 .h2{font-size:clamp(40px,5.6vw,80px)}
@@ -378,7 +388,7 @@ p{margin:0}
   </section>
 
   <!-- ALUNOS -->
-  <section id="alunos" class="sec blush" aria-labelledby="h-alunos">
+  <section id="alunos" class="sec light tight" aria-labelledby="h-alunos">
     <div class="wrap">
       <div class="sec-head">
         <div class="eyebrow anim a-wipe">Quem já passou por aqui</div>
@@ -395,7 +405,7 @@ p{margin:0}
   </section>
 
   <!-- DIFICULDADES -->
-  <section class="sec light anim a-panel" aria-labelledby="h-dif">
+  <section class="sec light tight" aria-labelledby="h-dif">
     <div class="wrap">
       <div class="dif-head">
         <h2 id="h-dif" class="display anim a-mask s1">Se você ainda sente insegurança ao pegar o carro, podemos trabalhar isso juntos.</h2>
@@ -415,8 +425,59 @@ p{margin:0}
     </div>
   </section>
 
+  <!-- COMO FUNCIONA -->
+  <section id="como-funciona" class="sec light tight" aria-labelledby="h-como">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 id="h-como" class="display h2 anim a-mask s1">Como funciona</h2>
+        <p class="muted anim a-up s2">Do primeiro contato à primeira aula, em quatro passos.</p>
+      </div>
+      <ol class="steps">
+        <li class="track" aria-hidden="true"></li>
+        <li class="track-fill anim long" aria-hidden="true"></li>
+        <li class="step anim a-pop"><span class="dot">01</span><div><h3>Fale comigo pelo WhatsApp</h3><p>Me conte sua experiência e o que você quer treinar.</p></div></li>
+        <li class="step anim a-pop s1"><span class="dot">02</span><div><h3>Escolha seu pacote</h3><p>3, 10 ou 20 aulas, de acordo com o que você precisa.</p></div></li>
+        <li class="step anim a-pop s2"><span class="dot">03</span><div><h3>Eu vou até você</h3><p>Busco você em casa ou no trabalho, no horário combinado.</p></div></li>
+        <li class="step anim a-pop s3"><span class="dot">04</span><div><h3>Vamos para a prática</h3><p>Aula individual, no seu ritmo, focada no que você precisa.</p></div></li>
+      </ol>
+      <div class="area anim a-up">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#FF2E88" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg>
+        <p><b>Atendo em Betim, Belo Horizonte e Contagem.</b> Busco você em casa ou no trabalho: a aula começa na sua porta.</p>
+        <a class="link-arrow" href="https://wa.me/5531996294794?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Vi%20seu%20site%20e%20gostaria%20de%20saber%20mais%20sobre%20as%20aulas%20de%20dire%C3%A7%C3%A3o." target="_blank" rel="noopener">Confirmar meu bairro <span class="arr" aria-hidden="true">→</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROMOÇÕES -->
+  <section id="promocoes" class="sec" aria-labelledby="h-promo">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="eyebrow anim a-wipe">Condições especiais</div>
+        <h2 id="h-promo" class="display h2 anim a-mask s1">Comece pagando <span class="pink">menos.</span></h2>
+      </div>
+      <div class="perks" style="margin-top:0">
+        <article class="perk anim a-l s1">
+          <div class="perk-big" aria-hidden="true">50%</div>
+          <div class="perk-body">
+            <h3 class="display">1 aula por R$40</h3>
+            <p>Quer conhecer antes de fechar um pacote? Faça uma aula por <b style="color:var(--white)">R$40</b>, metade do valor normal de R$80.</p>
+            <a class="link-arrow" href="https://wa.me/5531996294794?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Quero%20fazer%201%20aula%20por%20R%2440." target="_blank" rel="noopener">Quero minha aula por R$40 <span class="arr" aria-hidden="true">→</span></a>
+          </div>
+        </article>
+        <article class="perk anim a-r s2">
+          <div class="perk-big" aria-hidden="true">+1</div>
+          <div class="perk-body">
+            <h3 class="display">1 aula grátis a cada indicação</h3>
+            <p>Indicou um amigo e ele fechou com a Valéria? Você ganha 1 aula grátis. Sem limite de indicações.</p>
+            <a class="link-arrow" href="https://wa.me/5531996294794?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Quero%20indicar%20um%20amigo%20e%20ganhar%20uma%20aula%20gr%C3%A1tis." target="_blank" rel="noopener">Quero indicar alguém <span class="arr" aria-hidden="true">→</span></a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
   <!-- PLANOS -->
-  <section id="planos" class="sec" aria-labelledby="h-planos">
+  <section id="planos" class="sec tight" aria-labelledby="h-planos">
     <div class="wrap">
       <div class="sec-head">
         <div class="eyebrow anim a-wipe">Pacotes de aulas</div>
@@ -449,30 +510,11 @@ p{margin:0}
           <a class="btn btn-white btn-block" href="https://wa.me/5531996294794?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Tenho%20interesse%20no%20pacote%20de%2020%20aulas." target="_blank" rel="noopener">Quero 20 aulas <span class="arr" aria-hidden="true">→</span></a>
         </article>
       </div>
-
-      <div class="perks">
-        <article class="perk anim a-l s1">
-          <div class="perk-big" aria-hidden="true">50%</div>
-          <div class="perk-body">
-            <h3 class="display">1 aula por R$40</h3>
-            <p>Quer conhecer antes de fechar um pacote? Faça uma aula por <b style="color:var(--white)">R$40</b>, metade do valor normal de R$80.</p>
-            <a class="link-arrow" href="https://wa.me/5531996294794?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Quero%20fazer%201%20aula%20por%20R%2440." target="_blank" rel="noopener">Quero minha aula por R$40 <span class="arr" aria-hidden="true">→</span></a>
-          </div>
-        </article>
-        <article class="perk anim a-r s2">
-          <div class="perk-big" aria-hidden="true">+1</div>
-          <div class="perk-body">
-            <h3 class="display">1 aula grátis a cada indicação</h3>
-            <p>Indicou um amigo e ele fechou com a Valéria? Você ganha 1 aula grátis. Sem limite de indicações.</p>
-            <a class="link-arrow" href="https://wa.me/5531996294794?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Quero%20indicar%20um%20amigo%20e%20ganhar%20uma%20aula%20gr%C3%A1tis." target="_blank" rel="noopener">Quero indicar alguém <span class="arr" aria-hidden="true">→</span></a>
-          </div>
-        </article>
-      </div>
     </div>
   </section>
 
   <!-- EXAME -->
-  <section id="exame" class="sec" aria-labelledby="h-exame" style="padding-top:0">
+  <section id="exame" class="sec tight" aria-labelledby="h-exame">
     <div class="wrap">
       <div class="ticket anim a-wipe long">
         <div class="ticket-a">
@@ -487,56 +529,6 @@ p{margin:0}
             <a class="btn btn-dark btn-block" href="https://wa.me/5531996294794?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Gostaria%20de%20saber%20mais%20sobre%20a%20marca%C3%A7%C3%A3o%20do%20exame%20e%20aluguel%20do%20carro." target="_blank" rel="noopener">Quero marcar meu exame <span class="arr" aria-hidden="true">→</span></a>
           </div>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- COMO FUNCIONA -->
-  <section id="como-funciona" class="sec light anim a-panel" aria-labelledby="h-como">
-    <div class="wrap">
-      <div class="sec-head">
-        <h2 id="h-como" class="display h2 anim a-mask s1">Como funciona</h2>
-        <p class="muted anim a-up s2">Do primeiro contato à primeira aula, em quatro passos.</p>
-      </div>
-      <ol class="steps">
-        <li class="track" aria-hidden="true"></li>
-        <li class="track-fill anim long" aria-hidden="true"></li>
-        <li class="step anim a-pop"><span class="dot">01</span><div><h3>Fale comigo pelo WhatsApp</h3><p>Me conte sua experiência e o que você quer treinar.</p></div></li>
-        <li class="step anim a-pop s1"><span class="dot">02</span><div><h3>Escolha seu pacote</h3><p>3, 10 ou 20 aulas, de acordo com o que você precisa.</p></div></li>
-        <li class="step anim a-pop s2"><span class="dot">03</span><div><h3>Eu vou até você</h3><p>Busco você em casa ou no trabalho, no horário combinado.</p></div></li>
-        <li class="step anim a-pop s3"><span class="dot">04</span><div><h3>Vamos para a prática</h3><p>Aula individual, no seu ritmo, focada no que você precisa.</p></div></li>
-      </ol>
-    </div>
-  </section>
-
-  <!-- REGIÃO -->
-  <section id="regiao" class="sec blush overflow-clip" aria-labelledby="h-regiao">
-    <div class="wrap region">
-      <div>
-        <h2 id="h-regiao" class="anim a-wipe">Aulas perto de você.</h2>
-        <ul class="cities">
-          <li class="anim a-l s1"><span class="num">01</span><span class="display">Betim</span></li>
-          <li class="anim a-l s2"><span class="num">02</span><span class="display">Belo Horizonte</span></li>
-          <li class="anim a-l s3"><span class="num">03</span><span class="display">Contagem</span></li>
-        </ul>
-      </div>
-      <div class="pickup anim a-tr s2">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#FF2E88" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg>
-        <h3 class="display">Eu busco você em casa ou no trabalho.</h3>
-        <p>Atendo em Betim, Belo Horizonte e Contagem. Você não precisa se deslocar: a aula começa na sua porta.</p>
-        <a class="link-arrow" href="https://wa.me/5531996294794?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Vi%20seu%20site%20e%20gostaria%20de%20saber%20mais%20sobre%20as%20aulas%20de%20dire%C3%A7%C3%A3o." target="_blank" rel="noopener">Confirmar meu bairro no WhatsApp <span class="arr" aria-hidden="true">→</span></a>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA FINAL -->
-  <section class="sec final hot anim a-panel" aria-labelledby="h-final">
-    <div class="speed anim a-wipe long" aria-hidden="true"><span style="width:280px"></span><span style="width:160px;opacity:.5"></span></div>
-    <div class="wrap final-inner">
-      <h2 id="h-final" class="display anim a-mask s1">Não deixe a insegurança impedir você de <span class="pink">dirigir.</span></h2>
-      <p class="anim a-up s2">Ganhe prática no seu ritmo, com acompanhamento individual e 30 anos de experiência.</p>
-      <div class="anim a-pop s3">
-        <a class="btn btn-dark" style="min-height:68px;font-size:18px" href="https://wa.me/5531996294794?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Gostaria%20de%20agendar%20minhas%20aulas%20de%20dire%C3%A7%C3%A3o." target="_blank" rel="noopener">Chamar Valéria no WhatsApp <span class="arr" aria-hidden="true">→</span></a>
       </div>
     </div>
   </section>
