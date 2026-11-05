@@ -157,6 +157,33 @@ footer a{font-weight:800;text-decoration:none}
 .bf-only s{color:var(--muted);font-weight:600}
 .bf-only b{color:var(--pink);font-weight:800}
 .bf .tot{text-decoration:line-through}
+
+/* celular: topo enxuto, foto visível sem rolar */
+.hero-act{display:flex;flex-direction:column;gap:18px;align-items:flex-start}
+@media (max-width:959px){
+  .hero{gap:18px;padding-top:4px}
+  .hero-copy{gap:10px}
+  .hero h1{font-size:clamp(36px,10vw,48px)}
+  .hero .lead{font-size:16px}
+  .hero-photo img{aspect-ratio:5/4;border-radius:22px}
+  .promo-card{left:12px;bottom:12px;padding:10px 14px}
+  .promo-card b{font-size:22px}
+  .hero-cta .btn-line{display:none}
+  .hero-cta,.hero-cta .btn-main{width:100%}
+  .trust{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin:0;font-size:14px}
+  .top{height:56px}
+  .hide-m{display:none}
+  .bf .bf-bar{flex-wrap:nowrap;gap:12px;padding:8px 12px;font-size:13px}
+}
+@media (min-width:960px){
+  .hero{grid-template-areas:"copy photo" "act photo";row-gap:26px}
+  .hero-copy{grid-area:copy;align-self:end}
+  .hero-photo{grid-area:photo}
+  .hero-act{grid-area:act;align-self:start}
+}
+/* botão fixo aparece só depois do topo */
+.sticky{transform:translateY(140%);transition:transform .3s ease}
+.sticky.on{transform:none}
 /* depoimentos */
 .quotes{display:grid;grid-auto-flow:column;grid-auto-columns:min(80vw,320px);gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:10px}
 .quote{margin:0;display:flex;flex-direction:column;background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;scroll-snap-align:start}
@@ -199,8 +226,8 @@ footer a{font-weight:800;text-decoration:none}
 </head>
 <body>
 <a class="bf-bar" href="#precos">
-  <span><strong>BLACK FRIDAY</strong> · 10% OFF em todos os pacotes</span>
-  <span class="bf-end">Termina em <span class="bf-timer" aria-live="off"><b data-u="d">00</b>d <b data-u="h">00</b>h <b data-u="m">00</b>m <b data-u="s">00</b>s</span></span>
+  <span><strong>BLACK FRIDAY</strong> 10% OFF<span class="hide-m"> em todos os pacotes</span></span>
+  <span class="bf-end"><span class="hide-m">Termina em </span><span class="bf-timer" aria-live="off"><b data-u="d">00</b>d <b data-u="h">00</b>h <b data-u="m">00</b>m <b data-u="s">00</b>s</span></span>
 </a>
 <header class="wrap top">
   <a class="brand" href="#topo"><b>Valéria Maria</b><small>Instrutora de direção</small></a>
@@ -209,9 +236,14 @@ footer a{font-weight:800;text-decoration:none}
 <main id="topo">
   <section class="wrap hero">
     <div class="hero-copy">
-      <span class="chip">Betim · Belo Horizonte · Contagem</span>
       <h1>Perca o medo <span>de dirigir.</span></h1>
-      <p class="lead">Aulas particulares em carro manual com quem ensina há 20 anos. Eu busco você em casa ou no trabalho e a gente vai no seu ritmo.</p>
+      <p class="lead">Aulas em carro manual com quem ensina há 20 anos. Eu busco você em casa em BH, Betim e Contagem.</p>
+    </div>
+    <div class="hero-photo">
+      <img src="/img/valeria-alunas.jpg" alt="Valéria Maria sorrindo, abraçada a duas alunas ao lado do carro de aula" width="1224" height="1500" fetchpriority="high">
+      <div class="promo-card"><small>Primeira aula</small><b>R$40</b></div>
+    </div>
+    <div class="hero-act">
       <div class="hero-cta">
         <a class="btn btn-main" href="https://wa.me/5531996294794?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Quero%20agendar%20minha%20primeira%20aula." target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 19z"/></svg>
@@ -225,10 +257,6 @@ footer a{font-weight:800;text-decoration:none}
         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>Credenciada pelo DETRAN</li>
         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>Busco você em casa</li>
       </ul>
-    </div>
-    <div class="hero-photo">
-      <img src="/img/valeria-alunas.jpg" alt="Valéria Maria sorrindo, abraçada a duas alunas ao lado do carro de aula" width="1224" height="1500" fetchpriority="high">
-      <div class="promo-card"><small>Primeira aula</small><b>R$40</b></div>
     </div>
   </section>
 
@@ -374,6 +402,11 @@ footer a{font-weight:800;text-decoration:none}
   </a>
 </div>
 <script>
+(function(){
+  var st = document.querySelector('.sticky'), hero = document.querySelector('.hero');
+  if (!('IntersectionObserver' in window)) { st.classList.add('on'); return; }
+  new IntersectionObserver(function(e){ st.classList.toggle('on', !e[0].isIntersecting); }).observe(hero);
+})();
 (function(){
   var FIM = new Date('2026-11-30T23:59:59-03:00').getTime(); // fim da Black Friday
   var root = document.documentElement, timers = document.querySelectorAll('.bf-timer');
