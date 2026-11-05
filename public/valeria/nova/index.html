@@ -119,6 +119,20 @@ footer a{font-weight:800;text-decoration:none}
 .sticky{position:fixed;z-index:10;left:0;right:0;bottom:0;padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px));background:rgba(255,248,243,.94);backdrop-filter:blur(8px);border-top:1px solid var(--line)}
 .sticky .btn{width:100%}
 
+
+/* depoimentos */
+.quotes{display:grid;grid-auto-flow:column;grid-auto-columns:min(80vw,320px);gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:10px}
+.quote{margin:0;display:flex;flex-direction:column;background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;scroll-snap-align:start}
+.quote img{width:100%;aspect-ratio:4/3;object-fit:cover;object-position:50% 30%}
+.quote blockquote{margin:0;padding:18px 20px 8px;font-size:16px;font-weight:600;line-height:1.5}
+.quote figcaption{padding:0 20px 18px;font-size:14px;font-weight:700;color:var(--pink)}
+@media (min-width:900px){
+  .quotes{grid-auto-flow:initial;grid-template-columns:repeat(3,minmax(0,1fr));overflow:visible}
+  .quote.big{grid-row:span 2}
+  .quote.big img{aspect-ratio:4/3.4}
+  .quote.big blockquote{font-size:19px;padding:24px 26px 10px}
+  .quote.big figcaption{padding:0 26px 24px}
+}
 @media (min-width:760px){
   .students{grid-auto-flow:initial;grid-template-columns:repeat(5,minmax(0,1fr));overflow:visible}
   .steps{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -164,7 +178,8 @@ footer a{font-weight:800;text-decoration:none}
       </div>
       <ul class="trust">
         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>30 anos de experiência</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>Aula individual</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>+3 mil alunos aprovados</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>Credenciada pelo DETRAN</li>
         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>Busco você em casa</li>
       </ul>
     </div>
@@ -174,19 +189,19 @@ footer a{font-weight:800;text-decoration:none}
     </div>
   </section>
 
-  <!-- ALUNOS -->
-  <section class="sec" style="padding-top:0" aria-labelledby="h-alunos">
+  <!-- DEPOIMENTOS -->
+  <section class="sec" style="padding-top:0" aria-labelledby="h-dep">
     <div class="wrap">
       <div class="head">
-        <span class="kicker">Alunos da Valéria</span>
-        <h2 id="h-alunos" class="h2">Gente que chegou com medo e saiu dirigindo.</h2>
+        <span class="kicker">Depoimentos</span>
+        <h2 id="h-dep" class="h2">Quem aprendeu com a Val, recomenda.</h2>
       </div>
-      <div class="students">
-        <img src="/valeria/img/aluno-4.webp" alt="Valéria com um aluno ao lado do carro de aula" loading="lazy" width="362" height="482">
-        <img src="/valeria/img/aluno-5.webp" alt="Valéria abraçada a um aluno ao lado do carro de aula" loading="lazy" width="379" height="514">
-        <img src="/valeria/img/aluno-6.webp" alt="Valéria com uma aluna segurando o documento do exame" loading="lazy" width="399" height="509">
-        <img src="/valeria/img/aluno-7.webp" alt="Valéria com um aluno ao lado do carro" loading="lazy" width="461" height="566">
-        <img src="/valeria/img/valeria-alunos.jpg" alt="Valéria com um aluno e uma aluna ao lado do carro de aula" loading="lazy" width="1259" height="1500">
+      <div class="quotes">
+        <figure class="quote big"><img src="/valeria/img/depo-2.webp" alt="Valéria com uma aluna" loading="lazy" width="426" height="278"><blockquote>“A Val é uma excelente professora e profissional. Ao longo das aulas me passou cada vez mais segurança e sempre foi firme na medida certa. A Val me acompanhou durante toda a jornada, até a aprovação! Ela sempre foi extremamente paciente, me ajudando a superar bloqueios com o trânsito!”</blockquote><figcaption>Aluna da Valéria</figcaption></figure>
+        <figure class="quote"><img src="/valeria/img/depo-1.webp" alt="Valéria com uma aluna" loading="lazy" width="320" height="187"><blockquote>“Amei ter a Val como instrutora! Ela é muito simpática e me ensinou tudo e mais um pouco.”</blockquote><figcaption>Aluna da Valéria</figcaption></figure>
+        <figure class="quote"><img src="/valeria/img/depo-3.webp" alt="Valéria com uma aluna" loading="lazy" width="450" height="295"><blockquote>“Eu só tinha uma pauta vencendo e um sonho. Mentira, eu tinha a melhor instrutora de todas também! Obriiii Val!”</blockquote><figcaption>Aluna da Valéria</figcaption></figure>
+        <figure class="quote"><img src="/valeria/img/depo-4.webp" alt="Valéria com um aluno" loading="lazy" width="356" height="326"><blockquote>“Muito obrigado pelos ensinamentos, Val!”</blockquote><figcaption>Aluno da Valéria</figcaption></figure>
+        <figure class="quote"><img src="/valeria/img/depo-5.webp" alt="Valéria com uma aluna" loading="lazy" width="444" height="422"><blockquote>“E hoje se encerra mais um ciclo com a melhor instrutora.”</blockquote><figcaption>Aluna da Valéria</figcaption></figure>
       </div>
     </div>
   </section>
@@ -214,8 +229,8 @@ footer a{font-weight:800;text-decoration:none}
       </div>
       <ol class="steps">
         <li class="step"><div><h3>Me chama no WhatsApp</h3><p>Me conte sua experiência e o que você quer treinar.</p></div></li>
-        <li class="step"><div><h3>Eu busco você</h3><p>Em casa ou no trabalho, no horário combinado, em Betim, BH ou Contagem.</p></div></li>
-        <li class="step"><div><h3>Aula no seu ritmo</h3><p>Só você e eu no carro, focando no que você precisa.</p></div></li>
+        <li class="step"><div><h3>Eu busco você</h3><p>No meu HB20 manual, em casa ou no trabalho, das 7h às 20h, em Betim, BH ou Contagem.</p></div></li>
+        <li class="step"><div><h3>Aula no seu ritmo</h3><p>50 minutos só você e eu no carro, focando no que você precisa.</p></div></li>
       </ol>
     </div>
   </section>
@@ -226,6 +241,7 @@ footer a{font-weight:800;text-decoration:none}
       <div class="head">
         <span class="kicker">Preços</span>
         <h2 id="h-precos" class="h2">Comece com uma aula. Continue se gostar.</h2>
+        <p class="lead">Cada aula tem 50 minutos. Pagamento no Pix, cartão ou dinheiro.</p>
       </div>
       <div class="prices">
         <div class="row row-hl"><h3>Aula experimental <span class="badge">50% OFF</span></h3><p>Sua primeira aula pela metade do valor.</p><div class="val">R$40</div></div>
@@ -249,7 +265,10 @@ footer a{font-weight:800;text-decoration:none}
         <h2 id="h-faq" class="h2">Perguntas frequentes</h2>
       </div>
       <div class="faq">
-        <details><summary>A aula é em carro manual?</summary><p>Sim. Todas as aulas são em carro manual, para você treinar embreagem, marchas e arrancada de verdade.</p></details>
+        <details><summary>Qual é o carro das aulas?</summary><p>Um HB20 manual, carro próprio da Valéria. Você treina embreagem, marchas e arrancada de verdade.</p></details>
+        <details><summary>Você é credenciada?</summary><p>Sim. Sou instrutora credenciada pelo DETRAN, com 30 anos de experiência.</p></details>
+        <details><summary>Quanto tempo dura a aula e quais os horários?</summary><p>Cada aula tem 50 minutos. Atendo das 7h às 20h, no horário que combinarmos.</p></details>
+        <details><summary>Quais as formas de pagamento?</summary><p>Pix, cartão ou dinheiro.</p></details>
         <details><summary>Você me busca em casa?</summary><p>Sim. Busco você em casa ou no trabalho em Betim, Belo Horizonte e Contagem. Me mande seu bairro no WhatsApp para confirmar.</p></details>
         <details><summary>Já tenho carteira, mas parei de dirigir. Serve para mim?</summary><p>Serve. As aulas são montadas em cima da sua dificuldade, seja voltar a dirigir, perder o medo do trânsito ou treinar baliza.</p></details>
         <details><summary>Posso fazer só uma aula antes de fechar um pacote?</summary><p>Pode. A primeira aula sai por R$40, metade do valor normal.</p></details>
