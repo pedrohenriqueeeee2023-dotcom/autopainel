@@ -75,6 +75,15 @@ fi
 cd "$ROBO"
 PUPPETEER_SKIP_DOWNLOAD=true npm install --omit=dev --no-audit --no-fund --loglevel=error
 
+# Em servidor comum (x86), usa o Chrome na versão exata que o robô espera.
+# O Chrome mais novo do Google às vezes faz a página do WhatsApp "soltar" (detached Frame).
+if [ "$ARQ" = "amd64" ]; then
+  npx --yes puppeteer browsers install chrome >/dev/null
+  CERTO="$(node -p "require('puppeteer').executablePath()" 2>/dev/null || true)"
+  [ -n "$CERTO" ] && [ -x "$CERTO" ] && NAVEGADOR="$CERTO"
+  echo "Navegador do robô: $NAVEGADOR"
+fi
+
 passo "7/8 Configurações (.env)"
 [ -f .env ] || cp .env.example .env
 definir CHROME_PATH "$NAVEGADOR"

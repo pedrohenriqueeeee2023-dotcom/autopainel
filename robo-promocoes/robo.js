@@ -143,6 +143,20 @@ function verificarPaginaQuebrada(erro) {
   return true;
 }
 
+// A cada 3 minutos confere se a página do WhatsApp ainda responde.
+// Assim o robô se recupera sozinho antes da hora de enviar.
+setInterval(async () => {
+  if (estado.whatsapp !== 'conectado' || reiniciando || !client.pupPage) return;
+  try {
+    await Promise.race([
+      client.pupPage.evaluate(() => Boolean(window.WWebJS)),
+      new Promise((_, falhar) => setTimeout(() => falhar(new Error('Session closed: página não respondeu')), 20000)),
+    ]);
+  } catch (erro) {
+    verificarPaginaQuebrada(erro);
+  }
+}, 3 * 60 * 1000);
+
 // Liga o WhatsApp; se der erro, espera e tenta de novo sozinho
 let tentativas = 0;
 async function iniciarWhatsApp() {
