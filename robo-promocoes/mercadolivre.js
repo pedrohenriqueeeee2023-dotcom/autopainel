@@ -49,23 +49,31 @@ function linkLimpo(produtoId, permalink) {
   }
 }
 
-// Transforma um produto de catálogo numa oferta (ou null se não tiver desconto bom)
-async function montarOferta(produtoId) {
-  const anuncios = await chamar(`/products/${produtoId}/items?limit=1`);
-  const melhor = anuncios.results && anuncios.results[0];
-  if (!melhor || !melhor.original_price || !(melhor.original_price > melhor.price)) return null;
-  const desconto = Math.round(100 - (100 * melhor.price) / melhor.original_price);
-  if (desconto < config.mlDescontoMinimo) return null;
+// Transforma um produto de catálogo numa oferta.
+// "produto" pode vir pronto da busca (nome e fotos); senão é buscado aqui.
+// Devolve null se não passar nos filtros.
+async function montarOferta(produtoId, produto) {
+  const aceitarSemDesconto = Boolean(config.mlAceitarSemDesconto);
+  let melhor = null;
+  try {
+    const anuncios = await chamar(`/products/${produtoId}/items?limit=1`);
+    melhor = anuncios.results && anuncios.results[0];
+  } catch {
+    // alguns nichos (ex.: adulto) não mostram o preço pela API
+  }
+  const temDesconto = melhor && melhor.original_price && melhor.original_price > melhor.price;
+  const desconto = temDesconto ? Math.round(100 - (100 * melhor.price) / melhor.original_price) : 0;
+  if (!aceitarSemDesconto && (!temDesconto || desconto < config.mlDescontoMinimo)) return null;
 
-  const produto = await chamar(`/products/${produtoId}`);
+  if (!produto || !produto.pictures) produto = await chamar(`/products/${produtoId}`);
   const foto = produto.pictures && produto.pictures[0] && (produto.pictures[0].url || produto.pictures[0].secure_url);
   return {
     id: 'ml-' + produtoId,
     loja: 'Mercado Livre',
     automatica: true, // veio da busca automática (as coladas à mão não têm isso)
     titulo: produto.name,
-    preco: melhor.price,
-    precoAntes: melhor.original_price,
+    preco: melhor ? melhor.price : null,
+    precoAntes: temDesconto ? melhor.original_price : null,
     desconto,
     foto: foto ? foto.replace(/^http:/, 'https:') : null,
     // O link de afiliado do ML tem um código (ref) criado pelo próprio ML para cada
@@ -77,31 +85,53 @@ async function montarOferta(produtoId) {
   };
 }
 
-// Passa pelas subcategorias e devolve as melhores ofertas (maior desconto primeiro)
-async function buscarOfertasML(jaEnviados, registrar = console.log) {
-  const candidatos = new Set();
-  for (const categoria of config.mlCategorias) {
-    try {
-      const destaques = await chamar(`/highlights/MLB/category/${categoria}`);
-      for (const c of destaques.content || []) if (c.type === 'PRODUCT') candidatos.add(c.id);
-    } catch (erro) {
-      registrar(`Mercado Livre: não consegui ler a categoria ${categoria} (${erro.message}).`);
+// Duas formas de achar produtos:
+//  - mlPalavras preenchido: busca no catálogo por palavra (serve para nichos que o ML
+//    não mostra nos "mais vendidos", como o adulto)
+//  - senão: mais vendidos de cada subcategoria em mlCategorias
+async function acharCandidatos(registrar) {
+  const candidatos = new Map(); // id -> produto (ou null)
+  const palavras = config.mlPalavras || [];
+  if (palavras.length) {
+    for (const palavra of palavras) {
+      try {
+        const r = await chamar(`/products/search?status=active&site_id=MLB&limit=${config.mlPorPalavra || 30}&q=${encodeURIComponent(palavra)}`);
+        for (const p of r.results || []) if (!candidatos.has(p.id)) candidatos.set(p.id, p);
+      } catch (erro) {
+        registrar(`Mercado Livre: não consegui buscar "${palavra}" (${erro.message}).`);
+      }
+      await esperar(300);
     }
-    await esperar(300);
+  } else {
+    for (const categoria of config.mlCategorias) {
+      try {
+        const destaques = await chamar(`/highlights/MLB/category/${categoria}`);
+        for (const c of destaques.content || []) if (c.type === 'PRODUCT' && !candidatos.has(c.id)) candidatos.set(c.id, null);
+      } catch (erro) {
+        registrar(`Mercado Livre: não consegui ler a categoria ${categoria} (${erro.message}).`);
+      }
+      await esperar(300);
+    }
   }
+  return candidatos;
+}
 
+// Devolve as melhores ofertas: maior desconto primeiro, depois com preço, depois sem preço
+async function buscarOfertasML(jaEnviados, registrar = console.log) {
+  const candidatos = await acharCandidatos(registrar);
   const ofertas = [];
-  for (const id of candidatos) {
+  for (const [id, produto] of candidatos) {
     if (jaEnviados.has('ml-' + id)) continue;
     try {
-      const o = await montarOferta(id);
+      const o = await montarOferta(id, produto);
       if (o) ofertas.push(o);
     } catch {
       // produto sem dados ou bloqueado: pula
     }
     await esperar(250); // pausa pra não sobrecarregar a API
   }
-  return ofertas.sort((a, b) => b.desconto - a.desconto).slice(0, config.mlOfertasPorDia);
+  const nota = (o) => (o.desconto || 0) * 1000 + (o.preco ? 1 : 0);
+  return ofertas.sort((a, b) => nota(b) - nota(a)).slice(0, config.mlOfertasPorDia);
 }
 
 module.exports = { buscarOfertasML, temChaves };

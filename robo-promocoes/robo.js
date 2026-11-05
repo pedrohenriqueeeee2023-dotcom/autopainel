@@ -307,8 +307,9 @@ async function atualizarML() {
   estado.buscandoML = true;
   try {
     registrar('Buscando ofertas no Mercado Livre (mais vendidos de beleza)...');
-    const ofertas = await ml.buscarOfertasML(fila.idsEnviados(), registrar);
-    fila.limparMLAutomatico(); // troca as antigas pelas novas
+    fila.limparMLAutomatico(); // troca as que ainda esperam link pelas novas
+    const pular = new Set([...fila.idsEnviados(), ...fila.ids()]); // não repete o que já foi ou já está na fila
+    const ofertas = await ml.buscarOfertasML(pular, registrar);
     fila.adicionarNoFim(ofertas);
     registrar(`${ofertas.length} ofertas do Mercado Livre colocadas na fila.`);
   } catch (erro) {
@@ -326,17 +327,18 @@ async function atualizarOfertas() {
 
 // ---------- Envio ----------
 
+const EMOJI = process.env.EMOJI_OFERTA || '🌸'; // muda por grupo (ex.: 🔥 no After Dark)
+
 function montarTexto(o) {
   // Oferta do ML colada à mão: só tem texto e link
-  if (o.loja === 'Mercado Livre' && !o.preco) {
+  if (o.loja === 'Mercado Livre' && !o.preco && !o.automatica) {
     return `🛍️ *${o.titulo}*\n\n🛒 Mercado Livre\n👉 ${o.link}`;
   }
-  return (
-    `🌸 *${o.titulo}*\n\n` +
-    `~De ${reais(o.precoAntes)}~\n` +
-    `🔥 *Por ${reais(o.preco)}* (${o.desconto}% OFF)\n\n` +
-    `🛒 ${o.loja}\n👉 ${o.link}`
-  );
+  let preco;
+  if (!o.preco) preco = '👀 Veja o preço no link'; // o ML não mostra o preço de alguns nichos
+  else if (o.desconto > 0 && o.precoAntes) preco = `~De ${reais(o.precoAntes)}~\n🔥 *Por ${reais(o.preco)}* (${o.desconto}% OFF)`;
+  else preco = `💰 *${reais(o.preco)}*`;
+  return `${EMOJI} *${o.titulo}*\n\n${preco}\n\n🛒 ${o.loja}\n👉 ${o.link}`;
 }
 
 let enviando = false;

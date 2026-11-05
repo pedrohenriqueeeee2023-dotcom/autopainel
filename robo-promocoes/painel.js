@@ -21,6 +21,9 @@ const linkValido = (t) =>
   typeof t === 'string' && t.length === linkConexao.length &&
   crypto.timingSafeEqual(Buffer.from(t), Buffer.from(linkConexao));
 
+// Nome que aparece no painel (muda por robô: NOME_ROBO no .env)
+const NOME_ROBO = process.env.NOME_ROBO || 'Robô Laureta';
+
 function iniciarPainel(robo) {
   const app = express();
   app.use(express.json());
@@ -78,7 +81,7 @@ function iniciarPainel(robo) {
   };
 
   app.get('/api/estado', (req, res) => {
-    res.json({ ...robo.estado, config: robo.config, fila: robo.fila.listar(), linkConexao });
+    res.json({ ...robo.estado, config: robo.config, fila: robo.fila.listar(), linkConexao, nomeRobo: NOME_ROBO });
   });
   app.post('/api/link-conexao/novo', responder(async () => {
     linkConexao = novoLink();

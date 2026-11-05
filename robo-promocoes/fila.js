@@ -62,7 +62,9 @@ const fila = {
   },
   limparShopee() { salvar(ARQ_FILA, ler(ARQ_FILA, []).filter((o) => o.loja !== 'Shopee')); },
   // Tira só as do ML que vieram da busca automática (as coladas à mão ficam)
-  limparMLAutomatico() { salvar(ARQ_FILA, ler(ARQ_FILA, []).filter((o) => !(o.loja === 'Mercado Livre' && o.automatica))); },
+  // (as que já receberam o link do Gerador também ficam, para não perder o seu trabalho)
+  limparMLAutomatico() { salvar(ARQ_FILA, ler(ARQ_FILA, []).filter((o) => !(o.loja === 'Mercado Livre' && o.automatica && o.precisaLink))); },
+  ids() { return new Set(ler(ARQ_FILA, []).map((o) => o.id)); },
 
   idsEnviados() { return new Set(ler(ARQ_ENVIADOS, [])); },
   marcarEnviado(id) {

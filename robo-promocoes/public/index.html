@@ -192,9 +192,9 @@
 <header>
   <div class="topo">
     <div class="marca">
-      <div class="logo">L</div>
+      <div class="logo" id="logoTopo">L</div>
       <div>
-        <h1>Robô Laureta</h1>
+        <h1 id="nomeTopo">Robô Laureta</h1>
         <p>Grupo <b id="nomeGrupoTopo">…</b></p>
       </div>
     </div>
@@ -298,7 +298,11 @@
           <select id="cfgMlAtivo"><option value="1">Ligada</option><option value="0">Desligada</option></select></div>
         <div><label for="cfgMlDesconto">Desconto mínimo (%)</label><input id="cfgMlDesconto" type="number" min="0" max="99"></div>
         <div><label for="cfgMlPorDia">Ofertas por dia</label><input id="cfgMlPorDia" type="number" min="1"></div>
+        <div><label for="cfgMlSemDesconto">Sem desconto</label>
+          <select id="cfgMlSemDesconto"><option value="0">Só com desconto</option><option value="1">Aceitar também</option></select></div>
       </div>
+      <label for="cfgMlPalavras">Palavras buscadas no ML (uma por linha; em branco = mais vendidos de beleza)</label>
+      <textarea id="cfgMlPalavras" style="min-height:90px"></textarea>
       <h3>Shopee: palavras buscadas</h3>
       <label for="cfgPalavras">Uma por linha</label>
       <textarea id="cfgPalavras"></textarea>
@@ -421,6 +425,10 @@ function desenharEnvios(e) {
   $('btnDesligar').style.display = e.noServidor ? 'none' : '';
   $('btnShopee').textContent = (e.buscandoShopee || e.buscandoML) ? 'Buscando…' : 'Buscar ofertas agora';
   $('nomeGrupoTopo').textContent = e.config.nomeDoGrupo;
+  if (e.nomeRobo && $('nomeTopo').textContent !== e.nomeRobo) {
+    $('nomeTopo').textContent = e.nomeRobo; document.title = e.nomeRobo;
+    $('logoTopo').textContent = e.nomeRobo.replace(/^Robô\s+/i, '').charAt(0).toUpperCase();
+  }
 }
 
 function desenharFila(lista) {
@@ -428,7 +436,8 @@ function desenharFila(lista) {
   if (!lista.length) { ul.innerHTML = '<li class="vazio">A fila está vazia. Adicione ofertas do Mercado Livre ou busque na Shopee.</li>'; return; }
   ul.innerHTML = lista.map((o, i) => {
     const shopee = o.loja === 'Shopee';
-    const detalhe = o.preco ? `${reais(o.preco)} · ${o.desconto}% OFF${o.precisaLink ? ' · esperando link do Gerador' : ''}` : esc(o.link);
+    const precoTxt = o.preco ? (o.desconto > 0 ? `${reais(o.preco)} · ${o.desconto}% OFF` : reais(o.preco)) : 'preço no link';
+    const detalhe = (o.preco || o.automatica) ? `${precoTxt}${o.precisaLink ? ' · esperando link do Gerador' : ''}` : esc(o.link);
     const foto = o.foto ? `<img class="thumb" src="${esc(o.foto)}" alt="">` : `<div class="thumb"></div>`;
     return `<li>${foto}<div class="info">
         <div class="titulo"><span class="loja ${shopee ? 'shopee' : 'ml'}">${shopee ? 'Shopee' : 'Mercado Livre'}</span>${o.precisaLink ? '<span class="sem-link">Sem link</span>' : (i === 0 ? '<span class="proxima">Próxima</span>' : '')}${esc(o.titulo)}</div>
@@ -466,6 +475,8 @@ function preencherConfig(e) {
   $('cfgPalavras').value = c.palavras.join('\n');
   $('cfgMlAtivo').value = c.mlAtivo === false ? '0' : '1';
   $('cfgMlDesconto').value = c.mlDescontoMinimo; $('cfgMlPorDia').value = c.mlOfertasPorDia;
+  $('cfgMlSemDesconto').value = c.mlAceitarSemDesconto ? '1' : '0';
+  $('cfgMlPalavras').value = (c.mlPalavras || []).join('\n');
 }
 
 async function atualizar() {
@@ -542,6 +553,7 @@ $('formConfig').onsubmit = async (ev) => {
     vendasMinimas: $('cfgVendas').value, ofertasPorDia: $('cfgPorDia').value,
     palavras: $('cfgPalavras').value,
     mlAtivo: $('cfgMlAtivo').value === '1', mlDescontoMinimo: $('cfgMlDesconto').value, mlOfertasPorDia: $('cfgMlPorDia').value,
+    mlAceitarSemDesconto: $('cfgMlSemDesconto').value === '1', mlPalavras: $('cfgMlPalavras').value,
   });
   if (r.ok) avisar('💾 Configurações salvas!');
   configPreenchida = false; atualizar();

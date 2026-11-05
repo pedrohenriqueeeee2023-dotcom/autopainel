@@ -43,6 +43,12 @@ const padrao = {
   mlOfertasPorDia: 20,
   // Subcategorias de Beleza: pele, cabelo, maquiagem, perfumes, unhas, depilação,
   // tratamentos e artefatos para cabelo (chapinha, secador...)
+  // Se tiver palavras aqui, o ML busca por palavra no catálogo em vez das categorias
+  // (para nichos que não aparecem nos "mais vendidos", como o adulto)
+  mlPalavras: [],
+  mlPorPalavra: 30,
+  // Aceitar produtos sem desconto (ou que o ML não mostra o preço)
+  mlAceitarSemDesconto: false,
   mlCategorias: ['MLB199407', 'MLB1263', 'MLB1248', 'MLB6284', 'MLB29884', 'MLB5383', 'MLB278194', 'MLB455174'],
 };
 
@@ -60,12 +66,12 @@ Object.defineProperty(config, 'salvar', {
     for (const chave of Object.keys(padrao)) {
       if (!(chave in novos)) continue;
       const valor = novos[chave];
-      if (chave === 'palavras') {
+      if (chave === 'palavras' || chave === 'mlPalavras') {
         const lista = Array.isArray(valor) ? valor : String(valor).split('\n');
-        config.palavras = lista.map((p) => p.trim()).filter(Boolean);
+        config[chave] = lista.map((p) => p.trim()).filter(Boolean);
       } else if (chave === 'nomeDoGrupo') {
         config.nomeDoGrupo = String(valor).trim();
-      } else if (chave === 'enviosAtivos' || chave === 'mlAtivo') {
+      } else if (chave === 'enviosAtivos' || chave === 'mlAtivo' || chave === 'mlAceitarSemDesconto') {
         config[chave] = Boolean(valor);
       } else if (chave === 'mlCategorias') {
         continue; // só muda pelo código
