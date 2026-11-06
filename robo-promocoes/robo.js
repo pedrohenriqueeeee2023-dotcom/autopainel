@@ -432,10 +432,11 @@ async function enviarProxima(id) {
   const texto = montarTexto(oferta);
   try {
     try {
-      if (!oferta.foto) throw new Error('sem foto');
+      if (!oferta.foto) throw new Error('a oferta não tem foto');
       const foto = await MessageMedia.fromUrl(oferta.foto, { unsafeMime: true });
       await grupo.sendMessage(foto, { caption: texto });
-    } catch {
+    } catch (erroFoto) {
+      registrar('Foto não foi (' + ((erroFoto && erroFoto.message) || erroFoto) + '). Enviando só o texto.');
       await grupo.sendMessage(texto); // sem foto
     }
     fila.marcarEnviado(oferta.id);
@@ -504,6 +505,25 @@ client.on('message', async (msg) => {
   }
 });
 
+// Diagnóstico: manda uma foto de teste para o PRÓPRIO número do robô (não vai para o grupo)
+async function testarFoto(url) {
+  if (estado.whatsapp !== 'conectado') throw new Error('WhatsApp não está conectado.');
+  const eu = client.info && client.info.wid && client.info.wid._serialized;
+  const foto = url || (fila.listar().find((o) => o.foto) || {}).foto;
+  if (!eu || !foto) throw new Error('Sem número do robô ou sem foto para testar.');
+  const resultado = { foto };
+  try {
+    const media = await MessageMedia.fromUrl(foto, { unsafeMime: true });
+    resultado.baixou = `${media.mimetype}, ${Math.round(media.data.length / 1024)} KB`;
+    await client.sendMessage(eu, media, { caption: 'Teste de foto do robô (pode apagar)' });
+    resultado.enviou = true;
+  } catch (e) {
+    resultado.enviou = false;
+    resultado.erro = (e && (e.stack || e.message)) || String(e);
+  }
+  return resultado;
+}
+
 // ---------- Liga tudo ----------
 
 // Um erro inesperado vira aviso no painel em vez de desligar o robô
@@ -526,6 +546,7 @@ iniciarPainel({
   registrar,
   desconectar: () => client.logout(),
   pedirCodigo,
+  testarFoto,
   desligar: async () => {
     registrar('Desligando o robô a pedido do painel...');
     try { await client.destroy(); } catch {}

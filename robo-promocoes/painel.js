@@ -144,6 +144,7 @@ function iniciarPainel(robo) {
     await robo.desconectar();
   }));
 
+  app.post('/api/teste-foto', responder(async (req) => ({ ok: true, ...(await robo.testarFoto(req.body && req.body.url)) })));
   app.post('/api/desligar', (req, res) => {
     res.json({ ok: true });
     setTimeout(() => robo.desligar(), 500); // responde antes de desligar
