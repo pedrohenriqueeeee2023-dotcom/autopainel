@@ -94,8 +94,19 @@ async function montarOferta(produtoId, produto, regras = {}) {
 // Duas formas de achar produtos:
 //  - mlPalavras preenchido: busca no catálogo por palavra (serve para nichos que o ML
 //    não mostra nos "mais vendidos", como o adulto)
-//  - senão: mais vendidos de cada subcategoria em mlCategorias
-async function acharCandidatos(registrar) {
+//  - senão: mais vendidos de cada subcategoria (de mlGrupos, ou de mlCategorias)
+// Também anota de qual grupo (ex.: beleza, casa) cada produto veio.
+function categoriasComGrupo() {
+  const grupos = config.mlGrupos;
+  if (grupos && typeof grupos === 'object' && Object.keys(grupos).length) {
+    const lista = [];
+    for (const [grupo, cats] of Object.entries(grupos)) for (const c of cats || []) lista.push([c, grupo]);
+    return lista;
+  }
+  return (config.mlCategorias || []).map((c) => [c, 'geral']);
+}
+
+async function acharCandidatos(registrar, grupoDe = new Map()) {
   const candidatos = new Map(); // id -> produto (ou null)
   const palavras = config.mlPalavras || [];
   if (palavras.length) {
@@ -109,10 +120,12 @@ async function acharCandidatos(registrar) {
       await esperar(300);
     }
   } else {
-    for (const categoria of config.mlCategorias) {
+    for (const [categoria, grupo] of categoriasComGrupo()) {
       try {
         const destaques = await chamar(`/highlights/MLB/category/${categoria}`);
-        for (const c of destaques.content || []) if (c.type === 'PRODUCT' && !candidatos.has(c.id)) candidatos.set(c.id, null);
+        for (const c of destaques.content || []) {
+          if (c.type === 'PRODUCT' && !candidatos.has(c.id)) { candidatos.set(c.id, null); grupoDe.set(c.id, grupo); }
+        }
       } catch (erro) {
         registrar(`Mercado Livre: não consegui ler a categoria ${categoria} (${erro.message}).`);
       }
@@ -122,22 +135,46 @@ async function acharCandidatos(registrar) {
   return candidatos;
 }
 
+// Escolhe "vagas" ofertas: primeiro garante o mínimo de cada grupo (os de maior desconto
+// de cada um), depois completa com os maiores descontos de qualquer grupo.
+const nota = (o) => (o.desconto || 0) * 1000 + (o.preco ? 1 : 0);
+function escolherComMinimo(ofertas, vagas, minimoPorGrupo) {
+  const ordenadas = [...ofertas].sort((a, b) => nota(b) - nota(a));
+  const escolhidas = new Set();
+  if (minimoPorGrupo > 0) {
+    const grupos = [...new Set(ordenadas.map((o) => o.grupo))];
+    for (const g of grupos) {
+      ordenadas.filter((o) => o.grupo === g).slice(0, minimoPorGrupo).forEach((o) => escolhidas.add(o));
+    }
+  }
+  for (const o of ordenadas) { if (escolhidas.size >= vagas) break; escolhidas.add(o); }
+  // se o mínimo de todos os grupos passar das vagas, os de menor desconto saem
+  return [...escolhidas].sort((a, b) => nota(b) - nota(a)).slice(0, vagas);
+}
+
+// Quantas ofertas normais cabem por dia (o limite diário menos os destaques)
+function vagasNormais() {
+  if (!config.mlLimiteDiario) return config.mlOfertasPorDia;
+  const destaques = config.destaqueAtivo ? (config.destaquesPorDia || 0) : 0;
+  return Math.max(0, config.mlLimiteDiario - destaques);
+}
+
 // Devolve as melhores ofertas: maior desconto primeiro, depois com preço, depois sem preço
 async function buscarOfertasML(jaEnviados, registrar = console.log) {
-  const candidatos = await acharCandidatos(registrar);
+  const grupoDe = new Map();
+  const candidatos = await acharCandidatos(registrar, grupoDe);
   const ofertas = [];
   for (const [id, produto] of candidatos) {
     if (jaEnviados.has('ml-' + id)) continue;
     try {
       const o = await montarOferta(id, produto);
-      if (o) ofertas.push(o);
+      if (o) ofertas.push({ ...o, grupo: grupoDe.get(id) || 'geral' });
     } catch {
       // produto sem dados ou bloqueado: pula
     }
     await esperar(250); // pausa pra não sobrecarregar a API
   }
-  const nota = (o) => (o.desconto || 0) * 1000 + (o.preco ? 1 : 0);
-  return ofertas.sort((a, b) => nota(b) - nota(a)).slice(0, config.mlOfertasPorDia);
+  return escolherComMinimo(ofertas, vagasNormais(), config.mlMinimoPorGrupo || 0);
 }
 
 // ---------- Destaques: produtos de ticket mais alto (ex.: celulares, eletrodomésticos) ----------
@@ -178,8 +215,7 @@ async function buscarDestaquesML(jaEnviados, registrar = console.log) {
   }
   const economia = (o) => (o.precoAntes || o.preco) - o.preco;
   registrar(`Destaques: ${ofertas.length} produtos acima de R$ ${config.destaquePrecoMinimo || 200} com desconto.`);
-  // guarda alguns a mais que o limite do dia, caso você não gere o link de todos
-  return ofertas.sort((a, b) => economia(b) - economia(a)).slice(0, (config.destaquesPorDia || 2) * 3);
+  return ofertas.sort((a, b) => economia(b) - economia(a)).slice(0, config.destaquesPorDia || 2);
 }
 
-module.exports = { buscarOfertasML, buscarDestaquesML, temChaves };
+module.exports = { buscarOfertasML, buscarDestaquesML, temChaves, escolherComMinimo };
