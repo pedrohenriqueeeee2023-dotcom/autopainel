@@ -270,7 +270,11 @@ async function procurarGrupo() {
 
 // ---------- Relógio: roda a cada 30 segundos ----------
 
+// Lembra o dia da última busca automática (em dados/), para um reinício não trocar
+// a lista de ofertas que esperam link no meio do dia
+const ARQ_ULTIMA_BUSCA = require('path').join(__dirname, 'dados', 'ultima-busca.txt');
 let ultimoDiaBusca = null;
+try { ultimoDiaBusca = require('fs').readFileSync(ARQ_ULTIMA_BUSCA, 'utf8').trim() || null; } catch {}
 let diaContagem = new Date().toDateString();
 
 setInterval(tick, 30 * 1000);
@@ -284,6 +288,7 @@ async function tick() {
 
   if (ultimoDiaBusca !== hoje && agora.getHours() >= config.horaInicio - 1) {
     ultimoDiaBusca = hoje;
+    try { require('fs').writeFileSync(ARQ_ULTIMA_BUSCA, hoje); } catch {}
     await atualizarOfertas();
   }
 
