@@ -138,16 +138,22 @@ async function acharCandidatos(registrar, grupoDe = new Map()) {
 // Escolhe "vagas" ofertas: primeiro garante o mínimo de cada grupo (os de maior desconto
 // de cada um), depois completa com os maiores descontos de qualquer grupo.
 const nota = (o) => (o.desconto || 0) * 1000 + (o.preco ? 1 : 0);
-function escolherComMinimo(ofertas, vagas, minimoPorGrupo) {
+// limites: { casa: { minimo: 5, maximo: 5 } } muda o mínimo/máximo de um grupo específico
+function escolherComMinimo(ofertas, vagas, minimoPorGrupo, limites = {}) {
   const ordenadas = [...ofertas].sort((a, b) => nota(b) - nota(a));
   const escolhidas = new Set();
-  if (minimoPorGrupo > 0) {
-    const grupos = [...new Set(ordenadas.map((o) => o.grupo))];
-    for (const g of grupos) {
-      ordenadas.filter((o) => o.grupo === g).slice(0, minimoPorGrupo).forEach((o) => escolhidas.add(o));
-    }
+  const minimo = (g) => (limites[g] && limites[g].minimo != null ? limites[g].minimo : minimoPorGrupo);
+  const maximo = (g) => (limites[g] && limites[g].maximo != null ? limites[g].maximo : Infinity);
+  const doGrupo = (g) => [...escolhidas].filter((o) => o.grupo === g).length;
+  const grupos = [...new Set(ordenadas.map((o) => o.grupo))];
+  for (const g of grupos) {
+    const qtd = Math.min(minimo(g) || 0, maximo(g));
+    ordenadas.filter((o) => o.grupo === g).slice(0, qtd).forEach((o) => escolhidas.add(o));
   }
-  for (const o of ordenadas) { if (escolhidas.size >= vagas) break; escolhidas.add(o); }
+  for (const o of ordenadas) {
+    if (escolhidas.size >= vagas) break;
+    if (!escolhidas.has(o) && doGrupo(o.grupo) < maximo(o.grupo)) escolhidas.add(o);
+  }
   // se o mínimo de todos os grupos passar das vagas, os de menor desconto saem
   return [...escolhidas].sort((a, b) => nota(b) - nota(a)).slice(0, vagas);
 }
@@ -174,7 +180,7 @@ async function buscarOfertasML(jaEnviados, registrar = console.log) {
     }
     await esperar(250); // pausa pra não sobrecarregar a API
   }
-  return escolherComMinimo(ofertas, vagasNormais(), config.mlMinimoPorGrupo || 0);
+  return escolherComMinimo(ofertas, vagasNormais(), config.mlMinimoPorGrupo || 0, config.mlLimitesGrupo || {});
 }
 
 // ---------- Destaques: produtos de ticket mais alto (ex.: celulares, eletrodomésticos) ----------

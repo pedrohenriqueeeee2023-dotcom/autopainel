@@ -65,6 +65,8 @@ const padrao = {
   // Grupos de categorias (ex.: { beleza: [...], casa: [...] }) e o mínimo de ofertas de cada
   mlGrupos: null,
   mlMinimoPorGrupo: 0,
+  // Mínimo/máximo de um grupo específico, ex.: { casa: { minimo: 5, maximo: 5 } }
+  mlLimitesGrupo: {},
   mlCategorias: ['MLB199407', 'MLB1263', 'MLB1248', 'MLB6284', 'MLB29884', 'MLB5383', 'MLB278194', 'MLB455174'],
 };
 
@@ -93,7 +95,7 @@ Object.defineProperty(config, 'salvar', {
         const horas = (Array.isArray(valor) ? valor : String(valor).split(/[^0-9]+/))
           .map(Number).filter((h) => Number.isInteger(h) && h >= 0 && h <= 23);
         if (horas.length) config.destaqueHorarios = [...new Set(horas)].sort((a, b) => a - b);
-      } else if (chave === 'mlCategorias' || chave === 'destaqueCategorias' || chave === 'mlGrupos') {
+      } else if (chave === 'mlCategorias' || chave === 'destaqueCategorias' || chave === 'mlGrupos' || chave === 'mlLimitesGrupo') {
         continue; // só muda pelo código
       } else if (!Number.isNaN(Number(valor)) && valor !== '') {
         config[chave] = Number(valor);
