@@ -296,7 +296,7 @@ async function tick() {
   const dentroDoHorario = agora.getHours() >= config.horaInicio && agora.getHours() < config.horaFim;
   if (!config.enviosAtivos || !dentroDoHorario) { estado.proximoEnvio = null; return; }
 
-  if (!estado.proximoEnvio) estado.proximoEnvio = Date.now();
+  if (!estado.proximoEnvio) estado.proximoEnvio = calcularProximoEnvio();
   if (Date.now() < estado.proximoEnvio) return;
 
   estado.proximoEnvio = Date.now() + config.intervaloMinutos * 60 * 1000;
@@ -323,6 +323,23 @@ async function atualizarShopee() {
   } finally {
     estado.buscandoShopee = false;
   }
+}
+
+// ---------- Intervalo entre envios que sobrevive a reinícios ----------
+// Antes, ao reiniciar, o robô mandava a próxima oferta na hora. Agora ele lembra do
+// último envio (em dados/) e espera o intervalo; logo depois de ligar espera ainda
+// pelo menos 5 minutos.
+const ARQ_ULTIMO_ENVIO = require('path').join(__dirname, 'dados', 'ultimo-envio.txt');
+const LIGOU_EM = Date.now();
+function guardarUltimoEnvio() {
+  try { require('fs').writeFileSync(ARQ_ULTIMO_ENVIO, String(Date.now())); } catch {}
+}
+function calcularProximoEnvio() {
+  let ultimo = 0;
+  try { ultimo = Number(require('fs').readFileSync(ARQ_ULTIMO_ENVIO, 'utf8')) || 0; } catch {}
+  let proximo = ultimo ? ultimo + config.intervaloMinutos * 60 * 1000 : Date.now();
+  if (Date.now() - LIGOU_EM < 10 * 60 * 1000) proximo = Math.max(proximo, LIGOU_EM + 5 * 60 * 1000);
+  return Math.max(proximo, Date.now());
 }
 
 // ---------- Destaques: no máximo N por dia, em horários separados ----------
@@ -441,6 +458,7 @@ async function enviarProxima(id) {
       await grupo.sendMessage(texto); // sem foto
     }
     fila.marcarEnviado(oferta.id);
+    guardarUltimoEnvio();
     estado.enviadasHoje++;
     if (oferta.destaque) marcarDestaqueEnviado();
     registrar((oferta.destaque ? 'Destaque enviado no grupo: ' : 'Enviada no grupo: ') + oferta.titulo);
