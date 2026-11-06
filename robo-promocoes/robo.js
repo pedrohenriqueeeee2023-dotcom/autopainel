@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('./corrigir-wwebjs'); // corrige o envio de fotos antes de carregar a biblioteca
 const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const qrcodeTerminal = require('qrcode-terminal');
 const QRCode = require('qrcode');
