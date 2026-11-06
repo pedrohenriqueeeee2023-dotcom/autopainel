@@ -66,6 +66,13 @@ const fila = {
   // (as que já receberam o link do Gerador também ficam, para não perder o seu trabalho)
   limparMLAutomatico() { salvar(ARQ_FILA, ler(ARQ_FILA, []).filter((o) => !(o.loja === 'Mercado Livre' && o.automatica && o.precisaLink))); },
   ids() { return new Set(ler(ARQ_FILA, []).map((o) => o.id)); },
+  // Tira da fila as ofertas que não servem mais (ex.: palavra proibida). Devolve quantas saíram.
+  removerSe(regra) {
+    const f = ler(ARQ_FILA, []);
+    const fica = f.filter((o) => !regra(o));
+    salvar(ARQ_FILA, fica);
+    return f.length - fica.length;
+  },
 
   idsEnviados() { return new Set(ler(ARQ_ENVIADOS, [])); },
   marcarEnviado(id) {

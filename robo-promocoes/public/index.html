@@ -314,6 +314,9 @@
         <div><label for="cfgDestPorDia">Máximo por dia</label><input id="cfgDestPorDia" type="number" min="0" max="10"></div>
         <div><label for="cfgDestHoras">Horários (ex.: 11, 19)</label><input id="cfgDestHoras" placeholder="11, 19"></div>
       </div>
+      <h3>Palavras proibidas</h3>
+      <label for="cfgProibidas">Ofertas com estas palavras no nome são descartadas (uma por linha)</label>
+      <textarea id="cfgProibidas" style="min-height:80px" placeholder="masculino"></textarea>
       <h3>Shopee: palavras buscadas</h3>
       <label for="cfgPalavras">Uma por linha</label>
       <textarea id="cfgPalavras"></textarea>
@@ -487,6 +490,7 @@ function preencherConfig(e) {
   $('cfgMlAtivo').value = c.mlAtivo === false ? '0' : '1';
   $('cfgMlDesconto').value = c.mlDescontoMinimo; $('cfgMlPorDia').value = c.mlOfertasPorDia;
   $('cfgMlSemDesconto').value = c.mlAceitarSemDesconto ? '1' : '0';
+  $('cfgProibidas').value = (c.palavrasProibidas || []).join('\n');
   $('cfgDestAtivo').value = c.destaqueAtivo ? '1' : '0'; $('cfgDestPreco').value = c.destaquePrecoMinimo;
   $('cfgDestPorDia').value = c.destaquesPorDia; $('cfgDestHoras').value = (c.destaqueHorarios || []).join(', ');
   $('cfgMlPalavras').value = (c.mlPalavras || []).join('\n');
@@ -567,6 +571,7 @@ $('formConfig').onsubmit = async (ev) => {
     palavras: $('cfgPalavras').value,
     mlAtivo: $('cfgMlAtivo').value === '1', mlDescontoMinimo: $('cfgMlDesconto').value, mlOfertasPorDia: $('cfgMlPorDia').value,
     mlAceitarSemDesconto: $('cfgMlSemDesconto').value === '1', mlPalavras: $('cfgMlPalavras').value,
+    palavrasProibidas: $('cfgProibidas').value,
     destaqueAtivo: $('cfgDestAtivo').value === '1', destaquePrecoMinimo: $('cfgDestPreco').value,
     destaquesPorDia: $('cfgDestPorDia').value, destaqueHorarios: $('cfgDestHoras').value,
   });

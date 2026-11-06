@@ -2,6 +2,7 @@
 // O campo "offerLink" já vem com o SEU link de afiliado.
 const crypto = require('crypto');
 const config = require('./config');
+const { temPalavraProibida } = require('./filtros');
 
 const URL_API = 'https://open-api.affiliate.shopee.com.br/graphql';
 
@@ -51,6 +52,7 @@ async function buscarPalavra(palavra) {
   const dados = await chamarApi(BUSCA, { keyword: palavra, page: 1, limit: 50 });
   return dados.productOfferV2.nodes
     .filter((p) =>
+      !temPalavraProibida(p.productName) &&
       Number(p.priceDiscountRate) >= config.descontoMinimo &&
       Number(p.ratingStar) >= config.notaMinima &&
       Number(p.sales) >= config.vendasMinimas)

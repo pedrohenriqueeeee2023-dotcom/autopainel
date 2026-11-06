@@ -3,6 +3,7 @@
 // subcategoria e ficamos só com os que estão com desconto.
 // O link de afiliado vem do Gerador de links do ML (você cola no painel).
 const config = require('./config');
+const { temPalavraProibida } = require('./filtros');
 
 const API = 'https://api.mercadolibre.com';
 let token = null;
@@ -53,6 +54,7 @@ function linkLimpo(produtoId, permalink) {
 // "produto" pode vir pronto da busca (nome e fotos); senão é buscado aqui.
 // Devolve null se não passar nos filtros.
 async function montarOferta(produtoId, produto, regras = {}) {
+  if (produto && produto.name && temPalavraProibida(produto.name)) return null; // já sabemos o nome: descarta cedo
   const aceitarSemDesconto = regras.aceitarSemDesconto ?? Boolean(config.mlAceitarSemDesconto);
   const descontoMinimo = regras.descontoMinimo ?? config.mlDescontoMinimo;
   const precoMinimo = regras.precoMinimo || 0;
@@ -69,6 +71,7 @@ async function montarOferta(produtoId, produto, regras = {}) {
   if (precoMinimo && !(melhor && melhor.price >= precoMinimo)) return null;
 
   if (!produto || !produto.pictures) produto = await chamar(`/products/${produtoId}`);
+  if (temPalavraProibida(produto.name)) return null;
   const foto = produto.pictures && produto.pictures[0] && (produto.pictures[0].url || produto.pictures[0].secure_url);
   return {
     id: 'ml-' + produtoId,

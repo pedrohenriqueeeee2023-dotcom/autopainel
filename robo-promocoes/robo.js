@@ -6,6 +6,7 @@ const config = require('./config');
 const fila = require('./fila');
 const { buscarOfertas } = require('./shopee');
 const ml = require('./mercadolivre');
+const { temPalavraProibida } = require('./filtros');
 const { iniciarPainel } = require('./painel');
 
 const DONO = (process.env.DONO || '').replace(/\D/g, '');
@@ -360,6 +361,8 @@ async function atualizarML() {
   if (estado.buscandoML) return;
   estado.buscandoML = true;
   try {
+    const tirados = fila.removerSe((o) => temPalavraProibida(o.titulo));
+    if (tirados) registrar(`${tirados} ofertas tiradas da fila por terem palavra proibida no nome.`);
     registrar('Buscando ofertas no Mercado Livre...');
     fila.limparMLAutomatico(); // troca as que ainda esperam link pelas novas
     const pular = new Set([...fila.idsEnviados(), ...fila.ids()]); // não repete o que já foi ou já está na fila

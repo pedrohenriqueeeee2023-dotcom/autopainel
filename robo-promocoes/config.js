@@ -49,6 +49,9 @@ const padrao = {
   mlPorPalavra: 30,
   // Aceitar produtos sem desconto (ou que o ML não mostra o preço)
   mlAceitarSemDesconto: false,
+  // Ofertas com qualquer uma destas palavras no nome são descartadas (Shopee e ML)
+  palavrasProibidas: [],
+
   // Destaques: produtos de ticket mais alto (ex.: celulares e eletrodomésticos),
   // no máximo "destaquesPorDia" por dia, nos horários de "destaqueHorarios"
   destaqueAtivo: false,
@@ -74,7 +77,7 @@ Object.defineProperty(config, 'salvar', {
     for (const chave of Object.keys(padrao)) {
       if (!(chave in novos)) continue;
       const valor = novos[chave];
-      if (chave === 'palavras' || chave === 'mlPalavras') {
+      if (chave === 'palavras' || chave === 'mlPalavras' || chave === 'palavrasProibidas') {
         const lista = Array.isArray(valor) ? valor : String(valor).split('\n');
         config[chave] = lista.map((p) => p.trim()).filter(Boolean);
       } else if (chave === 'nomeDoGrupo') {
