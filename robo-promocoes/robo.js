@@ -9,6 +9,7 @@ const { buscarOfertas } = require('./shopee');
 const ml = require('./mercadolivre');
 const { temPalavraProibida } = require('./filtros');
 const { iniciarPainel } = require('./painel');
+const { criarContexto } = require('./contexto');
 
 const DONO = (process.env.DONO || '').replace(/\D/g, '');
 const reais = (n) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -551,7 +552,12 @@ process.on('unhandledRejection', (erro) => {
   registrar('Erro inesperado (o robô continua ligado): ' + ((erro && erro.message) || erro));
 });
 
+// "Por que hoje": só sugere palavras (6h30); não envia nada
+const contexto = criarContexto({ config, registrar });
+contexto.iniciar();
+
 iniciarPainel({
+  contexto,
   estado,
   config,
   fila,

@@ -133,9 +133,15 @@ function iniciarPainel(robo) {
   }));
   app.post('/api/config', responder(async (req) => {
     const grupoAntes = robo.config.nomeDoGrupo;
+    const cidadeAntes = robo.config.cidade;
+    const gatilhosAntes = JSON.stringify(robo.config.gatilhosDesligados || []);
     robo.config.salvar(req.body);
     robo.registrar('Configurações salvas.');
     if (robo.config.nomeDoGrupo !== grupoAntes) await robo.acharGrupo();
+    // "Por que hoje": trocou a cidade ou os gatilhos? recalcula em segundo plano
+    if (robo.contexto && (robo.config.cidade !== cidadeAntes || JSON.stringify(robo.config.gatilhosDesligados || []) !== gatilhosAntes)) {
+      robo.contexto.recalcular();
+    }
   }));
   app.post('/api/grupo/atualizar', responder(() => robo.acharGrupo().then(() => ({ ok: true }))));
   app.get('/api/grupo/mensagens', responder(async () => ({ ok: true, mensagens: await robo.mensagensDoGrupo() })));
@@ -144,6 +150,14 @@ function iniciarPainel(robo) {
     await robo.desconectar();
   }));
 
+  // "Por que hoje" (só sugestão)
+  app.get('/api/contexto', (req, res) => {
+    res.json({ ok: true, gatilhos: robo.contexto ? robo.contexto.gatilhos : [], contexto: robo.contexto ? robo.contexto.atual() : null });
+  });
+  app.post('/api/contexto/recalcular', responder(async () => {
+    if (!robo.contexto) return { ok: false, erro: 'Recurso indisponível.' };
+    return { ok: true, contexto: await robo.contexto.recalcular() };
+  }));
   app.post('/api/teste-foto', responder(async (req) => ({ ok: true, ...(await robo.testarFoto(req.body && req.body.url)) })));
   app.post('/api/desligar', (req, res) => {
     res.json({ ok: true });

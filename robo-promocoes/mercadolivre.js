@@ -224,4 +224,4 @@ async function buscarDestaquesML(jaEnviados, registrar = console.log) {
   return ofertas.sort((a, b) => economia(b) - economia(a)).slice(0, config.destaquesPorDia || 2);
 }
 
-module.exports = { buscarOfertasML, buscarDestaquesML, temChaves, escolherComMinimo };
+module.exports = { buscarOfertasML, buscarDestaquesML, temChaves, escolherComMinimo, chamar };

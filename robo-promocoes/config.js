@@ -49,6 +49,12 @@ const padrao = {
   mlPorPalavra: 30,
   // Aceitar produtos sem desconto (ou que o ML não mostra o preço)
   mlAceitarSemDesconto: false,
+  // "Por que hoje" (só sugestão): cidade do clima, nicho do banco de palavras
+  // ('beleza' ou 'adulto') e gatilhos desligados ('clima','datas','salario','semana','trends','ml')
+  cidade: 'Belo Horizonte',
+  nichoContexto: 'beleza',
+  gatilhosDesligados: [],
+
   // Ofertas com qualquer uma destas palavras no nome são descartadas (Shopee e ML)
   palavrasProibidas: [],
 
@@ -87,6 +93,11 @@ Object.defineProperty(config, 'salvar', {
       if (chave === 'palavras' || chave === 'mlPalavras' || chave === 'palavrasProibidas') {
         const lista = Array.isArray(valor) ? valor : String(valor).split('\n');
         config[chave] = lista.map((p) => p.trim()).filter(Boolean);
+      } else if (chave === 'cidade' || chave === 'nichoContexto') {
+        if (String(valor).trim()) config[chave] = String(valor).trim();
+      } else if (chave === 'gatilhosDesligados') {
+        const lista = Array.isArray(valor) ? valor : String(valor).split(/[,\s]+/);
+        config.gatilhosDesligados = lista.map((g) => String(g).trim()).filter(Boolean);
       } else if (chave === 'nomeDoGrupo') {
         config.nomeDoGrupo = String(valor).trim();
       } else if (chave === 'enviosAtivos' || chave === 'mlAtivo' || chave === 'mlAceitarSemDesconto' || chave === 'destaqueAtivo') {

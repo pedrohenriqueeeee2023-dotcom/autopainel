@@ -176,6 +176,20 @@
   ::-webkit-scrollbar { width: 10px; height: 10px; }
   ::-webkit-scrollbar-thumb { background: var(--borda-forte); border-radius: 10px; border: 3px solid transparent; background-clip: padding-box; }
   ::-webkit-scrollbar-thumb:hover { background: var(--neon); background-clip: padding-box; }
+  /* ---------- Por que hoje ---------- */
+  .sinais { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .sinal { background: var(--campo); border: 1px solid var(--borda); border-radius: 999px; padding: 6px 12px; font-size: .78rem; color: var(--suave); max-width: 100%; }
+  .sinal b { color: var(--texto); font-weight: 600; margin-right: 4px; }
+  .sinal.off { opacity: .45; }
+  .ctx-lista { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  .ctx-item { background: var(--campo); border: 1px solid var(--borda); border-radius: 13px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
+  .ctx-item .palavra { font-weight: 600; color: var(--neon-2); }
+  .ctx-item .motivo { font-size: .76rem; color: var(--suave); }
+  .ctx-item .gancho { font-size: .84rem; }
+  .ctx-item button { align-self: flex-start; margin-top: 4px; }
+  .gatilhos { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 6px; }
+  .gatilhos label { display: inline-flex; align-items: center; gap: 6px; margin: 0; font-size: .84rem; color: var(--texto); cursor: pointer; }
+  .gatilhos input { width: auto; accent-color: var(--neon); }
   #aviso {
     position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 10; display: none;
     background: var(--cartao-2); color: var(--texto); border: 1px solid var(--neon); box-shadow: 0 0 24px var(--neon-brilho);
@@ -225,6 +239,24 @@
       <button id="btnAgora">Enviar a próxima agora</button>
       <button id="btnShopee" class="secundario">Buscar ofertas agora</button>
     </div>
+  </section>
+
+  <section class="largo" id="secContexto">
+    <h2>Por que hoje <span class="selo aviso">só sugestão</span></h2>
+    <p class="ajuda">Todo dia às 6h30 o robô olha clima, datas comemorativas, fase do salário, dia da semana, Google Trends e os mais vendidos do ML, e sugere palavras de busca para a Shopee com ganchos para a mensagem. <b>Nada aqui envia mensagem nem muda a fila.</b></p>
+    <div id="ctxSinais" class="sinais"><span class="sinal">Carregando…</span></div>
+    <div id="ctxLista" class="ctx-lista"></div>
+    <div class="botoes">
+      <button id="btnCtxCopiar" class="secundario">Copiar palavras</button>
+      <button id="btnCtxRecalcular" class="secundario">Recalcular agora</button>
+    </div>
+    <div class="linha" style="margin-top:6px">
+      <div><label for="ctxCidade">Cidade do clima</label><input id="ctxCidade" placeholder="Belo Horizonte"></div>
+      <div><label>&nbsp;</label><button id="btnCtxCidade" class="secundario">Salvar cidade</button></div>
+    </div>
+    <label>Gatilhos ligados</label>
+    <div id="ctxGatilhos" class="gatilhos"></div>
+    <p class="ajuda" id="ctxGerado" style="margin:12px 0 0"></p>
   </section>
 
   <section>
@@ -578,6 +610,72 @@ $('formConfig').onsubmit = async (ev) => {
   if (r.ok) avisar('💾 Configurações salvas!');
   configPreenchida = false; atualizar();
 };
+
+// ---------- Por que hoje (só sugestão) ----------
+const NOMES_GATILHO = { clima: '🌦️ Clima', datas: '📅 Datas', salario: '💸 Salário', semana: '🗓️ Dia', trends: '🔎 Google Trends', ml: '🏆 Mais vendidos ML' };
+let ctxAtual = null;
+async function carregarContexto() {
+  try {
+    const r = await (await fetch('/api/contexto', { cache: 'no-store' })).json();
+    desenharContexto(r.contexto, r.gatilhos || Object.keys(NOMES_GATILHO));
+  } catch {}
+}
+function desenharContexto(c, gatilhos) {
+  ctxAtual = c;
+  const desligados = new Set((ultimo && ultimo.config && ultimo.config.gatilhosDesligados) || []);
+  if (!c) {
+    $('ctxSinais').innerHTML = '<span class="sinal">Ainda não gerou hoje. Gera às 6h30, ou clique em "Recalcular agora".</span>';
+    $('ctxLista').innerHTML = '';
+  } else {
+    $('ctxSinais').innerHTML = gatilhos.map((g) =>
+      `<span class="sinal ${desligados.has(g) ? 'off' : ''}"><b>${NOMES_GATILHO[g] || g}</b>${esc((c.sinais || {})[g] || '—')}</span>`).join('');
+    $('ctxLista').innerHTML = (c.sugestoes || []).length
+      ? c.sugestoes.map((s, i) => `<div class="ctx-item"><span class="palavra">${esc(s.palavra)}</span>
+          <span class="motivo">${esc(s.motivo)}</span><span class="gancho">${esc(s.gancho)}</span>
+          <button class="mini secundario" data-gancho="${i}">Copiar gancho</button></div>`).join('')
+      : '<div class="vazio">Nenhuma sugestão hoje.</div>';
+    const quando = new Date(c.geradoEm).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+    $('ctxGerado').textContent = `Gerado em ${quando}${c.cidade ? ' · cidade: ' + c.cidade : ''}. As palavras não entram sozinhas na busca: copie e cole em Configurações > Shopee se quiser usar.`;
+  }
+  if (!$('ctxGatilhos').dataset.pronto) {
+    $('ctxGatilhos').innerHTML = gatilhos.map((g) =>
+      `<label><input type="checkbox" data-gatilho="${g}" ${desligados.has(g) ? '' : 'checked'}> ${NOMES_GATILHO[g] || g}</label>`).join('');
+    $('ctxGatilhos').dataset.pronto = '1';
+  }
+  if (document.activeElement !== $('ctxCidade') && ultimo && ultimo.config) $('ctxCidade').value = ultimo.config.cidade || '';
+}
+async function copiarTexto(texto, aviso) {
+  try { await navigator.clipboard.writeText(texto); } catch {
+    const t = document.createElement('textarea'); t.value = texto; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove();
+  }
+  avisar(aviso);
+}
+$('btnCtxCopiar').onclick = () => {
+  if (!ctxAtual || !ctxAtual.sugestoes || !ctxAtual.sugestoes.length) return avisar('Nada para copiar ainda.');
+  copiarTexto(ctxAtual.sugestoes.map((s) => s.palavra).join('\n'), 'Palavras copiadas (uma por linha).');
+};
+$('ctxLista').onclick = (ev) => {
+  const b = ev.target.closest('button[data-gancho]'); if (!b || !ctxAtual) return;
+  copiarTexto(ctxAtual.sugestoes[Number(b.dataset.gancho)].gancho, 'Gancho copiado.');
+};
+$('btnCtxRecalcular').onclick = async () => {
+  $('btnCtxRecalcular').disabled = true; $('btnCtxRecalcular').textContent = 'Calculando…';
+  const r = await api('POST', '/api/contexto/recalcular');
+  if (r.ok) { avisar('Sugestões atualizadas.'); await carregarContexto(); }
+  $('btnCtxRecalcular').disabled = false; $('btnCtxRecalcular').textContent = 'Recalcular agora';
+};
+$('btnCtxCidade').onclick = async () => {
+  const cidade = $('ctxCidade').value.trim(); if (!cidade) return;
+  const r = await api('POST', '/api/config', { cidade });
+  if (r.ok) { avisar('Cidade salva. Recalculando…'); setTimeout(carregarContexto, 8000); }
+};
+$('ctxGatilhos').onchange = async () => {
+  const desligados = [...$('ctxGatilhos').querySelectorAll('input[data-gatilho]')].filter((i) => !i.checked).map((i) => i.dataset.gatilho);
+  const r = await api('POST', '/api/config', { gatilhosDesligados: desligados });
+  if (r.ok) { avisar('Gatilhos salvos. Recalculando…'); setTimeout(carregarContexto, 8000); }
+};
+setTimeout(carregarContexto, 800);
+setInterval(carregarContexto, 60 * 1000);
 
 atualizar();
 setInterval(atualizar, 3000);
