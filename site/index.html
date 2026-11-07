@@ -2,6 +2,13 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
+<script>
+  // Consentimento (LGPD): tudo negado até a pessoa aceitar no aviso de cookies.
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', { analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
+  try { if (localStorage.getItem('cookies') === 'aceito') gtag('consent', 'update', { analytics_storage: 'granted' }); } catch (e) {}
+</script>
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -199,6 +206,17 @@ footer a{font-weight:800;text-decoration:none}
 /* botão fixo aparece só depois do topo */
 .sticky{transform:translateY(140%);transition:transform .3s ease}
 .sticky.on{transform:none}
+
+/* aviso de cookies */
+.cookie{position:fixed;z-index:20;left:12px;right:12px;bottom:12px;display:flex;flex-direction:column;gap:14px;padding:18px;background:var(--surface);border-radius:var(--r);box-shadow:0 12px 40px rgba(29,21,25,.22);font-size:15px}
+.cookie[hidden]{display:none}
+.cookie-btns{display:flex;gap:10px}
+.cookie-btns .btn{flex:1;min-height:46px;font-size:15px;font-family:inherit;cursor:pointer;border:0;background:var(--pink)}
+.cookie-btns .btn-line{background:transparent;border:2px solid var(--ink)}
+.cookie-open .sticky{visibility:hidden}
+@media (min-width:760px){
+  .cookie{left:auto;right:24px;bottom:24px;max-width:420px}
+}
 /* depoimentos */
 .quotes{display:grid;grid-auto-flow:column;grid-auto-columns:min(80vw,320px);gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:10px}
 .quote{margin:0;display:flex;flex-direction:column;background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;scroll-snap-align:start}
@@ -263,7 +281,7 @@ footer a{font-weight:800;text-decoration:none}
     </div>
     <div class="hero-act">
       <div class="hero-cta">
-        <a data-cta="topo" class="btn btn-main" href="https://wa.me/553172070822?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Quero%20agendar%20minha%20primeira%20aula." target="_blank" rel="noopener">
+        <a data-cta="topo" class="btn btn-main" href="https://wa.me/5531972070822?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Quero%20agendar%20minha%20primeira%20aula." target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 19z"/></svg>
           Agendar pelo WhatsApp
         </a>
@@ -313,7 +331,7 @@ footer a{font-weight:800;text-decoration:none}
         <li><svg viewBox="0 0 24 24" fill="none" stroke="#D6006B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v5h5"/><path d="M12 8v4l3 2"/></svg><div><h3>Voltar a dirigir</h3><p>Retomar depois de um tempo sem dirigir.</p></div></li>
         <li><svg viewBox="0 0 24 24" fill="none" stroke="#D6006B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="1"/><path d="M9 4V2.5h6V4"/><path d="M8.5 13l2.5 2.5 4.5-5"/></svg><div><h3>Preparação para exame</h3><p>Treinar as manobras cobradas na prova.</p></div></li>
       </ul>
-      <p class="needs-foot">Não achou sua dificuldade? <a data-cta="para_quem_e" href="https://wa.me/553172070822?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Quero%20te%20contar%20minha%20dificuldade%20para%20dirigir." target="_blank" rel="noopener">Me conte no WhatsApp →</a></p>
+      <p class="needs-foot">Não achou sua dificuldade? <a data-cta="para_quem_e" href="https://wa.me/5531972070822?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Quero%20te%20contar%20minha%20dificuldade%20para%20dirigir." target="_blank" rel="noopener">Me conte no WhatsApp →</a></p>
     </div>
   </section>
 
@@ -348,7 +366,7 @@ footer a{font-weight:800;text-decoration:none}
         </div>
         <div class="promo-buy">
           <div class="promo-price"><s>R$80</s><b>R$40</b></div>
-          <a data-cta="aula_experimental" class="btn btn-white" href="https://wa.me/553172070822?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Quero%20agendar%20minha%20aula%20experimental%20por%20R%2440." target="_blank" rel="noopener">Quero minha aula experimental</a>
+          <a data-cta="aula_experimental" class="btn btn-white" href="https://wa.me/5531972070822?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Quero%20agendar%20minha%20aula%20experimental%20por%20R%2440." target="_blank" rel="noopener">Quero minha aula experimental</a>
         </div>
       </div>
       <div class="bf-box">
@@ -362,7 +380,7 @@ footer a{font-weight:800;text-decoration:none}
         <div class="row"><h3>Exame prático</h3><p>Eu cuido da marcação e do aluguel do carro para o dia da prova.</p><div class="val">R$400</div></div>
         <div class="price-foot">
           <p><span>Indicou, ganhou:</span> 1 aula grátis a cada amigo que fechar com a Valéria.</p>
-          <a data-cta="pacotes" class="btn btn-main" href="https://wa.me/553172070822?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Quero%20saber%20qual%20pacote%20%C3%A9%20melhor%20para%20mim." target="_blank" rel="noopener">Escolher pelo WhatsApp</a>
+          <a data-cta="pacotes" class="btn btn-main" href="https://wa.me/5531972070822?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Quero%20saber%20qual%20pacote%20%C3%A9%20melhor%20para%20mim." target="_blank" rel="noopener">Escolher pelo WhatsApp</a>
         </div>
       </div>
     </div>
@@ -395,7 +413,7 @@ footer a{font-weight:800;text-decoration:none}
         <div>
           <h2>Sua primeira aula por R$40.</h2>
           <p>Me chama no WhatsApp e a gente marca um horário.</p>
-          <a data-cta="chamada_final" class="btn btn-main" style="margin-top:22px" href="https://wa.me/553172070822?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Quero%20agendar%20minha%20primeira%20aula%20por%20R%2440." target="_blank" rel="noopener">
+          <a data-cta="chamada_final" class="btn btn-main" style="margin-top:22px" href="https://wa.me/5531972070822?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Quero%20agendar%20minha%20primeira%20aula%20por%20R%2440." target="_blank" rel="noopener">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 19z"/></svg>
             Agendar minha aula
           </a>
@@ -409,17 +427,38 @@ footer a{font-weight:800;text-decoration:none}
 <footer>
   <div class="wrap">
     <span>© 2026 Valéria Maria · Instrutora de direção · Betim, BH e Contagem</span>
-    <a data-cta="rodape" href="https://wa.me/553172070822" target="_blank" rel="noopener">(31) 7207-0822</a>
+    <a data-cta="rodape" href="https://wa.me/5531972070822" target="_blank" rel="noopener">(31) 97207-0822</a>
   </div>
 </footer>
 
+<div class="cookie" role="dialog" aria-label="Aviso de cookies" hidden>
+  <p>Usamos cookies para entender como o site é usado e melhorar sua experiência.</p>
+  <div class="cookie-btns">
+    <button type="button" class="btn btn-line" data-cookie="recusado">Recusar</button>
+    <button type="button" class="btn btn-main" data-cookie="aceito">Aceitar</button>
+  </div>
+</div>
 <div class="sticky">
-  <a data-cta="botao_fixo" class="btn btn-main" href="https://wa.me/553172070822?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Quero%20agendar%20minha%20aula%20experimental%20por%20R%2440." target="_blank" rel="noopener">
+  <a data-cta="botao_fixo" class="btn btn-main" href="https://wa.me/5531972070822?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Quero%20agendar%20minha%20aula%20experimental%20por%20R%2440." target="_blank" rel="noopener">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 19z"/></svg>
     Agendar aula por R$40
   </a>
 </div>
 <script>
+// Aviso de cookies: mostra uma vez e guarda a escolha.
+(function(){
+  var box = document.querySelector('.cookie'), saved = null;
+  try { saved = localStorage.getItem('cookies'); } catch (e) {}
+  if (saved) return;
+  box.hidden = false; document.documentElement.classList.add('cookie-open');
+  box.addEventListener('click', function(e){
+    var v = e.target.getAttribute && e.target.getAttribute('data-cookie');
+    if (!v) return;
+    try { localStorage.setItem('cookies', v); } catch (err) {}
+    if (v === 'aceito') gtag('consent', 'update', { analytics_storage: 'granted' });
+    box.hidden = true; document.documentElement.classList.remove('cookie-open');
+  });
+})();
 // Envia "whatsapp_click" ao GA4 e ao GTM em todo clique num link de WhatsApp, com o local do botão.
 document.addEventListener('click', function(e){
   var a = e.target.closest && e.target.closest('a[href*="wa.me/"]');
