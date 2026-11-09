@@ -96,14 +96,36 @@ async function montarOferta(produtoId, produto, regras = {}) {
 //    não mostra nos "mais vendidos", como o adulto)
 //  - senão: mais vendidos de cada subcategoria (de mlGrupos, ou de mlCategorias)
 // Também anota de qual grupo (ex.: beleza, casa) cada produto veio.
+// Natal: de 1º de novembro a 25 de dezembro entra sozinho um grupo "natal"
+// (árvores, pisca-pisca, enfeites, Papai Noel...), sem precisar mexer na config.
+// Vem primeiro na lista para esses produtos ficarem marcados como "natal" e não "casa".
+const CATEGORIAS_NATAL = [
+  'MLB117798', // Árvores e Enfeites de Natal (geral)
+  'MLB117806', // Árvores de Natal
+  'MLB117801', // Enfeites para Árvores
+  'MLB189949', // Pisca Pisca
+  'MLB117799', // Bonecos de Papai Noel
+  'MLB277814', // Guirlandas de Natal
+  'MLB117805', // Velas Natalinas
+  'MLB457302', // Capas de Almofada (Natal)
+  'MLB428947', // Botas de Natal
+  'MLB457301', // Porta-velas de Natal
+  'MLB270249', // Presépios de Natal
+];
+function epocaDeNatal(data = new Date()) {
+  const mes = data.getMonth() + 1;
+  return mes === 11 || (mes === 12 && data.getDate() <= 25);
+}
+
 function categoriasComGrupo() {
   const grupos = config.mlGrupos;
+  const natal = epocaDeNatal() && config.mlNatal !== false ? CATEGORIAS_NATAL.map((c) => [c, 'natal']) : [];
   if (grupos && typeof grupos === 'object' && Object.keys(grupos).length) {
-    const lista = [];
+    const lista = [...natal];
     for (const [grupo, cats] of Object.entries(grupos)) for (const c of cats || []) lista.push([c, grupo]);
     return lista;
   }
-  return (config.mlCategorias || []).map((c) => [c, 'geral']);
+  return [...natal, ...(config.mlCategorias || []).map((c) => [c, 'geral'])];
 }
 
 async function acharCandidatos(registrar, grupoDe = new Map()) {

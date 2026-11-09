@@ -270,9 +270,10 @@
     <div id="mlSemPendencia" class="ajuda">Nenhuma oferta esperando link agora.</div>
     <div id="mlPendente" style="display:none">
       <ol class="passos">
-        <li>Clique em <b>Copiar links</b>.</li>
+        <li>Clique em <b>Copiar links</b> (vão 30 por vez, o máximo do Gerador).</li>
         <li>No painel de afiliados do ML, abra o <b>Gerador de produtos recomendados</b>, cole tudo e clique em <b>Gerar</b>.</li>
         <li>Copie <b>todos</b> os links que ele devolver e cole no campo de baixo, <b>na mesma ordem</b>.</li>
+        <li>Clique em <b>Salvar links</b>: o próximo lote de 30 aparece sozinho. Repita quantas vezes quiser.</li>
       </ol>
       <label for="mlLista">Produtos esperando link (<span id="mlQtd">0</span>)</label>
       <textarea id="mlLista" readonly></textarea>
@@ -497,14 +498,19 @@ function desenharFila(lista) {
 }
 
 let ultimaListaML = null;
+const LOTE_ML = 30;
 function desenharLinksML(lista) {
   const esperando = lista.filter((o) => o.precisaLink);
-  const texto = esperando.map((o) => o.linkProduto).join('\n');
+  // O Gerador do ML aceita no máximo 30 produtos por vez: mostra/copia só o próximo lote
+  const lote = esperando.slice(0, LOTE_ML);
+  const texto = lote.map((o) => o.linkProduto).join('\n');
   $('seloLinksML').className = 'selo ' + (esperando.length ? 'aviso' : 'ok');
   $('seloLinksML').textContent = esperando.length ? `${esperando.length} esperando` : 'em dia';
   $('mlPendente').style.display = esperando.length ? '' : 'none';
   $('mlSemPendencia').style.display = esperando.length ? 'none' : '';
-  if (texto !== ultimaListaML) { ultimaListaML = texto; $('mlLista').value = texto; $('mlQtd').textContent = esperando.length; }
+  $('mlQtd').textContent = esperando.length > LOTE_ML ? `próximos ${lote.length} de ${esperando.length}` : esperando.length;
+  $('btnCopiarML').textContent = `Copiar ${lote.length} links`;
+  if (texto !== ultimaListaML) { ultimaListaML = texto; $('mlLista').value = texto; }
 }
 
 function desenharLog(log) {

@@ -115,9 +115,11 @@ function iniciarPainel(robo) {
     const esperando = robo.fila.esperandoLink().length;
     const usados = robo.fila.colocarLinks(links);
     robo.registrar(`${usados} links de afiliado do ML colocados nas ofertas.`);
-    const aviso = links.length !== esperando
-      ? ` Atenção: você colou ${links.length} links e havia ${esperando} ofertas esperando; usei na ordem.`
-      : '';
+    // O painel copia de 30 em 30 (limite do Gerador do ML): só avisa se não bater com o lote
+    const lote = Math.min(30, esperando);
+    const aviso = links.length !== lote
+      ? ` Atenção: você colou ${links.length} links e o lote tinha ${lote}; usei na ordem.`
+      : (esperando > usados ? ` Faltam ${esperando - usados}: copie o próximo lote.` : '');
     return { ok: true, usados, aviso };
   }));
   app.delete('/api/fila/:id', responder((req) => robo.fila.remover(req.params.id)));
