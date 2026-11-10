@@ -297,11 +297,49 @@ async function tick() {
   const dentroDoHorario = agora.getHours() >= config.horaInicio && agora.getHours() < config.horaFim;
   if (!config.enviosAtivos || !dentroDoHorario) { estado.proximoEnvio = null; return; }
 
+  await avisarSemLink();
+
   if (!estado.proximoEnvio) estado.proximoEnvio = calcularProximoEnvio();
   if (Date.now() < estado.proximoEnvio) return;
 
   estado.proximoEnvio = Date.now() + config.intervaloMinutos * 60 * 1000;
   if (fila.prontas(filtroDaVez()) > 0) await enviarProxima();
+}
+
+// ---------- Aviso no WhatsApp pessoal quando acabam as ofertas com link ----------
+// Se não sobrou nenhuma oferta pronta (todas esperando o link do Gerador do ML),
+// manda um aviso para AVISO_NUMERO (ou DONO) a cada 30 minutos, só no horário de envio.
+// Vai só para o número pessoal, nunca para o grupo.
+const AVISO_NUMERO = (process.env.AVISO_NUMERO || process.env.DONO || '').replace(/\D/g, '');
+const AVISO_A_CADA = 30 * 60 * 1000;
+const ARQ_ULTIMO_AVISO = require('path').join(__dirname, 'dados', 'ultimo-aviso-link.txt');
+let avisando = false;
+async function avisarSemLink() {
+  if (!AVISO_NUMERO || avisando) return;
+  if (Date.now() - LIGOU_EM < 3 * 60 * 1000) return; // espera o WhatsApp assentar depois de ligar
+  if (fila.prontas((o) => !o.destaque) > 0) return;
+  let ultimo = 0;
+  try { ultimo = Number(require('fs').readFileSync(ARQ_ULTIMO_AVISO, 'utf8')) || 0; } catch {}
+  if (Date.now() - ultimo < AVISO_A_CADA) return;
+  avisando = true;
+  try {
+    const id = await client.getNumberId(AVISO_NUMERO); // acha o id certo (com ou sem o 9)
+    if (!id) throw new Error('número ' + AVISO_NUMERO + ' não tem WhatsApp');
+    const esperando = fila.esperandoLink().length;
+    const nome = config.nomeDoGrupo ? ` (${config.nomeDoGrupo})` : '';
+    await client.sendMessage(id._serialized,
+      `⚠️ *Robô sem link${nome}*\n\nAcabaram as ofertas com link pronto, então o robô parou de enviar.\n` +
+      `${esperando} ofertas esperando o link do Gerador do ML.\n\nCole os links no painel. ` +
+      'Repito este aviso a cada 30 minutos enquanto estiver sem link.');
+    require('fs').writeFileSync(ARQ_ULTIMO_AVISO, String(Date.now()));
+    registrar(`Aviso "sem link" enviado para o seu WhatsApp (${esperando} esperando link).`);
+  } catch (erro) {
+    // tenta de novo em 5 min em vez de a cada 30 s
+    try { require('fs').writeFileSync(ARQ_ULTIMO_AVISO, String(Date.now() - AVISO_A_CADA + 5 * 60 * 1000)); } catch {}
+    registrar('Não consegui mandar o aviso "sem link": ' + ((erro && erro.message) || erro));
+  } finally {
+    avisando = false;
+  }
 }
 
 // ---------- Shopee ----------
