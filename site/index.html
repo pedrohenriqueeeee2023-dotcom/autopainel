@@ -235,6 +235,8 @@ footer a{font-weight:800;text-decoration:none}
 @media (min-width:760px){
   .cookie{left:auto;right:24px;bottom:24px;max-width:420px}
 }
+.ref-link{color:#FF8CBF;white-space:nowrap}
+.ref-link:hover{color:#fff}
 /* depoimentos */
 .quotes{display:grid;grid-auto-flow:column;grid-auto-columns:min(80vw,320px);gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:10px}
 .quote{margin:0;display:flex;flex-direction:column;background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;scroll-snap-align:start}
@@ -397,7 +399,7 @@ footer a{font-weight:800;text-decoration:none}
         <div class="row"><h3>20 aulas</h3><p>Para quem está começando do zero.</p><div class="val">R$70<small>por aula</small><small>Total: <span class="tot">R$1.400</span></small><small class="bf-only">Black: <b>R$1.260</b></small></div></div>
         <div class="row"><h3>Exame prático</h3><p>Eu cuido da marcação e do aluguel do carro para o dia da prova.</p><div class="val">R$400</div></div>
         <div class="price-foot">
-          <p><span>Indicou, ganhou:</span> 1 aula grátis a cada amigo que fechar com a Valéria.</p>
+          <p><span>Indicou, ganhou:</span> 1 aula grátis a cada amigo que fechar com a Valéria. <a class="ref-link" data-cta="indicacao" href="https://wa.me/5531972070822?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Quero%20indicar%20um%20amigo%20e%20ganhar%20uma%20aula%20gr%C3%A1tis." target="_blank" rel="noopener">Quero indicar alguém →</a></p>
           <a data-cta="pacotes" class="btn btn-main" href="https://wa.me/5531972070822?text=Ol%C3%A1%2C%20Val%C3%A9ria%21%20Quero%20saber%20qual%20pacote%20%C3%A9%20melhor%20para%20mim." target="_blank" rel="noopener">Escolher pelo WhatsApp</a>
         </div>
       </div>
@@ -487,6 +489,11 @@ document.addEventListener('click', function(e){
   window.dataLayer.push({ event: 'whatsapp_click', cta_location: sec, cta_text: txt });
   if (window.gtag) gtag('event', 'whatsapp_click', { cta_location: sec, cta_text: txt });
   if (window.fbq) fbq('track', 'Contact', { content_name: sec });
+  // Botões que pedem a aula experimental de R$40 também contam como Lead.
+  if (['aula_experimental', 'botao_fixo', 'chamada_final'].indexOf(sec) > -1) {
+    if (window.gtag) gtag('event', 'generate_lead', { cta_location: sec, value: 40, currency: 'BRL' });
+    if (window.fbq) fbq('track', 'Lead', { content_name: sec, value: 40, currency: 'BRL' });
+  }
 });
 (function(){
   var st = document.querySelector('.sticky'), hero = document.querySelector('.hero');
@@ -505,6 +512,30 @@ document.addEventListener('click', function(e){
     timers.forEach(function(el){ el.querySelectorAll('b').forEach(function(b){ b.textContent = pad(v[b.dataset.u]); }); });
   }
   var id = setInterval(tick, 1000); tick();
+})();
+</script>
+<script>
+// Outros eventos (GA4 respeita o consentimento; o pixel só existe depois do Aceitar).
+(function(){
+  function enviar(nomeGA, nomeMeta, dados, personalizado){
+    if (window.gtag) gtag('event', nomeGA, dados || {});
+    if (window.fbq) fbq(personalizado ? 'trackCustom' : 'track', nomeMeta, dados || {});
+  }
+  function quandoAparecer(el, fn){
+    if (!el || !('IntersectionObserver' in window)) return;
+    var io = new IntersectionObserver(function(e){ if (e[0].isIntersecting){ io.disconnect(); fn(); } }, { threshold: 0.3 });
+    io.observe(el);
+  }
+  // Viu a seção de preços
+  quandoAparecer(document.getElementById('precos'), function(){ enviar('view_precos', 'ViewContent', { content_name: 'precos' }); });
+  // Chegou ao fim da página
+  quandoAparecer(document.querySelector('footer'), function(){ enviar('scroll_fim', 'scroll_fim', {}, true); });
+  // Abriu uma pergunta frequente
+  document.querySelectorAll('.faq details').forEach(function(d){
+    d.addEventListener('toggle', function(){
+      if (d.open) enviar('faq_open', 'faq_open', { question: d.querySelector('summary').textContent.trim() }, true);
+    });
+  });
 })();
 </script>
 </body>
