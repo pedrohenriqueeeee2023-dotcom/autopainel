@@ -7,7 +7,25 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('consent', 'default', { analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
-  try { if (localStorage.getItem('cookies') === 'aceito') gtag('consent', 'update', { analytics_storage: 'granted' }); } catch (e) {}
+  // Meta Pixel: só carrega depois que a pessoa aceita os cookies.
+  window.carregarPixel = function(){
+    if (window.fbq) return;
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1025963517257640');
+    fbq('track', 'PageView');
+  };
+  try {
+    if (localStorage.getItem('cookies') === 'aceito') {
+      gtag('consent', 'update', { analytics_storage: 'granted' });
+      carregarPixel();
+    }
+  } catch (e) {}
 </script>
 <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -455,11 +473,11 @@ footer a{font-weight:800;text-decoration:none}
     var v = e.target.getAttribute && e.target.getAttribute('data-cookie');
     if (!v) return;
     try { localStorage.setItem('cookies', v); } catch (err) {}
-    if (v === 'aceito') gtag('consent', 'update', { analytics_storage: 'granted' });
+    if (v === 'aceito') { gtag('consent', 'update', { analytics_storage: 'granted' }); carregarPixel(); }
     box.hidden = true; document.documentElement.classList.remove('cookie-open');
   });
 })();
-// Envia "whatsapp_click" ao GA4 e ao GTM em todo clique num link de WhatsApp, com o local do botão.
+// Envia "whatsapp_click" ao GA4 e ao GTM, e "Contact" ao Meta Pixel em todo clique num link de WhatsApp, com o local do botão.
 document.addEventListener('click', function(e){
   var a = e.target.closest && e.target.closest('a[href*="wa.me/"]');
   if (!a) return;
@@ -468,6 +486,7 @@ document.addEventListener('click', function(e){
   var txt = a.textContent.replace(/\s+/g, ' ').trim();
   window.dataLayer.push({ event: 'whatsapp_click', cta_location: sec, cta_text: txt });
   if (window.gtag) gtag('event', 'whatsapp_click', { cta_location: sec, cta_text: txt });
+  if (window.fbq) fbq('track', 'Contact', { content_name: sec });
 });
 (function(){
   var st = document.querySelector('.sticky'), hero = document.querySelector('.hero');
