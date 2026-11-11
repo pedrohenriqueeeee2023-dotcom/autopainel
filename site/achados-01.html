@@ -27,28 +27,50 @@
 <title>Achados 01 | Black Friday</title>
 <meta name="description" content="Entre no grupo Achados 01 no WhatsApp e receba as melhores ofertas da Black Friday.">
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#0B0B0B">
+<meta name="theme-color" content="#070707">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@500;700;800&display=swap">
 <style>
-:root{--bg:#0B0B0B;--ink:#fff;--muted:#B5B5B5;--yellow:#FFD400;--green:#25D366;--card:#171717}
+:root{--bg:#070707;--ink:#fff;--muted:#C9C2B0;--gold:#FFC83D;--gold2:#FF8A00;--green:#25D366}
 *{box-sizing:border-box;margin:0}
-html,body{height:100%}
-body{background:var(--bg);color:var(--ink);font-family:Manrope,system-ui,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px 16px}
-main{width:100%;max-width:420px;text-align:center;display:flex;flex-direction:column;gap:20px}
-.tag{align-self:center;background:var(--yellow);color:#000;font-weight:800;font-size:13px;letter-spacing:.08em;padding:6px 12px;border-radius:99px}
-h1{font-size:clamp(34px,10vw,46px);line-height:1.05;font-weight:800}
-h1 span{color:var(--yellow)}
-p{color:var(--muted);font-size:17px;line-height:1.5}
-ul{list-style:none;padding:0;display:grid;gap:10px;text-align:left;background:var(--card);border-radius:16px;padding:18px}
-li{font-size:16px;display:flex;gap:10px}
-li::before{content:"✓";color:var(--green);font-weight:800}
-.btn{display:flex;align-items:center;justify-content:center;gap:10px;min-height:58px;border-radius:14px;background:var(--green);color:#04210F;font-weight:800;font-size:18px;text-decoration:none;font-family:inherit;border:0;cursor:pointer;animation:pulse 1.8s infinite}
+html,body{height:100%;overflow:hidden}
+body{background:radial-gradient(ellipse at 50% 35%,#2a1d05 0%,var(--bg) 60%);color:var(--ink);font-family:Manrope,system-ui,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px 16px}
+
+/* carrosséis dos lados */
+.rail{position:fixed;top:0;bottom:0;width:min(46vw,300px);overflow:hidden;opacity:.28;filter:blur(1.6px) saturate(.9);pointer-events:none;z-index:0;
+  -webkit-mask-image:linear-gradient(transparent,#000 15%,#000 85%,transparent);mask-image:linear-gradient(transparent,#000 15%,#000 85%,transparent)}
+.rail.l{left:-6vw;transform:rotate(-4deg)}
+.rail.r{right:-6vw;transform:rotate(4deg)}
+.track{display:flex;flex-direction:column;gap:14px;animation:sobe 38s linear infinite}
+.rail.r .track{animation-name:desce;animation-duration:44s}
+@keyframes sobe{to{transform:translateY(-50%)}}
+@keyframes desce{from{transform:translateY(-50%)}to{transform:translateY(0)}}
+.promo{background:#1F2C24;border-radius:12px;padding:10px;font-size:12px;line-height:1.35;color:#E9EDEF}
+.promo .img{height:90px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:44px;margin-bottom:8px;background:linear-gradient(135deg,#2c2c2c,#121212)}
+.promo b{display:block;font-size:13px}
+.promo s{color:#8FA39A}
+.promo .por{color:var(--green);font-weight:800;font-size:15px}
+.promo .off{float:right;background:var(--gold);color:#000;font-weight:800;border-radius:6px;padding:1px 6px}
+/* escurece o centro para o texto ficar legível */
+.fade{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse 55% 60% at 50% 50%,rgba(7,7,7,.92),rgba(7,7,7,.25) 75%,transparent)}
+
+main{position:relative;z-index:2;width:100%;max-width:400px;text-align:center;display:flex;flex-direction:column;gap:18px}
+.tag{align-self:center;display:flex;align-items:center;gap:8px;border:1px solid rgba(255,200,61,.45);color:var(--gold);font-weight:800;font-size:12px;letter-spacing:.14em;padding:7px 14px;border-radius:99px;background:rgba(255,200,61,.08)}
+.tag i{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold);animation:pisca 1.2s infinite}
+@keyframes pisca{50%{opacity:.25}}
+h1{font-family:Anton,Impact,sans-serif;font-weight:400;font-size:clamp(58px,19vw,92px);line-height:.92;letter-spacing:.01em;text-transform:uppercase}
+h1 span{display:block;background:linear-gradient(180deg,#FFE08A,var(--gold) 45%,var(--gold2));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 24px rgba(255,160,0,.35))}
+.sub{color:var(--muted);font-size:17px;line-height:1.5}
+.sub strong{color:#fff}
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.chips span{font-size:13px;font-weight:700;padding:7px 12px;border-radius:99px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;min-height:60px;border-radius:16px;background:linear-gradient(180deg,#34E37A,#1FB85A);color:#032411;font-weight:800;font-size:18px;text-decoration:none;box-shadow:0 10px 30px rgba(37,211,102,.35),inset 0 1px 0 rgba(255,255,255,.4);animation:pulse 1.8s infinite}
 .btn svg{width:24px;height:24px}
-.small{font-size:13px}
+.small{font-size:13px;color:#8d877a}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
-@media (prefers-reduced-motion:reduce){.btn{animation:none}}
+@media (prefers-reduced-motion:reduce){.btn,.track,.tag i{animation:none}}
+
 .cookie{position:fixed;z-index:10;left:12px;right:12px;top:12px;max-width:480px;margin:auto;background:#fff;color:#111;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;font-size:14px;text-align:left;box-shadow:0 12px 40px rgba(0,0,0,.5)}
 .cookie[hidden]{display:none}
 .cookie div{display:flex;gap:10px}
@@ -57,20 +79,20 @@ li::before{content:"✓";color:var(--green);font-weight:800}
 </style>
 </head>
 <body>
+<div class="rail l" aria-hidden="true"><div class="track"></div></div>
+<div class="rail r" aria-hidden="true"><div class="track"></div></div>
+<div class="fade"></div>
+
 <main>
-  <span class="tag">EDIÇÃO BLACK FRIDAY</span>
+  <span class="tag"><i></i>EDIÇÃO BLACK FRIDAY</span>
   <h1>Achados <span>01</span></h1>
-  <p>Entre no grupo gratuito do WhatsApp e receba as melhores ofertas da Black Friday antes de todo mundo.</p>
-  <ul>
-    <li>Promoções reais, conferidas</li>
-    <li>Cupons exclusivos do grupo</li>
-    <li>Sem spam: só achados</li>
-  </ul>
+  <p class="sub">Os <strong>melhores descontos da Black Friday</strong> direto no seu WhatsApp, antes de todo mundo.</p>
+  <div class="chips"><span>🔥 Ofertas conferidas</span><span>🎟️ Cupons do grupo</span><span>🚫 Sem spam</span></div>
   <a class="btn js-grupo" data-cta="principal" href="#" target="_blank" rel="noopener">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 19z"/></svg>
-    Entrar no grupo agora
+    Entrar no grupo grátis
   </a>
-  <p class="small">Vagas limitadas. Você pode sair do grupo quando quiser.</p>
+  <p class="small">Vagas limitadas · Saia quando quiser</p>
 </main>
 
 <div class="cookie" hidden>
@@ -84,6 +106,29 @@ li::before{content:"✓";color:var(--green);font-weight:800}
 <script>
 // Coloca o link do grupo em todos os botões
 document.querySelectorAll('.js-grupo').forEach(function(a){ a.href = LINK_GRUPO; });
+
+// "Prints" de promoções nos carrosséis (ilustrativos)
+(function(){
+  var P = [
+    ['🎧','Fone Bluetooth com cancelamento de ruído','299,90','119,90',60],
+    ['📱','Smartphone 128GB tela 6.6"','1.899,00','1.149,00',39],
+    ['👟','Tênis de corrida masculino','399,99','179,99',55],
+    ['☕','Cafeteira expresso automática','899,00','449,00',50],
+    ['⌚','Smartwatch com GPS','599,00','239,00',60],
+    ['🧴','Kit skincare 5 itens','189,90','79,90',58],
+    ['📺','Smart TV 50" 4K','2.799,00','1.799,00',36],
+    ['🎮','Controle sem fio para console','449,00','259,00',42],
+    ['🍳','Air fryer 5 litros','549,90','249,90',55],
+    ['💻','Notebook 16GB SSD 512GB','4.299,00','2.899,00',33],
+    ['🎒','Mochila notebook impermeável','229,90','89,90',61],
+    ['🔊','Caixa de som portátil','349,00','159,00',54]
+  ];
+  function card(p){ return '<div class="promo"><div class="img">'+p[0]+'</div><span class="off">-'+p[4]+'%</span><b>'+p[1]+'</b><s>R$ '+p[2]+'</s><br><span class="por">R$ '+p[3]+'</span><br>🔗 link no grupo</div>'; }
+  var tr = document.querySelectorAll('.track');
+  [P.slice(0,6).concat(P.slice(6)), P.slice(6).concat(P.slice(0,6))].forEach(function(lista, i){
+    var h = lista.map(card).join(''); tr[i].innerHTML = h + h; // duplicado = loop contínuo
+  });
+})();
 
 // Aviso de cookies: mostra uma vez e guarda a escolha
 (function(){
