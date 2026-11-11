@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<script>
+  // ===== TROQUE AQUI =====
+  window.LINK_GRUPO = 'https://chat.whatsapp.com/SEU_CODIGO_AQUI'; // link de convite do grupo
+  window.PIXEL_ID   = 'SEU_PIXEL_ID_AQUI';                         // ID do Pixel da Meta
+  // =======================
+
+  // Meta Pixel: só carrega depois que a pessoa aceita os cookies (LGPD).
+  window.carregarPixel = function(){
+    if (window.fbq || /SEU_/.test(PIXEL_ID)) return;
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', PIXEL_ID);
+    fbq('track', 'PageView', { content_name: 'achados-01' });
+  };
+  try { if (localStorage.getItem('cookies') === 'aceito') carregarPixel(); } catch (e) {}
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Achados 01 | Black Friday</title>
+<meta name="description" content="Entre no grupo Achados 01 no WhatsApp e receba as melhores ofertas da Black Friday.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0B0B0B">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap">
+<style>
+:root{--bg:#0B0B0B;--ink:#fff;--muted:#B5B5B5;--yellow:#FFD400;--green:#25D366;--card:#171717}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:Manrope,system-ui,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px 16px}
+main{width:100%;max-width:420px;text-align:center;display:flex;flex-direction:column;gap:20px}
+.tag{align-self:center;background:var(--yellow);color:#000;font-weight:800;font-size:13px;letter-spacing:.08em;padding:6px 12px;border-radius:99px}
+h1{font-size:clamp(34px,10vw,46px);line-height:1.05;font-weight:800}
+h1 span{color:var(--yellow)}
+p{color:var(--muted);font-size:17px;line-height:1.5}
+ul{list-style:none;padding:0;display:grid;gap:10px;text-align:left;background:var(--card);border-radius:16px;padding:18px}
+li{font-size:16px;display:flex;gap:10px}
+li::before{content:"✓";color:var(--green);font-weight:800}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;min-height:58px;border-radius:14px;background:var(--green);color:#04210F;font-weight:800;font-size:18px;text-decoration:none;font-family:inherit;border:0;cursor:pointer;animation:pulse 1.8s infinite}
+.btn svg{width:24px;height:24px}
+.small{font-size:13px}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
+@media (prefers-reduced-motion:reduce){.btn{animation:none}}
+.cookie{position:fixed;left:12px;right:12px;bottom:12px;max-width:480px;margin:auto;background:#fff;color:#111;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;font-size:14px;text-align:left;box-shadow:0 12px 40px rgba(0,0,0,.5)}
+.cookie[hidden]{display:none}
+.cookie div{display:flex;gap:10px}
+.cookie button{flex:1;min-height:44px;border-radius:10px;font:700 15px Manrope,sans-serif;cursor:pointer;border:2px solid #111;background:transparent}
+.cookie button[data-cookie=aceito]{background:#111;color:#fff}
+</style>
+</head>
+<body>
+<main>
+  <span class="tag">EDIÇÃO BLACK FRIDAY</span>
+  <h1>Achados <span>01</span></h1>
+  <p>Entre no grupo gratuito do WhatsApp e receba as melhores ofertas da Black Friday antes de todo mundo.</p>
+  <ul>
+    <li>Promoções reais, conferidas</li>
+    <li>Cupons exclusivos do grupo</li>
+    <li>Sem spam: só achados</li>
+  </ul>
+  <a class="btn js-grupo" data-cta="principal" href="#" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 19z"/></svg>
+    Entrar no grupo agora
+  </a>
+  <p class="small">Vagas limitadas. Você pode sair do grupo quando quiser.</p>
+</main>
+
+<div class="cookie" hidden>
+  <span>Usamos cookies para medir os anúncios e melhorar sua experiência.</span>
+  <div>
+    <button data-cookie="recusado">Recusar</button>
+    <button data-cookie="aceito">Aceitar</button>
+  </div>
+</div>
+
+<script>
+// Coloca o link do grupo em todos os botões
+document.querySelectorAll('.js-grupo').forEach(function(a){ a.href = LINK_GRUPO; });
+
+// Aviso de cookies: mostra uma vez e guarda a escolha
+(function(){
+  var box = document.querySelector('.cookie'), saved = null;
+  try { saved = localStorage.getItem('cookies'); } catch (e) {}
+  if (saved) return;
+  box.hidden = false;
+  box.addEventListener('click', function(e){
+    var v = e.target.getAttribute('data-cookie');
+    if (!v) return;
+    try { localStorage.setItem('cookies', v); } catch (err) {}
+    if (v === 'aceito') carregarPixel();
+    box.hidden = true;
+  });
+})();
+
+// Clique no botão do grupo = evento "Lead" no Pixel
+document.addEventListener('click', function(e){
+  var a = e.target.closest && e.target.closest('.js-grupo');
+  if (a && window.fbq) fbq('track', 'Lead', { content_name: 'achados-01', cta: a.dataset.cta });
+});
+</script>
+</body>
+</html>
