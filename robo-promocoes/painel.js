@@ -116,7 +116,7 @@ function iniciarPainel(robo) {
   };
 
   app.get('/api/estado', (req, res) => {
-    res.json({ ...robo.estado, config: robo.config, fila: robo.fila.listar(), linkConexao, nomeRobo: NOME_ROBO, videos: robo.videos.listar() });
+    res.json({ ...robo.estado, config: robo.config, fila: robo.fila.listar(), linkConexao, nomeRobo: NOME_ROBO });
   });
   app.post('/api/link-conexao/novo', responder(async () => {
     linkConexao = novoLink();
@@ -179,19 +179,26 @@ function iniciarPainel(robo) {
     if (!robo.contexto) return { ok: false, erro: 'Recurso indisponível.' };
     return { ok: true, contexto: await robo.contexto.recalcular() };
   }));
-  // Vídeos de produtos
-  app.post('/api/videos', responder(async (req) => robo.videos.adicionar(req.body && req.body.url)));
-  app.post('/api/videos/:n/aprovar', responder(async (req) => robo.videos.aprovar(Number(req.params.n))));
-  app.post('/api/videos/:n/produto', responder(async (req) => {
-    const { palavras, link } = req.body || {};
-    if (!palavras && !link) return { ok: false, erro: 'Escreva o nome do produto ou cole um link.' };
-    robo.videos.trocarProduto(Number(req.params.n), link ? { link } : { palavras })
-      .catch((e) => robo.registrar('Vídeo #' + req.params.n + ': ' + e.message));
-    return { ok: true };
+  // Robô do Instagram (pm2 robo-insta, mesmo servidor): estado, comandos e vídeo de prévia
+  const INSTA = `http://127.0.0.1:${process.env.INSTA_PORTA || 3005}`;
+  const insta = async (caminho, corpo) => {
+    const r = await fetch(INSTA + caminho, corpo ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corpo) } : {});
+    return r.json();
+  };
+  app.get('/api/insta', responder(async () => {
+    try { return { ok: true, ...(await insta('/estado')) }; } catch { return { ok: true, desligado: true }; }
   }));
-  app.delete('/api/videos/:n', responder(async (req) => robo.videos.descartar(Number(req.params.n))));
-  app.get('/api/videos/:n/arquivo', (req, res) => {
-    const arquivo = robo.videos.arquivoFinal(Number(req.params.n));
+  app.post('/api/insta/comando', responder(async (req) => {
+    try {
+      const { resposta } = await insta('/comando', { texto: String((req.body && req.body.texto) || '') });
+      return { ok: !/^❌/.test(resposta || ''), resposta, erro: resposta };
+    } catch { return { ok: false, erro: 'O robô do Instagram está desligado.' }; }
+  }));
+  app.post('/api/insta/ativo', responder(async (req) => {
+    try { return await insta('/ativo', { ativo: Boolean(req.body && req.body.ativo) }); } catch { return { ok: false, erro: 'O robô do Instagram está desligado.' }; }
+  }));
+  app.get('/api/insta/video/:n', (req, res) => {
+    const arquivo = path.join(PASTA_INSTA, 'posts', String(Number(req.params.n)), 'final.mp4');
     if (!require('fs').existsSync(arquivo)) return res.status(404).send('Vídeo não encontrado');
     res.sendFile(arquivo);
   });

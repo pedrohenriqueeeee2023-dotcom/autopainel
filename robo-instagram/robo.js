@@ -260,14 +260,37 @@ async function comando(texto) {
 
 // Servidor só para o próprio computador (o robô do WhatsApp repassa os comandos)
 function iniciarServidor() {
+  const json = (res, dados) => res.writeHead(200, { 'Content-Type': 'application/json' }).end(JSON.stringify(dados));
   http.createServer((req, res) => {
-    if (req.method !== 'POST' || req.url !== '/comando') { res.writeHead(404).end(); return; }
+    // Estado para o painel
+    if (req.method === 'GET' && req.url === '/estado') {
+      const hoje = diaDe();
+      const posts = lerPosts().slice(-15).reverse().map((p) => ({
+        n: p.n, quando: `${nomeDia(p.dia)} às ${p.hora}h`, status: p.status, headline: p.headline, legenda: p.legenda,
+        original: p.midia && p.midia.permalink, link: p.link, erro: p.erro, motivo: p.motivo,
+        opcoes: p.opcoes && p.opcoes.map((o) => `${nomeDia(o.dia)} às ${o.hora}h`),
+        temVideo: fs.existsSync(path.join(pastaDo(p.n), 'final.mp4')),
+      }));
+      const postadosHoje = lerPosts().filter((p) => p.status === 'postado' && new Date(p.postadoEm).toDateString() === hoje).length;
+      return json(res, { conta: conta && conta.username, ativo: config.ativo, horarios: config.horarios, antecedencia: config.antecedenciaMinutos, posts, postadosHoje });
+    }
+    if (req.method !== 'POST' || !['/comando', '/ativo'].includes(req.url)) { res.writeHead(404).end(); return; }
     let corpo = '';
     req.on('data', (d) => { corpo += d; if (corpo.length > 20000) req.destroy(); });
     req.on('end', async () => {
+      let dados = {};
+      try { dados = JSON.parse(corpo); } catch {}
+      if (req.url === '/ativo') {
+        // Liga/desliga as postagens e guarda em dados/config.json
+        config.ativo = Boolean(dados.ativo);
+        const arq = path.join(DADOS, 'config.json');
+        gravar(arq, { ...ler(arq, {}), ativo: config.ativo });
+        registrar(`Postagens ${config.ativo ? 'LIGADAS' : 'DESLIGADAS'} pelo painel.`);
+        return json(res, { ok: true, ativo: config.ativo });
+      }
       let resposta = null;
-      try { resposta = await comando(String(JSON.parse(corpo).texto || '').trim()); } catch (e) { resposta = '❌ ' + e.message; }
-      res.writeHead(200, { 'Content-Type': 'application/json' }).end(JSON.stringify({ resposta }));
+      try { resposta = await comando(String(dados.texto || '').trim()); } catch (e) { resposta = '❌ ' + e.message; }
+      json(res, { resposta });
     });
   }).listen(PORTA, '127.0.0.1', () => registrar(`Esperando comandos do WhatsApp na porta ${PORTA}.`));
 }

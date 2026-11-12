@@ -10,7 +10,6 @@ const ml = require('./mercadolivre');
 const { temPalavraProibida } = require('./filtros');
 const { iniciarPainel } = require('./painel');
 const { criarContexto } = require('./contexto');
-const { criarVideos } = require('./videos');
 
 const DONO = (process.env.DONO || '').replace(/\D/g, '');
 const reais = (n) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -289,9 +288,6 @@ async function tick() {
 
   if (diaContagem !== hoje) { diaContagem = hoje; estado.enviadasHoje = 0; }
 
-  // Vídeos têm a própria chave (config.videoAtivo) e os próprios horários
-  videos.tick({ conectado: true }).catch((e) => registrar('Erro nos vídeos: ' + e.message));
-
   if (ultimoDiaBusca !== hoje && agora.getHours() >= config.horaInicio - 1) {
     ultimoDiaBusca = hoje;
     try { require('fs').writeFileSync(ARQ_ULTIMA_BUSCA, hoje); } catch {}
@@ -568,10 +564,6 @@ client.on('message', async (msg) => {
     }
   }
 
-  // Vídeos: links do TikTok/Reels/Shorts, "ok 3", "nao 3", "produto 3 ...", "link 3 ...", "videos"
-  const respostaVideo = await videos.comando(texto);
-  if (respostaVideo) return msg.reply(respostaVideo);
-
   if (/^ml\s/i.test(texto)) {
     const [titulo, link] = texto.slice(3).split('|');
     const r = adicionarML(titulo, link);
@@ -611,7 +603,7 @@ process.on('unhandledRejection', (erro) => {
   registrar('Erro inesperado (o robô continua ligado): ' + ((erro && erro.message) || erro));
 });
 
-// Vídeos de produtos (3x por dia). Prévias vão só para o DONO; o grupo só nos horários.
+// Mensagem/vídeo só para o DONO (usado pela ponte com o robô do Instagram)
 async function enviarParaDono({ arquivo, texto }) {
   if (!DONO) throw new Error('falta o DONO no .env');
   if (estado.whatsapp !== 'conectado') throw new Error('WhatsApp não está conectado');
@@ -623,17 +615,6 @@ async function enviarParaDono({ arquivo, texto }) {
     await client.sendMessage(id._serialized, texto);
   }
 }
-async function enviarNoGrupo({ arquivo, texto }) {
-  if (estado.whatsapp !== 'conectado') throw new Error('WhatsApp não está conectado');
-  if (!grupo && !(await acharGrupo())) throw new Error('grupo não encontrado');
-  try {
-    await grupo.sendMessage(MessageMedia.fromFilePath(arquivo), { caption: texto });
-  } catch (erro) {
-    verificarPaginaQuebrada(erro);
-    throw erro;
-  }
-}
-const videos = criarVideos({ config, registrar, enviarParaDono, enviarNoGrupo, montarTexto, ligouEm: LIGOU_EM });
 
 // "Por que hoje": só sugere palavras (6h30); não envia nada
 const contexto = criarContexto({ config, registrar });
@@ -655,7 +636,6 @@ iniciarPainel({
   desconectar: () => client.logout(),
   pedirCodigo,
   testarFoto,
-  videos,
   enviarParaDono,
   desligar: async () => {
     registrar('Desligando o robô a pedido do painel...');
