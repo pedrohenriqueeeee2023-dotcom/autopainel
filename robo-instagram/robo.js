@@ -10,6 +10,7 @@ const path = require('path');
 const config = require('./config');
 const ig = require('./ig');
 const { editar, duracao } = require('./editar');
+const { headlineDoTitulo } = require('./cabecalho');
 
 const DADOS = path.join(__dirname, 'dados');
 const ARQ_ESTADO = path.join(DADOS, 'estado.json');
@@ -87,7 +88,16 @@ async function preparar(pasta) {
         continue;
       }
       registrar(`Editando ${m.url} (${m.views} visualizações, ${Math.round(d)}s)...`);
-      const arquivo = await editar(pasta, { ...config.marca, duracaoMaxima: config.duracaoMaxima });
+      if (!conta) conta = await ig.minhaConta().catch(() => null);
+      const headline = headlineDoTitulo(m.titulo);
+      const arquivo = await editar(pasta, {
+        nome: config.marca.nome,
+        usuario: config.marca.usuario || (conta && conta.username) || 'rota.achadinhos',
+        verificado: config.marca.verificado,
+        headline,
+        duracaoMaxima: config.duracaoMaxima,
+      });
+      m.headline = headline;
       gravar(path.join(pasta, 'midia.json'), { ...m, permalink: m.url });
       return { midia: { ...m, permalink: m.url, like_count: m.views }, arquivo };
     } catch (e) {

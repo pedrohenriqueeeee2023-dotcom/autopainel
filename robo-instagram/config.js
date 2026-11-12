@@ -24,13 +24,11 @@ const padrao = {
   // Não usa vídeos com estas palavras na legenda original
   palavrasProibidas: ['sexy', 'lingerie', '+18', 'arma', 'remédio', 'emagrecer'],
 
+  // Topo do vídeo (estilo post de perfil). Foto: marca/logo.png. usuario vazio = @ da conta ligada.
   marca: {
     nome: 'Rota dos Achadinhos',
-    subtitulo: 'achadinhos todo dia',
-    rodape: 'SIGA PRA MAIS ACHADINHOS',
-    cor: '#e91e8c',
-    corDestaque: '#ffd84d',
-    corTexto: '#3a0d24',
+    usuario: '',
+    verificado: true,
   },
 
   // Legenda do post. {conta} vira o @ da conta.

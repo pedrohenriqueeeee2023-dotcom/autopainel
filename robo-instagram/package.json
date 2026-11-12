@@ -10,5 +10,5 @@
     "conta": "node robo.js conta"
   },
   "engines": { "node": ">=18" },
-  "dependencies": { "dotenv": "^16.4.5" }
+  "dependencies": { "dotenv": "^16.4.5", "puppeteer-core": "25.16.0" }
 }
