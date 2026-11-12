@@ -66,22 +66,25 @@ const IGNORAR = new Set(('achadinho achadinhos achado achados shopee shein merca
   'na no da do de para pra com sem que e o a os as um uma meu minha seu sua esse essa isso aqui ' +
   'achei comprei amei ameiii testei usei vale pena vem ver veja olha olhem gente vcs voces você viral fyp foryou ' +
   'foryoupage parati paravoce tiktok tiktokmademebuyit reels shorts trend promo promocao promoção ' +
-  'oferta ofertas desconto barato barata comprinhas compras unboxing review resenha dica dicas casa').split(' '));
+  'oferta ofertas desconto barato barata comprinhas compras unboxing review resenha dica dicas casa ' +
+  'este esta esse essa último ultimo última ultima melhor melhores novo nova novidade super top coisa coisas ' +
+  'produto produtos item itens app loja tudo muito mais hoje agora corre garantir marca comenta comentários ' +
+  'achou maravilhoso maravilhosos maravilhosa útil úteis util uteis lindo linda perfeito perfeita incrível incrivel amo ' +
+  'descrição descricao perfil video vídeo ela ele elas eles você voce quem também tambem ama bom boa').split(' '));
+// Começos de palavra que nunca são o produto (#shopeefinds, #achadinhosdashopee, #fypシ...)
+const IGNORAR_INICIO = /^(shopee|achad|achei|fyp|fy|foryou|viral|tiktok|reels|link|promo|oferta|comprinha)/;
 
+// Texto livre da legenda primeiro; hashtags (que costumam ser genéricas) só completam
 function palavrasDaLegenda(texto) {
-  const limpo = String(texto || '')
-    .replace(/https?:\/\/\S+/g, ' ')
-    .replace(/@\S+/g, ' ')
-    .replace(/#/g, ' ')
-    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
-    .toLowerCase();
-  const vistas = new Set();
-  const palavras = limpo.split(/\s+/).filter((p) => {
-    if (p.length < 3 || /^\d+$/.test(p) || IGNORAR.has(p) || vistas.has(p)) return false;
-    vistas.add(p);
-    return true;
-  });
-  return palavras.slice(0, 4).join(' ');
+  const semLinks = String(texto || '').replace(/https?:\/\/\S+/g, ' ').replace(/@\S+/g, ' ');
+  const tags = (semLinks.match(/#[\p{L}\p{N}_]+/gu) || []).map((t) => t.slice(1));
+  const livre = semLinks.replace(/#[\p{L}\p{N}_]+/gu, ' ');
+  const separar = (s) => s.replace(/[^\p{L}\p{N}\s]/gu, ' ').toLowerCase().split(/\s+/);
+  const candidatas = [...separar(livre), ...separar(tags.join(' '))]
+    .filter((p) => p.length >= 3 && !/^\d+$/.test(p) && !IGNORAR.has(p) && !IGNORAR_INICIO.test(p));
+  // Tira repetidas e as cortadas ("utensil" quando também tem "utensilios")
+  const unicas = [...new Set(candidatas)].filter((p, _, todas) => !todas.some((o) => o !== p && o.startsWith(p) && o.length - p.length <= 3));
+  return unicas.slice(0, 4).join(' ');
 }
 
 // ---------- Etapas ----------
