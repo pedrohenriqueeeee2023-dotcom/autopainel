@@ -97,7 +97,7 @@ function iniciarPainel(robo) {
   };
 
   app.get('/api/estado', (req, res) => {
-    res.json({ ...robo.estado, config: robo.config, fila: robo.fila.listar(), linkConexao, nomeRobo: NOME_ROBO });
+    res.json({ ...robo.estado, config: robo.config, fila: robo.fila.listar(), linkConexao, nomeRobo: NOME_ROBO, videos: robo.videos.listar() });
   });
   app.post('/api/link-conexao/novo', responder(async () => {
     linkConexao = novoLink();
@@ -160,6 +160,22 @@ function iniciarPainel(robo) {
     if (!robo.contexto) return { ok: false, erro: 'Recurso indisponível.' };
     return { ok: true, contexto: await robo.contexto.recalcular() };
   }));
+  // Vídeos de produtos
+  app.post('/api/videos', responder(async (req) => robo.videos.adicionar(req.body && req.body.url)));
+  app.post('/api/videos/:n/aprovar', responder(async (req) => robo.videos.aprovar(Number(req.params.n))));
+  app.post('/api/videos/:n/produto', responder(async (req) => {
+    const { palavras, link } = req.body || {};
+    if (!palavras && !link) return { ok: false, erro: 'Escreva o nome do produto ou cole um link.' };
+    robo.videos.trocarProduto(Number(req.params.n), link ? { link } : { palavras })
+      .catch((e) => robo.registrar('Vídeo #' + req.params.n + ': ' + e.message));
+    return { ok: true };
+  }));
+  app.delete('/api/videos/:n', responder(async (req) => robo.videos.descartar(Number(req.params.n))));
+  app.get('/api/videos/:n/arquivo', (req, res) => {
+    const arquivo = robo.videos.arquivoFinal(Number(req.params.n));
+    if (!require('fs').existsSync(arquivo)) return res.status(404).send('Vídeo não encontrado');
+    res.sendFile(arquivo);
+  });
   app.post('/api/teste-foto', responder(async (req) => ({ ok: true, ...(await robo.testarFoto(req.body && req.body.url)) })));
   app.post('/api/desligar', (req, res) => {
     res.json({ ok: true });

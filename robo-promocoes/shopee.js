@@ -90,4 +90,46 @@ async function buscarOfertas(jaEnviados) {
     .slice(0, config.ofertasPorDia);
 }
 
-module.exports = { buscarOfertas };
+// ---------- Para os vídeos: achar UM produto (por nome ou pelo link da Shopee) ----------
+
+const CAMPOS = 'itemId shopId productName priceMin priceDiscountRate sales ratingStar imageUrl offerLink';
+
+function paraOferta(p) {
+  const preco = Number(p.priceMin);
+  const desconto = Number(p.priceDiscountRate) || 0;
+  return {
+    id: 'shopee-' + p.itemId,
+    loja: 'Shopee',
+    titulo: p.productName,
+    preco,
+    precoAntes: desconto > 0 ? preco / (1 - desconto / 100) : null,
+    desconto,
+    foto: p.imageUrl,
+    link: p.offerLink,
+  };
+}
+
+// Procura pelo nome e devolve o mais relevante que tenha nota boa e já tenha vendido
+async function buscarProdutoShopee(palavras) {
+  const q = `query P($keyword: String) { productOfferV2(keyword: $keyword, sortType: 1, page: 1, limit: 20) { nodes { ${CAMPOS} } } }`;
+  const nos = (await chamarApi(q, { keyword: palavras })).productOfferV2.nodes
+    .filter((p) => !temPalavraProibida(p.productName));
+  const bom = nos.find((p) => Number(p.ratingStar) >= 4.5 && Number(p.sales) >= 20) || nos[0];
+  return bom ? paraOferta(bom) : null;
+}
+
+// Recebe um link de produto da Shopee (normal ou encurtado) e devolve a oferta com o SEU link
+async function produtoPorLinkShopee(url) {
+  let final = url;
+  if (!/-i\.\d+\.\d+|\/product\/\d+\/\d+/.test(url)) {
+    const r = await fetch(url, { redirect: 'follow' }); // link curto: descobre o endereço final
+    final = r.url;
+  }
+  const m = final.match(/-i\.(\d+)\.(\d+)/) || final.match(/\/product\/(\d+)\/(\d+)/);
+  if (!m) return null;
+  const q = `query P($shopId: Int64, $itemId: Int64) { productOfferV2(shopId: $shopId, itemId: $itemId, page: 1, limit: 1) { nodes { ${CAMPOS} } } }`;
+  const nos = (await chamarApi(q, { shopId: Number(m[1]), itemId: Number(m[2]) })).productOfferV2.nodes;
+  return nos[0] ? paraOferta(nos[0]) : null;
+}
+
+module.exports = { buscarOfertas, buscarProdutoShopee, produtoPorLinkShopee };

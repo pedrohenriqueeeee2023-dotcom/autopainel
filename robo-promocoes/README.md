@@ -49,3 +49,28 @@ pm2 start robo.js --name robo
 ```
 Na VPS, **coloque uma senha** em `PAINEL_SENHA` no `.env`. Sem senha, o painel só abre no próprio computador.
 Acesse `http://IP-DA-VPS:3000` e entre com qualquer usuário + a senha.
+
+## Vídeos de produtos (3x por dia)
+Você manda o link de um vídeo (TikTok, Reels, Shorts ou Kwai) no privado do robô, ou cola no painel (card **Vídeos de produtos**).
+O robô baixa o vídeo, acha o produto na Shopee com o seu link de afiliado, edita (vertical, preço e desconto em cima,
+"LINK NA LEGENDA" embaixo) e te manda o vídeo pronto no privado.
+
+Respostas no privado do robô (`N` é o número do vídeo):
+- `ok N`: aprova (posta no próximo horário)
+- `nao N`: descarta
+- `produto N nome do produto`: procura outro produto na Shopee e refaz o vídeo
+- `link N https://...`: usa esse link (Shopee vira link de afiliado com preço; outro link vai como está)
+- `videos`: lista os vídeos e o status
+
+Posta 1 vídeo aprovado em cada horário de **Horários** (padrão 10h, 15h e 20h, vale só dentro da hora).
+Vem **desligado**: ligue no painel quando quiser que vá para o grupo. Com **Aprovação** em "Postar sem aprovar",
+os vídeos com produto encontrado vão direto (os sem produto continuam esperando você).
+
+Precisa de `ffmpeg` e `yt-dlp` no computador do robô. No servidor (Ubuntu):
+```bash
+sudo apt install -y ffmpeg
+```
+```bash
+mkdir -p ~/bin && curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o ~/bin/yt-dlp && chmod +x ~/bin/yt-dlp
+```
+E no `.env`: `YTDLP_PATH=/home/venus/bin/yt-dlp`.

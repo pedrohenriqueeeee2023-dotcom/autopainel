@@ -73,6 +73,12 @@ const padrao = {
   mlMinimoPorGrupo: 0,
   // Mínimo/máximo de um grupo específico, ex.: { casa: { minimo: 5, maximo: 5 } }
   mlLimitesGrupo: {},
+  // Vídeos de produtos (você manda os links no privado do robô). Vem DESLIGADO.
+  videoAtivo: false,
+  // Cada vídeo vai pro seu privado e só posta no grupo depois de "ok N"
+  videoAprovacao: true,
+  // Horas em que posta um vídeo aprovado (vale só dentro da hora: 15 = das 15h às 15h59)
+  videoHorarios: [10, 15, 20],
   mlCategorias: ['MLB199407', 'MLB1263', 'MLB1248', 'MLB6284', 'MLB29884', 'MLB5383', 'MLB278194', 'MLB455174'],
 };
 
@@ -100,12 +106,12 @@ Object.defineProperty(config, 'salvar', {
         config.gatilhosDesligados = lista.map((g) => String(g).trim()).filter(Boolean);
       } else if (chave === 'nomeDoGrupo') {
         config.nomeDoGrupo = String(valor).trim();
-      } else if (chave === 'enviosAtivos' || chave === 'mlAtivo' || chave === 'mlAceitarSemDesconto' || chave === 'destaqueAtivo') {
+      } else if (chave === 'enviosAtivos' || chave === 'mlAtivo' || chave === 'mlAceitarSemDesconto' || chave === 'destaqueAtivo' || chave === 'videoAtivo' || chave === 'videoAprovacao') {
         config[chave] = Boolean(valor);
-      } else if (chave === 'destaqueHorarios') {
+      } else if (chave === 'destaqueHorarios' || chave === 'videoHorarios') {
         const horas = (Array.isArray(valor) ? valor : String(valor).split(/[^0-9]+/))
-          .map(Number).filter((h) => Number.isInteger(h) && h >= 0 && h <= 23);
-        if (horas.length) config.destaqueHorarios = [...new Set(horas)].sort((a, b) => a - b);
+          .filter((h) => h !== '').map(Number).filter((h) => Number.isInteger(h) && h >= 0 && h <= 23);
+        if (horas.length) config[chave] = [...new Set(horas)].sort((a, b) => a - b);
       } else if (chave === 'mlCategorias' || chave === 'destaqueCategorias' || chave === 'mlGrupos' || chave === 'mlLimitesGrupo') {
         continue; // só muda pelo código
       } else if (!Number.isNaN(Number(valor)) && valor !== '') {

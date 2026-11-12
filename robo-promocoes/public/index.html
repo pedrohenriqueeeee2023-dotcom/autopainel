@@ -241,6 +241,25 @@
     </div>
   </section>
 
+  <section class="largo" id="secVideos">
+    <h2>Vídeos de produtos <span id="seloVideos" class="selo aviso">…</span></h2>
+    <div id="chaveVideos" class="chave off">
+      <div><b id="textoVideos">…</b><div class="ajuda" id="ajudaVideos" style="margin:2px 0 0"></div></div>
+      <button id="btnVideos">…</button>
+    </div>
+    <p class="ajuda">Cole o link de um vídeo do TikTok, Reels, Shorts ou Kwai (ou mande o link no privado do robô). Ele baixa, acha o produto na Shopee com o seu link, edita e te manda pra aprovar. Só posta no grupo nos horários, e só os aprovados.</p>
+    <form id="formVideo" class="linha">
+      <div style="flex:3"><label for="videoUrl">Link do vídeo</label><input id="videoUrl" type="url" placeholder="https://www.tiktok.com/@.../video/..." required></div>
+      <div><label>&nbsp;</label><button type="submit">Adicionar</button></div>
+    </form>
+    <div class="linha">
+      <div><label for="videoHorarios">Horários (horas)</label><input id="videoHorarios" placeholder="10, 15, 20"></div>
+      <div><label for="videoAprovacao">Aprovação</label><select id="videoAprovacao"><option value="1">Eu aprovo cada vídeo</option><option value="0">Postar sem aprovar</option></select></div>
+      <div><label>&nbsp;</label><button id="btnSalvarVideos" class="secundario">Salvar</button></div>
+    </div>
+    <ul id="listaVideos" class="lista"></ul>
+  </section>
+
   <section class="largo" id="secContexto">
     <h2>Por que hoje <span class="selo aviso">só sugestão</span></h2>
     <p class="ajuda">Todo dia às 6h30 o robô olha clima, datas comemorativas, fase do salário, dia da semana, Google Trends e os mais vendidos do ML, e sugere palavras de busca para a Shopee com ganchos para a mensagem. <b>Nada aqui envia mensagem nem muda a fila.</b></p>
@@ -497,6 +516,77 @@ function desenharFila(lista) {
   }).join('');
 }
 
+// ---------- Vídeos ----------
+const ROTULO_VIDEO = { novo: 'Na fila', baixando: 'Baixando…', editando: 'Editando…', aguardando: 'Esperando aprovação', pronto: 'Aprovado', postado: 'Postado', erro: 'Erro' };
+let videosAssinatura = '';
+function desenharVideos(e) {
+  const c = e.config, on = c.videoAtivo;
+  const horas = (c.videoHorarios || []).map((h) => h + 'h').join(', ');
+  $('chaveVideos').className = 'chave ' + (on ? 'on' : 'off');
+  $('textoVideos').textContent = on ? 'Vídeos ligados' : 'Vídeos desligados';
+  $('ajudaVideos').textContent = on ? `Posta 1 vídeo aprovado às ${horas}` : 'Pode adicionar e aprovar vídeos; nada vai pro grupo enquanto estiver desligado.';
+  $('btnVideos').textContent = on ? 'Desligar' : 'Ligar';
+  $('btnVideos').className = on ? 'secundario' : '';
+  const lista = e.videos || [];
+  const prontos = lista.filter((v) => v.status === 'pronto').length;
+  $('seloVideos').className = 'selo ' + (prontos ? 'ok' : 'aviso');
+  $('seloVideos').textContent = prontos + ' aprovado' + (prontos === 1 ? '' : 's');
+  if (!$('secVideos').contains(document.activeElement)) {
+    $('videoHorarios').value = (c.videoHorarios || []).join(', ');
+    $('videoAprovacao').value = c.videoAprovacao ? '1' : '0';
+  }
+  const assinatura = JSON.stringify(lista);
+  if (assinatura === videosAssinatura) return; // não recarrega os players à toa
+  videosAssinatura = assinatura;
+  const ul = $('listaVideos');
+  if (!lista.length) { ul.innerHTML = '<li class="vazio">Nenhum vídeo ainda. Cole um link acima.</li>'; return; }
+  ul.innerHTML = lista.map((v) => {
+    const p = v.produto;
+    const temArquivo = ['aguardando', 'pronto'].includes(v.status);
+    const preco = p && p.preco ? (p.desconto > 0 ? `${reais(p.preco)} · ${p.desconto}% OFF` : reais(p.preco)) : '';
+    const detalhe = v.status === 'erro' ? esc(v.erro) : p ? `${preco ? preco + ' · ' : ''}<a href="${esc(p.link)}" target="_blank" rel="noopener">link</a>` : (v.palavras ? `Não achei "${esc(v.palavras)}" na Shopee` : esc(v.url));
+    const midia = temArquivo ? `<video class="thumb" src="/api/videos/${v.n}/arquivo" preload="metadata" controls playsinline style="width:90px;height:160px;object-fit:cover"></video>` : '<div class="thumb"></div>';
+    return `<li>${midia}<div class="info">
+        <div class="titulo"><span class="loja ${v.status === 'pronto' ? 'shopee' : 'ml'}">#${v.n} ${ROTULO_VIDEO[v.status] || v.status}</span>${esc(p ? p.titulo : '')}</div>
+        <div class="detalhe">${detalhe}</div></div>
+      <div class="acoes">
+        ${v.status === 'aguardando' && p ? `<button class="mini" data-video="aprovar" data-n="${v.n}">Aprovar</button>` : ''}
+        ${temArquivo ? `<button class="mini secundario" data-video="produto" data-n="${v.n}">Trocar produto</button>` : ''}
+        ${v.status !== 'postado' ? `<button class="mini perigo" data-video="descartar" data-n="${v.n}">Descartar</button>` : ''}
+      </div></li>`;
+  }).join('');
+}
+$('btnVideos').onclick = async () => {
+  const ligar = !ultimo.config.videoAtivo;
+  if (ligar && !confirm('Ligar os vídeos? O robô vai postar no GRUPO 1 vídeo aprovado em cada horário.')) return;
+  await api('POST', '/api/config', { videoAtivo: ligar }); atualizar();
+};
+$('btnSalvarVideos').onclick = async () => {
+  const r = await api('POST', '/api/config', { videoHorarios: $('videoHorarios').value, videoAprovacao: $('videoAprovacao').value === '1' });
+  if (r.ok !== false) avisar('✅ Vídeos salvos');
+  atualizar();
+};
+$('formVideo').onsubmit = async (ev) => {
+  ev.preventDefault();
+  const r = await api('POST', '/api/videos', { url: $('videoUrl').value });
+  if (r.ok) { $('videoUrl').value = ''; avisar(`📥 Vídeo #${r.n} recebido. Vou baixar e editar.`); }
+  atualizar();
+};
+$('listaVideos').onclick = async (ev) => {
+  const b = ev.target.closest('button[data-video]'); if (!b) return;
+  const n = b.dataset.n, acao = b.dataset.video;
+  if (acao === 'aprovar') await api('POST', `/api/videos/${n}/aprovar`);
+  if (acao === 'descartar' && confirm(`Descartar o vídeo #${n}?`)) await api('DELETE', `/api/videos/${n}`);
+  if (acao === 'produto') {
+    const t = prompt('Nome do produto para procurar na Shopee, ou cole um link (Shopee/ML):');
+    if (!t) return;
+    const corpo = /^https?:\/\//.test(t.trim()) ? { link: t.trim() } : { palavras: t.trim() };
+    const r = await api('POST', `/api/videos/${n}/produto`, corpo);
+    if (r.ok) avisar('🔎 Refazendo o vídeo com o produto novo…');
+  }
+  atualizar();
+};
+
 let ultimaListaML = null;
 const LOTE_ML = 30;
 function desenharLinksML(lista) {
@@ -539,7 +629,7 @@ async function atualizar() {
     const e = await (await fetch('/api/estado')).json();
     const gruposMudaram = ultimo && JSON.stringify(ultimo.grupos) !== JSON.stringify(e.grupos);
     ultimo = e;
-    desenharWhatsapp(e); desenharEnvios(e); desenharFila(e.fila); desenharLog(e.log); desenharLinksML(e.fila);
+    desenharWhatsapp(e); desenharEnvios(e); desenharFila(e.fila); desenharLog(e.log); desenharLinksML(e.fila); desenharVideos(e);
     if (!configPreenchida || (gruposMudaram && !$('formConfig').contains(document.activeElement))) {
       preencherConfig(e); configPreenchida = true;
     }
