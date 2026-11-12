@@ -1,0 +1,14 @@
+{
+  "name": "robo-instagram",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Posta 3 Reels por dia no Instagram: acha por hashtag, coloca no layout da marca e publica pela API oficial",
+  "main": "robo.js",
+  "scripts": {
+    "start": "node robo.js",
+    "teste": "node robo.js teste",
+    "conta": "node robo.js conta"
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": { "dotenv": "^16.4.5" }
+}

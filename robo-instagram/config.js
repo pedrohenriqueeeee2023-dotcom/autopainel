@@ -1,0 +1,53 @@
+// Configurações do robô do Instagram. O que estiver em dados/config.json substitui o padrão.
+const fs = require('fs');
+const path = require('path');
+
+const ARQUIVO = path.join(__dirname, 'dados', 'config.json');
+
+const padrao = {
+  // Posta de verdade só quando estiver true (vem DESLIGADO: ligue depois de ver o teste)
+  ativo: false,
+
+  // Horas em que posta (fuso do servidor). Vale só dentro da hora: 15 = das 15h às 15h59.
+  horarios: [10, 15, 20],
+
+  // Hashtags onde o robô procura Reels de produtos (máximo 30 diferentes por semana, regra da Meta)
+  hashtags: ['achadinhosshopee', 'achadinhos', 'achadinhosdashopee', 'achadosshopee', 'comprinhasshopee'],
+
+  // Só pega vídeos com pelo menos isso de curtidas e de 5 a 90 segundos
+  minimoCurtidas: 300,
+  duracaoMinima: 5,
+  duracaoMaxima: 90,
+
+  // Não usa vídeos com estas palavras na legenda original
+  palavrasProibidas: ['sexy', 'lingerie', '+18', 'arma', 'remédio', 'emagrecer'],
+
+  marca: {
+    nome: 'Rota dos Achadinhos',
+    subtitulo: 'achadinhos todo dia',
+    rodape: 'SIGA PRA MAIS ACHADINHOS',
+    cor: '#e91e8c',
+    corDestaque: '#ffd84d',
+    corTexto: '#3a0d24',
+  },
+
+  // Legenda do post. {conta} vira o @ da conta.
+  legenda: [
+    '✨ Achadinho do dia!',
+    '',
+    'Salva pra não perder 💾 e manda pra amiga que precisa 💕',
+    'Segue {conta} pra mais achadinhos todo dia 🛍️',
+    '',
+    '#achadinhos #achadinhosshopee #achadosshopee #comprinhas #achadinhosdodia',
+  ].join('\n'),
+};
+
+const config = JSON.parse(JSON.stringify(padrao));
+try {
+  const salvo = JSON.parse(fs.readFileSync(ARQUIVO, 'utf8'));
+  Object.assign(config, salvo, { marca: { ...padrao.marca, ...(salvo.marca || {}) } });
+} catch {
+  // ainda não tem config salva: usa o padrão
+}
+
+module.exports = config;
