@@ -75,6 +75,25 @@ function iniciarPainel(robo) {
     }
   });
 
+  // Ponte com o robô do Instagram (mesmo computador): ele manda prévias e avisos para o DONO.
+  // Só aceita pedidos do próprio computador e só arquivos da pasta de dados do robô do Instagram.
+  const PASTA_INSTA = path.resolve(__dirname, '..', 'robo-instagram', 'dados') + path.sep;
+  app.post('/interno/dono', async (req, res) => {
+    const ip = req.socket.remoteAddress || '';
+    if (!['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(ip) || req.headers['x-forwarded-for']) {
+      return res.status(403).json({ ok: false, erro: 'só do próprio computador' });
+    }
+    const { texto, arquivo } = req.body || {};
+    const arq = arquivo ? path.resolve(String(arquivo)) : null;
+    if (arq && !arq.startsWith(PASTA_INSTA)) return res.status(400).json({ ok: false, erro: 'arquivo fora da pasta permitida' });
+    try {
+      await robo.enviarParaDono({ texto: String(texto || '').slice(0, 4000), arquivo: arq });
+      res.json({ ok: true });
+    } catch (e) {
+      res.json({ ok: false, erro: e.message });
+    }
+  });
+
   // Senha opcional (obrigatória se o painel ficar na internet, ex.: VPS)
   const senha = process.env.PAINEL_SENHA;
   if (senha) {

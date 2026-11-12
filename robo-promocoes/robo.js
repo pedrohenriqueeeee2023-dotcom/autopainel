@@ -555,6 +555,19 @@ client.on('message', async (msg) => {
 
   const texto = msg.body.trim();
 
+  // Robô do Instagram (mesmo servidor): aprovar N, trocar N, legenda N ..., headline N ..., horario N 1|2|3, reels
+  if (/^(aprovar|aprovo|sim|trocar|troca|legenda|headline|hor[aá]rio)\s+#?\d+|^(reels|insta)$/i.test(texto)) {
+    try {
+      const r = await fetch(`http://127.0.0.1:${process.env.INSTA_PORTA || 3005}/comando`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ texto }),
+      });
+      const { resposta } = await r.json();
+      if (resposta) return msg.reply(resposta);
+    } catch {
+      return msg.reply('❌ O robô do Instagram não está respondendo (ele está ligado no pm2?).');
+    }
+  }
+
   // Vídeos: links do TikTok/Reels/Shorts, "ok 3", "nao 3", "produto 3 ...", "link 3 ...", "videos"
   const respostaVideo = await videos.comando(texto);
   if (respostaVideo) return msg.reply(respostaVideo);
@@ -643,6 +656,7 @@ iniciarPainel({
   pedirCodigo,
   testarFoto,
   videos,
+  enviarParaDono,
   desligar: async () => {
     registrar('Desligando o robô a pedido do painel...');
     try { await client.destroy(); } catch {}

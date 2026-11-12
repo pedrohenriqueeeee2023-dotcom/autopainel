@@ -10,6 +10,8 @@ const padrao = {
 
   // Horas em que posta (fuso do servidor). Vale só dentro da hora: 15 = das 15h às 15h59.
   horarios: [10, 15, 20],
+  // Quantos minutos antes de cada horário o robô prepara o vídeo e manda pra você aprovar
+  antecedenciaMinutos: 120,
 
   // Perfis do TikTok de onde o robô pega os vídeos (o mais visto que ainda não usou)
   tiktokPerfis: ['cavatioficial', 'achadinhosdolima.08', 'acheishopeeaqui', 'albandivulga', '_achadinhosdoshopee'],
