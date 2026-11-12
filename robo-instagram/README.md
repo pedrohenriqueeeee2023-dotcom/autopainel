@@ -1,8 +1,8 @@
 # Robô do Instagram (Rota dos Achadinhos)
 
 3 vezes por dia (10h, 15h e 20h) ele:
-1. procura Reels populares de produtos nas hashtags (API oficial do Instagram);
-2. baixa o mais curtido que ainda não usou (de 5 a 90 segundos);
+1. olha os vídeos recentes de uma lista de perfis de achadinhos do TikTok (`tiktokPerfis` em `config.js`);
+2. baixa o mais visto que ainda não usou (de 5 a 90 segundos);
 3. coloca no nosso layout: fundo rosa, logo e nome em cima, vídeo no meio, "SIGA PRA MAIS ACHADINHOS" embaixo;
 4. posta como Reels na conta, com a legenda padrão.
 
@@ -49,7 +49,7 @@ cd ~/robo-laureta/robo-instagram && pm2 start robo.js --name robo-insta && pm2 s
 
 ## 3. Ligar as postagens
 Crie/edite `dados/config.json` com `{ "ativo": true }` e reinicie: `pm2 restart robo-insta`.
-Dá pra mudar também `horarios`, `hashtags`, `minimoCurtidas`, `legenda` e as cores/textos em `marca`
+Dá pra mudar também `horarios`, `tiktokPerfis`, `minimoVisualizacoes`, `legenda` e as cores/textos em `marca`
 (o padrão de tudo está em `config.js`). Logo e fonte ficam em `marca/`.
 
 Ver o que ele fez: `pm2 logs robo-insta`. Histórico dos posts: `dados/historico.json`.
@@ -57,4 +57,5 @@ Ver o que ele fez: `pm2 logs robo-insta`. Histórico dos posts: `dados/historico
 ## Atenção
 - São vídeos de outros criadores. O Instagram reduz o alcance de conteúdo repostado e pode punir a conta
   se receber denúncias de direitos autorais. A legenda não tem link (link em legenda não é clicável).
-- A busca por hashtag aceita no máximo 30 hashtags diferentes por semana (regra da Meta).
+- Precisa do `yt-dlp` no servidor (`YTDLP_PATH=/home/venus/bin/yt-dlp` no `.env`).
+- A busca por hashtag do Instagram precisa de aprovação da Meta, por isso a fonte é o TikTok.

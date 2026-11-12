@@ -1,4 +1,4 @@
-// Robô do Instagram: 3x por dia acha um Reels de produto por hashtag, coloca no nosso
+// Robô do Instagram: 3x por dia pega um vídeo de produto de perfis do TikTok, coloca no nosso
 // layout e posta sozinho na conta.
 //
 //   node robo.js          roda sempre (no servidor: pm2 start robo.js --name robo-insta)
@@ -14,7 +14,6 @@ const { editar, duracao } = require('./editar');
 const DADOS = path.join(__dirname, 'dados');
 const ARQ_ESTADO = path.join(DADOS, 'estado.json');
 const ARQ_USADOS = path.join(DADOS, 'usados.json');
-const ARQ_HASHTAGS = path.join(DADOS, 'hashtags.json');
 const ARQ_HISTORICO = path.join(DADOS, 'historico.json');
 fs.mkdirSync(DADOS, { recursive: true });
 
@@ -22,55 +21,77 @@ const ler = (arq, padrao) => { try { return JSON.parse(fs.readFileSync(arq, 'utf
 const gravar = (arq, dados) => fs.writeFileSync(arq, JSON.stringify(dados, null, 2));
 const registrar = (t) => console.log(new Date().toLocaleString('pt-BR'), t);
 
-// ---------- Achar e preparar um vídeo ----------
+// ---------- Achar e preparar um vídeo (perfis do TikTok) ----------
+const { spawn } = require('child_process');
+const YTDLP = process.env.YTDLP_PATH || 'yt-dlp';
 
-async function candidatos() {
-  const cache = ler(ARQ_HASHTAGS, {});
-  const usados = new Set(ler(ARQ_USADOS, []));
-  const proibidas = config.palavrasProibidas.map((p) => p.toLowerCase());
-  const todos = new Map();
-  for (const tag of config.hashtags) {
-    try {
-      const id = await ig.idDaHashtag(tag, cache);
-      for (const m of await ig.videosDaHashtag(id)) todos.set(m.id, m);
-    } catch (e) {
-      registrar(`Hashtag #${tag}: ${e.message}`);
-    }
-  }
-  gravar(ARQ_HASHTAGS, cache);
-  return [...todos.values()]
-    .filter((m) => !usados.has(m.id))
-    .filter((m) => (m.like_count || 0) >= config.minimoCurtidas)
-    .filter((m) => !proibidas.some((p) => (m.caption || '').toLowerCase().includes(p)))
-    .sort((a, b) => (b.like_count || 0) - (a.like_count || 0));
+function ytdlp(args, cwd, timeoutMin = 5) {
+  return new Promise((resolve, reject) => {
+    const p = spawn(YTDLP, args, { cwd, windowsHide: true });
+    let out = '', err = '';
+    p.stdout.on('data', (d) => { out += d; });
+    p.stderr.on('data', (d) => { err = (err + d).slice(-2000); });
+    const t = setTimeout(() => { p.kill('SIGKILL'); reject(new Error('yt-dlp demorou demais')); }, timeoutMin * 60000);
+    p.on('error', (e) => { clearTimeout(t); reject(new Error(e.code === 'ENOENT' ? 'yt-dlp não está instalado (YTDLP_PATH no .env)' : e.message)); });
+    p.on('close', (code) => {
+      clearTimeout(t);
+      if (code === 0) resolve(out);
+      else reject(new Error('yt-dlp: ' + (err.trim().split('\n').pop() || 'código ' + code)));
+    });
+  });
 }
 
-async function baixar(url, destino) {
-  const r = await fetch(url);
-  if (!r.ok) throw new Error('download falhou (' + r.status + ')');
-  fs.writeFileSync(destino, Buffer.from(await r.arrayBuffer()));
+// Lista os vídeos recentes de cada perfil e devolve os que ainda não usou, mais vistos primeiro
+async function candidatos() {
+  const usados = new Set(ler(ARQ_USADOS, []));
+  const proibidas = config.palavrasProibidas.map((p) => p.toLowerCase());
+  const todos = [];
+  for (const perfil of config.tiktokPerfis) {
+    const nome = perfil.replace(/^@/, '');
+    try {
+      const out = await ytdlp(['--flat-playlist', '--no-warnings', '-I', `1:${config.videosPorPerfil}`,
+        '--print', '%(id)s\t%(view_count)s\t%(duration)s\t%(title).200s', `https://www.tiktok.com/@${nome}`]);
+      for (const linha of out.trim().split('\n').filter(Boolean)) {
+        const [id, views, dur, titulo = ''] = linha.split('\t');
+        todos.push({
+          id: 'tt-' + id, perfil: nome, views: Number(views) || 0, duracao: Number(dur) || 0, titulo,
+          url: `https://www.tiktok.com/@${nome}/video/${id}`,
+        });
+      }
+    } catch (e) {
+      registrar(`Perfil @${nome}: ${e.message}`);
+    }
+  }
+  return todos
+    .filter((v) => !usados.has(v.id))
+    .filter((v) => v.views >= config.minimoVisualizacoes)
+    .filter((v) => !v.duracao || (v.duracao >= config.duracaoMinima && v.duracao <= config.duracaoMaxima))
+    .filter((v) => !proibidas.some((p) => v.titulo.toLowerCase().includes(p)))
+    .sort((a, b) => b.views - a.views);
 }
 
 // Prepara 1 vídeo na pasta indicada. Devolve { midia, arquivo } ou lança erro.
 async function preparar(pasta) {
   const lista = await candidatos();
-  if (!lista.length) throw new Error('nenhum Reels novo encontrado nas hashtags (tente outras hashtags ou baixe minimoCurtidas)');
+  if (!lista.length) throw new Error('nenhum vídeo novo nos perfis do TikTok (adicione perfis ou baixe minimoVisualizacoes)');
   for (const m of lista.slice(0, 6)) {
     try {
       fs.rmSync(pasta, { recursive: true, force: true });
       fs.mkdirSync(pasta, { recursive: true });
-      await baixar(m.media_url, path.join(pasta, 'orig.mp4'));
+      await ytdlp(['--no-playlist', '--no-warnings', '--no-progress',
+        '-f', 'b[ext=mp4][vcodec^=avc]/b[ext=mp4]/bv*+ba/b', '--merge-output-format', 'mp4',
+        '-o', 'orig.mp4', m.url], pasta);
       const d = await duracao(path.join(pasta, 'orig.mp4'));
       if (d < config.duracaoMinima || d > config.duracaoMaxima) {
         marcarUsado(m.id); // não serve: não tenta de novo
         continue;
       }
-      registrar(`Editando Reels ${m.permalink} (${m.like_count} curtidas, ${Math.round(d)}s)...`);
+      registrar(`Editando ${m.url} (${m.views} visualizações, ${Math.round(d)}s)...`);
       const arquivo = await editar(pasta, { ...config.marca, duracaoMaxima: config.duracaoMaxima });
-      gravar(path.join(pasta, 'midia.json'), m);
-      return { midia: m, arquivo };
+      gravar(path.join(pasta, 'midia.json'), { ...m, permalink: m.url });
+      return { midia: { ...m, permalink: m.url, like_count: m.views }, arquivo };
     } catch (e) {
-      registrar(`Pulando ${m.permalink}: ${e.message}`);
+      registrar(`Pulando ${m.url}: ${e.message}`);
       marcarUsado(m.id);
     }
   }
@@ -182,7 +203,7 @@ async function iniciar() {
     const pasta = path.join(DADOS, 'teste');
     const { midia, arquivo } = await preparar(pasta);
     console.log('\nVídeo de teste pronto (NÃO foi postado):', arquivo);
-    console.log('Original:', midia.permalink, `(${midia.like_count} curtidas)`);
+    console.log('Original:', midia.permalink, `(${midia.views} visualizações)`);
     return;
   }
   conta = await ig.minhaConta();

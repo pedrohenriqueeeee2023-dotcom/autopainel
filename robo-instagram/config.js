@@ -11,11 +11,13 @@ const padrao = {
   // Horas em que posta (fuso do servidor). Vale só dentro da hora: 15 = das 15h às 15h59.
   horarios: [10, 15, 20],
 
-  // Hashtags onde o robô procura Reels de produtos (máximo 30 diferentes por semana, regra da Meta)
-  hashtags: ['achadinhosshopee', 'achadinhos', 'achadinhosdashopee', 'achadosshopee', 'comprinhasshopee'],
+  // Perfis do TikTok de onde o robô pega os vídeos (o mais visto que ainda não usou)
+  tiktokPerfis: ['cavatioficial', 'achadinhosdolima.08', 'acheishopeeaqui', 'albandivulga', '_achadinhosdoshopee'],
+  // Quantos vídeos recentes olhar em cada perfil
+  videosPorPerfil: 15,
 
-  // Só pega vídeos com pelo menos isso de curtidas e de 5 a 90 segundos
-  minimoCurtidas: 300,
+  // Só pega vídeos com pelo menos isso de visualizações e de 5 a 90 segundos
+  minimoVisualizacoes: 1000,
   duracaoMinima: 5,
   duracaoMaxima: 90,
 
