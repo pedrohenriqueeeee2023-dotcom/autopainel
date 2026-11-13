@@ -35,8 +35,9 @@ function ytdlp(args, cwd, timeoutMin = 5) {
 }
 
 // Lista os vídeos recentes de cada perfil e devolve os que ainda não usou, mais vistos primeiro
-async function candidatos() {
-  const usados = new Set(ler(ARQ_USADOS, []));
+// evitar: ids de vídeos que já estão em outros posts da fila
+async function candidatos(evitar = []) {
+  const usados = new Set([...ler(ARQ_USADOS, []), ...evitar]);
   const proibidas = config.palavrasProibidas.map((p) => p.toLowerCase());
   const todos = [];
   for (const perfil of config.tiktokPerfis) {
@@ -63,10 +64,20 @@ async function candidatos() {
     .sort((a, b) => b.views - a.views);
 }
 
+// Embaralha só os 5 melhores, para não pegar sempre o mesmo perfil/vídeo
+function variar(lista) {
+  const topo = lista.slice(0, 5);
+  for (let i = topo.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [topo[i], topo[j]] = [topo[j], topo[i]];
+  }
+  return [...topo, ...lista.slice(5)];
+}
+
 // Prepara 1 vídeo na pasta indicada. Devolve { midia, arquivo } ou lança erro.
 // headlineFixa: usa essa headline em vez da tirada da legenda do TikTok
-async function preparar(pasta, headlineFixa) {
-  const lista = await candidatos();
+async function preparar(pasta, headlineFixa, evitar = []) {
+  const lista = variar(await candidatos(evitar));
   if (!lista.length) throw new Error('nenhum vídeo novo nos perfis do TikTok (adicione perfis ou baixe minimoVisualizacoes)');
   for (const m of lista.slice(0, 6)) {
     try {

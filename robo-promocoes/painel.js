@@ -94,6 +94,19 @@ function iniciarPainel(robo) {
     }
   });
 
+  // Vídeo do Reels para o Instagram baixar na hora de postar (a API da Meta precisa de um link público).
+  // Só abre com o código aleatório daquele post, e só enquanto o post não foi publicado.
+  app.get('/publico/reels/:arquivo', (req, res) => {
+    const token = String(req.params.arquivo).replace(/\.mp4$/, '');
+    if (!/^[a-f0-9]{32}$/.test(token)) return res.status(404).end();
+    let posts = [];
+    try { posts = JSON.parse(require('fs').readFileSync(path.join(PASTA_INSTA, 'posts.json'), 'utf8')); } catch {}
+    const post = posts.find((p) => p.token === token && p.status !== 'postado');
+    const arquivo = post && path.join(PASTA_INSTA, 'posts', String(Number(post.n)), 'final.mp4');
+    if (!arquivo || !require('fs').existsSync(arquivo)) return res.status(404).end();
+    res.type('video/mp4').sendFile(arquivo);
+  });
+
   // Senha opcional (obrigatória se o painel ficar na internet, ex.: VPS)
   const senha = process.env.PAINEL_SENHA;
   if (senha) {

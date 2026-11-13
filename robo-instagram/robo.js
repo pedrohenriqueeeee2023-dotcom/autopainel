@@ -45,6 +45,9 @@ function atualizar(n, mudancas) {
   return p;
 }
 const pastaDo = (n) => path.join(DADOS, 'posts', String(n));
+// Link público do vídeo (servido pelo painel do robô do WhatsApp) para o Instagram baixar
+const URL_PUBLICA = (process.env.INSTA_URL_PUBLICA || '').replace(/\/$/, '');
+const linkDoVideo = (p) => (URL_PUBLICA && p.token ? `${URL_PUBLICA}/publico/reels/${p.token}.mp4` : null);
 const legendaPadrao = (conta) => config.legenda.replace(/\{conta\}/g, conta ? '@' + conta.username : 'a gente');
 
 // ---------- WhatsApp (pelo robô do WhatsApp) ----------
@@ -81,8 +84,10 @@ async function preparar(p, headlineFixa) {
   try {
     atualizar(p.n, { status: 'preparando' });
     registrar(`Reels #${p.n}: preparando para ${nomeDia(p.dia)} às ${p.hora}h...`);
-    const { midia } = await fonte.preparar(pastaDo(p.n), headlineFixa);
-    const pronto = atualizar(p.n, { status: 'aguardando', midia, headline: midia.headline, erro: null });
+    // não repete vídeo que já está em outro post da fila
+    const emUso = lerPosts().filter((x) => x.n !== p.n && x.midia && x.status !== 'postado').map((x) => x.midia.id);
+    const { midia } = await fonte.preparar(pastaDo(p.n), headlineFixa, emUso);
+    const pronto = atualizar(p.n, { status: 'aguardando', midia, headline: midia.headline, erro: null, token: require('crypto').randomBytes(16).toString('hex') });
     registrar(`Reels #${p.n}: pronto, esperando aprovação.`);
     await mandarPrevia(pronto);
   } catch (e) {
@@ -170,8 +175,12 @@ async function tick() {
   if (Date.now() - LIGOU_EM < 5 * 60 * 1000) return; // nunca logo depois de ligar
   postando = true;
   try {
+    if (!daVez.token) { // posts antigos (de antes do link público)
+      daVez.token = require('crypto').randomBytes(16).toString('hex');
+      atualizar(daVez.n, { token: daVez.token });
+    }
     registrar(`Reels #${daVez.n}: postando...`);
-    const pub = await ig.postarReels(path.join(pastaDo(daVez.n), 'final.mp4'), daVez.legenda, registrar);
+    const pub = await ig.postarReels(path.join(pastaDo(daVez.n), 'final.mp4'), daVez.legenda, registrar, linkDoVideo(daVez));
     fonte.marcarUsado(daVez.midia.id);
     atualizar(daVez.n, { status: 'postado', postadoEm: Date.now(), link: pub.permalink || pub.id });
     const hist = ler(ARQ_HISTORICO, []);
@@ -190,9 +199,32 @@ async function tick() {
 
 // ---------- Comandos (vêm do WhatsApp do DONO) ----------
 // Devolve o texto de resposta, ou null se não for um comando daqui
-async function comando(texto) {
+// citado: texto da mensagem que você respondeu (ex.: a prévia "📸 Reels #3 ..."), se houver
+async function comando(texto, citado = '') {
   let m;
   const achar = (n) => lerPosts().find((p) => p.n === Number(n));
+  texto = String(texto || '').trim().replace(/[.!]+$/, '');
+  if (texto) registrar(`Comando recebido: "${texto.slice(0, 80)}"${citado ? ' (respondendo uma mensagem)' : ''}`);
+
+  // Sem número: usa o Reels da mensagem respondida, ou o último esperando
+  const doCitado = (String(citado).match(/Reels #(\d+)/) || [])[1];
+  const ultimo = (...status) => { const l = lerPosts().filter((p) => status.includes(p.status)); return l.length ? l[l.length - 1].n : null; };
+  const semNumero = (n, resto) => (n ? resto(n) : null);
+  if (/^(aprovar|aprovo|aprovado|aprova|sim|ok|okay|pode|pode postar|posta|👍|✅)$/i.test(texto)) {
+    const n = doCitado || ultimo('aguardando');
+    if (!n) return '❌ Não tem nenhum Reels esperando aprovação agora. Mande *reels* pra ver a fila.';
+    texto = `aprovar ${n}`;
+  } else if (/^(trocar|troca|n[aã]o|outro|reprovar|reprovo|reprovado|👎)$/i.test(texto)) {
+    const n = doCitado || ultimo('aguardando', 'aprovado', 'perdido');
+    if (!n) return '❌ Não tem nenhum Reels pra trocar agora.';
+    texto = `trocar ${n}`;
+  } else if ((m = texto.match(/^(legenda|headline)\s+(?!#?\d+\s)([\s\S]+)$/i))) {
+    texto = semNumero(doCitado || ultimo('aguardando', 'aprovado', 'perdido'), (n) => `${m[1]} ${n} ${m[2]}`) || texto;
+  } else if ((m = texto.match(/^(?:hor[aá]rio\s+|op[cç][aã]o\s+)?([123])$/i))) {
+    const n = doCitado || ultimo('perdido');
+    if (!n) return null;
+    texto = `horario ${n} ${m[1]}`;
+  }
 
   if ((m = texto.match(/^(?:aprovar|aprovo|sim)\s+#?(\d+)$/i))) {
     const p = achar(m[1]);
@@ -289,7 +321,7 @@ function iniciarServidor() {
         return json(res, { ok: true, ativo: config.ativo });
       }
       let resposta = null;
-      try { resposta = await comando(String(dados.texto || '').trim()); } catch (e) { resposta = '❌ ' + e.message; }
+      try { resposta = await comando(String(dados.texto || '').trim(), String(dados.citado || '')); } catch (e) { resposta = '❌ ' + e.message; }
       json(res, { resposta });
     });
   }).listen(PORTA, '127.0.0.1', () => registrar(`Esperando comandos do WhatsApp na porta ${PORTA}.`));

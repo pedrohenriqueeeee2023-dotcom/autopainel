@@ -551,16 +551,25 @@ client.on('message', async (msg) => {
 
   const texto = msg.body.trim();
 
-  // Robô do Instagram (mesmo servidor): aprovar N, trocar N, legenda N ..., headline N ..., horario N 1|2|3, reels
-  if (/^(aprovar|aprovo|sim|trocar|troca|legenda|headline|hor[aá]rio)\s+#?\d+|^(reels|insta)$/i.test(texto)) {
+  // Robô do Instagram (mesmo servidor). Aceita com ou sem número: "aprovar 3", "sim", "ok", "trocar",
+  // "legenda ...", "headline ...", "horario 3 2" ou só "2", "reels". Sem número, vale o Reels da
+  // mensagem respondida (a prévia) ou o último esperando.
+  const PALAVRA_INSTA = /^(aprovar|aprovo|aprovado|aprova|sim|ok|okay|pode|pode postar|posta|trocar|troca|n[aã]o|outro|reprovar|reprovo|reprovado|legenda|headline|hor[aá]rio|op[cç][aã]o|reels|insta|[123]|👍|👎|✅)\b/i;
+  const textoLimpo = texto.replace(/[.!]+$/, '');
+  if (PALAVRA_INSTA.test(textoLimpo) || ['👍', '👎', '✅'].includes(textoLimpo)) {
+    let citado = '';
+    try { if (msg.hasQuotedMsg) citado = (await msg.getQuotedMessage()).body || ''; } catch {}
+    const responder = async (t) => {
+      try { await client.sendMessage(msg.from, t); } catch (e) { registrar('Não consegui responder no WhatsApp: ' + e.message); }
+    };
     try {
       const r = await fetch(`http://127.0.0.1:${process.env.INSTA_PORTA || 3005}/comando`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ texto }),
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ texto: textoLimpo, citado }),
       });
       const { resposta } = await r.json();
-      if (resposta) return msg.reply(resposta);
+      if (resposta) return responder(resposta);
     } catch {
-      return msg.reply('❌ O robô do Instagram não está respondendo (ele está ligado no pm2?).');
+      return responder('❌ O robô do Instagram não está respondendo (ele está ligado no pm2?).');
     }
   }
 

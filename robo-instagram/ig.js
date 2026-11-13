@@ -54,38 +54,48 @@ async function videosDaHashtag(hashtagId, tipo = 'top_media') {
   return (r.data || []).filter((m) => m.media_type === 'VIDEO' && m.media_url);
 }
 
-// ---------- Postar um Reels (envio direto do arquivo, sem precisar de link público) ----------
-async function postarReels(arquivo, legenda, registrar = () => {}) {
-  const tamanho = fs.statSync(arquivo).size;
-  const cont = await chamar('POST', `/${usuario()}/media`, {
-    media_type: 'REELS',
-    upload_type: 'resumable',
-    caption: legenda,
-    share_to_feed: 'true',
-  });
-  registrar(`Enviando o vídeo pro Instagram (${Math.round(tamanho / 1024 / 1024)} MB)...`);
-  const up = await fetch(`https://rupload.facebook.com/ig-api-upload/${VERSAO}/${cont.id}`, {
-    method: 'POST',
-    headers: { Authorization: 'OAuth ' + process.env.IG_TOKEN, offset: '0', file_size: String(tamanho) },
-    body: fs.readFileSync(arquivo),
-  });
-  const upJson = await up.json().catch(() => ({}));
-  if (!up.ok || upJson.success === false) throw new Error('Falha ao enviar o arquivo: ' + JSON.stringify(upJson).slice(0, 300));
-
-  // O Instagram processa o vídeo antes de deixar publicar (até ~5 min)
+// ---------- Postar um Reels ----------
+// 1) cria o "container": o Instagram baixa o vídeo do link público (urlVideo) e processa.
+//    Sem urlVideo, tenta o envio direto do arquivo (resumable).
+// 2) publica. Separado para dar pra testar o passo 1 sem publicar nada.
+async function criarContainer({ arquivo, urlVideo, legenda }, registrar = () => {}) {
+  let cont;
+  if (urlVideo) {
+    registrar('Pedindo pro Instagram baixar o vídeo do servidor...');
+    cont = await chamar('POST', `/${usuario()}/media`, { media_type: 'REELS', video_url: urlVideo, caption: legenda, share_to_feed: 'true' });
+  } else {
+    const tamanho = fs.statSync(arquivo).size;
+    cont = await chamar('POST', `/${usuario()}/media`, { media_type: 'REELS', upload_type: 'resumable', caption: legenda, share_to_feed: 'true' });
+    registrar(`Enviando o vídeo pro Instagram (${Math.round(tamanho / 1024 / 1024)} MB)...`);
+    const up = await fetch(`https://rupload.facebook.com/ig-api-upload/${VERSAO}/${cont.id}`, {
+      method: 'POST',
+      headers: { Authorization: 'OAuth ' + process.env.IG_TOKEN, offset: '0', file_size: String(tamanho), 'Content-Type': 'application/octet-stream' },
+      body: fs.readFileSync(arquivo),
+    });
+    const upJson = await up.json().catch(() => ({}));
+    if (!up.ok || upJson.success === false) throw new Error('Falha ao enviar o arquivo: ' + JSON.stringify(upJson).slice(0, 300));
+  }
+  // O Instagram processa o vídeo antes de deixar publicar (até ~10 min)
   for (let i = 0; i < 40; i++) {
     await new Promise((r) => setTimeout(r, 15000));
     const st = await chamar('GET', '/' + cont.id, { fields: 'status_code,status' });
-    if (st.status_code === 'FINISHED') {
-      const pub = await chamar('POST', `/${usuario()}/media_publish`, { creation_id: cont.id });
-      const info = await chamar('GET', '/' + pub.id, { fields: 'permalink' }).catch(() => ({}));
-      return { id: pub.id, permalink: info.permalink };
-    }
+    if (st.status_code === 'FINISHED') return cont.id;
     if (st.status_code === 'ERROR' || st.status_code === 'EXPIRED') {
       throw new Error('O Instagram recusou o vídeo: ' + (st.status || st.status_code));
     }
   }
   throw new Error('O Instagram demorou demais pra processar o vídeo');
+}
+
+async function publicarContainer(id) {
+  const pub = await chamar('POST', `/${usuario()}/media_publish`, { creation_id: id });
+  const info = await chamar('GET', '/' + pub.id, { fields: 'permalink' }).catch(() => ({}));
+  return { id: pub.id, permalink: info.permalink };
+}
+
+async function postarReels(arquivo, legenda, registrar = () => {}, urlVideo = null) {
+  const id = await criarContainer({ arquivo, urlVideo, legenda }, registrar);
+  return publicarContainer(id);
 }
 
 // ---------- Token: avisa quando estiver perto de vencer e tenta renovar ----------
@@ -106,4 +116,4 @@ async function renovarToken() {
   return r.access_token;
 }
 
-module.exports = { minhaConta, idDaHashtag, videosDaHashtag, postarReels, diasParaVencer, renovarToken };
+module.exports = { minhaConta, idDaHashtag, videosDaHashtag, postarReels, criarContainer, publicarContainer, diasParaVencer, renovarToken };
