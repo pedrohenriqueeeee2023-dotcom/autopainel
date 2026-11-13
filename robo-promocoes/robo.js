@@ -554,7 +554,7 @@ client.on('message', async (msg) => {
   // Robô do Instagram (mesmo servidor). Aceita com ou sem número: "aprovar 3", "sim", "ok", "trocar",
   // "legenda ...", "headline ...", "horario 3 2" ou só "2", "reels". Sem número, vale o Reels da
   // mensagem respondida (a prévia) ou o último esperando.
-  const PALAVRA_INSTA = /^(aprovar|aprovo|aprovado|aprova|sim|ok|okay|pode|pode postar|posta|trocar|troca|n[aã]o|outro|reprovar|reprovo|reprovado|legenda|headline|hor[aá]rio|op[cç][aã]o|reels|insta|[123]|👍|👎|✅)\b/i;
+  const PALAVRA_INSTA = /^(postar|pr[eé]via|aprovar|aprovo|aprovado|aprova|sim|ok|okay|pode|pode postar|posta|trocar|troca|n[aã]o|outro|reprovar|reprovo|reprovado|legenda|headline|hor[aá]rio|op[cç][aã]o|reels|insta|[123]|👍|👎|✅)\b/i;
   const textoLimpo = texto.replace(/[.!]+$/, '');
   if (PALAVRA_INSTA.test(textoLimpo) || ['👍', '👎', '✅'].includes(textoLimpo)) {
     let citado = '';

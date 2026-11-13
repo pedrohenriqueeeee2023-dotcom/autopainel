@@ -70,6 +70,7 @@ async function mandarPrevia(p) {
     `📸 *Reels #${p.n}* para *${nomeDia(p.dia)} às ${p.hora}h*\n\n` +
     `*Headline:* ${p.headline}\n\n*Legenda:*\n${p.legenda}\n\n` +
     `✅ *aprovar ${p.n}* (posta no horário)\n` +
+    `🚀 *postar ${p.n}* (posta agora)\n` +
     `🔄 *trocar ${p.n}* (procuro outro vídeo)\n` +
     `✏️ *headline ${p.n} texto novo*\n` +
     `📝 *legenda ${p.n} texto novo*`,
@@ -226,6 +227,25 @@ async function comando(texto, citado = '') {
     texto = `horario ${n} ${m[1]}`;
   }
 
+  // postar N: aprova e posta agora (em até 1 minuto), sem esperar o horário
+  if ((m = texto.match(/^postar(?:\s+#?(\d+))?$/i))) {
+    const n = m[1] || doCitado || ultimo('aguardando', 'aprovado', 'perdido');
+    const p = n && achar(n);
+    if (!p) return '❌ Não tem nenhum Reels pronto pra postar.';
+    if (!p.midia || !['aguardando', 'aprovado', 'perdido'].includes(p.status)) return `❌ O Reels #${p.n} está "${p.status}".`;
+    atualizar(p.n, { status: 'aprovado', dia: diaDe(), hora: new Date().getHours(), opcoes: null });
+    registrar(`Reels #${p.n}: aprovado para postar agora.`);
+    const espera = Math.max(0, Math.ceil((LIGOU_EM + 5 * 60000 - Date.now()) / 60000));
+    return `🚀 Postando o Reels #${p.n} ${espera ? `em ${espera + 1} minutos` : 'em até 1 minuto'}. Te aviso com o link.` +
+      (config.ativo ? '' : '\n⚠️ As postagens estão desligadas (ativo: false).');
+  }
+  // previa N: manda a prévia de novo
+  if ((m = texto.match(/^pr[eé]via\s+#?(\d+)$/i))) {
+    const p = achar(m[1]);
+    if (!p || !p.midia || !fs.existsSync(path.join(pastaDo(p.n), 'final.mp4'))) return `❌ O Reels #${m[1]} não tem vídeo pronto.`;
+    await mandarPrevia(p);
+    return null; // a própria prévia já é a resposta
+  }
   if ((m = texto.match(/^(?:aprovar|aprovo|sim)\s+#?(\d+)$/i))) {
     const p = achar(m[1]);
     if (!p) return `❌ Não achei o Reels #${m[1]}.`;
