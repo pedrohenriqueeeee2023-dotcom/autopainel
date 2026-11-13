@@ -88,7 +88,7 @@ async function preparar(p, headlineFixa) {
     // não repete vídeo que já está em outro post da fila
     const emUso = lerPosts().filter((x) => x.n !== p.n && x.midia && x.status !== 'postado').map((x) => x.midia.id);
     const { midia } = await fonte.preparar(pastaDo(p.n), headlineFixa, emUso);
-    const pronto = atualizar(p.n, { status: 'aguardando', midia, headline: midia.headline, erro: null, token: require('crypto').randomBytes(16).toString('hex') });
+    const pronto = atualizar(p.n, { status: 'aguardando', midia, headline: midia.headline, legenda: midia.legenda || p.legenda, erro: null, token: require('crypto').randomBytes(16).toString('hex') });
     registrar(`Reels #${p.n}: pronto, esperando aprovação.`);
     await mandarPrevia(pronto);
   } catch (e) {

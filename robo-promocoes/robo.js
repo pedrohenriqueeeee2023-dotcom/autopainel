@@ -544,10 +544,42 @@ async function mensagensDoGrupo() {
 //   ml Sérum Vitamina C de R$89 por R$49 | https://meli.la/xxxx
 //   fila
 //   agora
+// A mensagem veio do DONO? O WhatsApp novo às vezes manda o remetente como um código interno
+// ("...@lid") em vez do número, então confere o número de verdade por trás desse código.
+let idDono = null;
+const soNumero = (id) => String(id || '').split('@')[0].split(':')[0];
+const mesmoNumero = (a, b) => {
+  a = soNumero(a); b = soNumero(b);
+  if (!a || !b) return false;
+  // aceita com e sem o 9 depois do DDD
+  const sem9 = (n) => (n.length === 13 && n.startsWith('55') ? n.slice(0, 4) + n.slice(5) : n);
+  return a === b || sem9(a) === sem9(b);
+};
+async function ehDono(msg) {
+  if (!DONO) return false;
+  if (!idDono) {
+    try { idDono = (await client.getNumberId(DONO))?._serialized || null; } catch {}
+  }
+  if (mesmoNumero(msg.from, DONO) || (idDono && msg.from === idDono)) return true;
+  if (msg.from.endsWith('@lid')) {
+    try {
+      const [info] = await client.getContactLidAndPhone([msg.from]);
+      if (info && (mesmoNumero(info.pn, DONO) || (idDono && info.pn === idDono))) return true;
+    } catch {}
+  }
+  try {
+    const contato = await msg.getContact();
+    if (mesmoNumero(contato.number, DONO)) return true;
+  } catch {}
+  return false;
+}
+
 client.on('message', async (msg) => {
-  if (msg.from.endsWith('@g.us')) return; // ignora mensagens de grupos
-  const contato = await msg.getContact();
-  if (!DONO || contato.number !== DONO) return;
+  if (msg.from.endsWith('@g.us') || msg.from === 'status@broadcast') return; // ignora grupos e status
+  if (!(await ehDono(msg))) {
+    registrar(`Mensagem no privado ignorada (não é do DONO): final ${soNumero(msg.from).slice(-4)}`);
+    return;
+  }
 
   const texto = msg.body.trim();
 
