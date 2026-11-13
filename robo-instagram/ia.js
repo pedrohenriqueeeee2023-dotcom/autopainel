@@ -2,7 +2,7 @@
 // Sem a chave (ou se o Gemini falhar), o robô usa a headline tirada da legenda do TikTok
 // e a legenda padrão do config.js.
 // Tenta estes modelos em ordem (o Google aposenta modelos antigos de tempos em tempos)
-const MODELOS = (process.env.GEMINI_MODELO || 'gemini-3.8-flash,gemini-flash-latest').split(',').map((m) => m.trim()).filter(Boolean);
+const MODELOS = (process.env.GEMINI_MODELO || 'gemini-3.5-flash-lite,gemini-flash-lite-latest,gemini-3.8-flash').split(',').map((m) => m.trim()).filter(Boolean);
 const espera = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const temChave = () => Boolean(process.env.GEMINI_API_KEY);
