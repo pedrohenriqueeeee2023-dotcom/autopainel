@@ -556,7 +556,7 @@ async function carregarInsta() {
     ul.innerHTML = `<li class="vazio">Nenhum Reels ainda. O próximo aparece ${Math.round((e.antecedencia || 120) / 60)}h antes do horário.</li>`;
     return;
   }
-  ul.innerHTML = e.posts.map((p) => {
+  const item = (p) => {
     const midia = p.temVideo
       ? `<video class="thumb" src="/api/insta/video/${p.n}" preload="metadata" controls playsinline style="width:90px;height:160px;object-fit:cover"></video>`
       : '<div class="thumb"></div>';
@@ -577,6 +577,17 @@ async function carregarInsta() {
         <div class="detalhe"><b>${esc(p.headline || '')}</b>${extra ? ' · ' + extra : ''}</div>
         <div class="detalhe" style="white-space:pre-line;max-height:4.5em;overflow:hidden">${esc(p.legenda || '')}</div></div>
       <div class="acoes">${botoes.join('')}</div></li>`;
+  };
+  // Separa em grupos: o que precisa de você primeiro, depois o que já vai sair, depois o que já saiu
+  const grupos = [
+    { titulo: 'Esperando sua aprovação', vazio: 'Nada esperando você.', st: ['aguardando', 'perdido', 'novo', 'preparando', 'trocar', 'erro'] },
+    { titulo: 'Aprovados (vão ser postados)', vazio: 'Nenhum aprovado esperando o horário.', st: ['aprovado'] },
+    { titulo: 'Postados', vazio: 'Nenhum postado ainda.', st: ['postado'] },
+  ];
+  ul.innerHTML = grupos.map((g) => {
+    const lista = e.posts.filter((p) => g.st.includes(p.status));
+    return `<li style="display:block;color:var(--texto);font-weight:700;font-size:.95rem;padding:16px 2px 6px;border-top:1px solid var(--borda-forte)">${g.titulo} <span style="color:var(--suave);font-weight:500">(${lista.length})</span></li>` +
+      (lista.length ? lista.map(item).join('') : `<li class="vazio" style="display:block;padding:10px 2px;text-align:left">${g.vazio}</li>`);
   }).join('');
 }
 $('btnInsta').onclick = async () => {

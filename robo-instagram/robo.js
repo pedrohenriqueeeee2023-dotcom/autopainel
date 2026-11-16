@@ -30,7 +30,12 @@ const PORTA = Number(process.env.INSTA_PORTA) || 3005;
 // ---------- Datas ----------
 const diaDe = (d = new Date()) => d.toDateString();
 function amanha() { const d = new Date(); d.setDate(d.getDate() + 1); return diaDe(d); }
-const nomeDia = (dia) => (dia === diaDe() ? 'hoje' : dia === amanha() ? 'amanhã' : dia);
+const nomeDia = (dia) => {
+  if (dia === diaDe()) return 'hoje';
+  if (dia === amanha()) return 'amanhã';
+  const d = new Date(dia);
+  return isNaN(d) ? dia : d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }); // ex.: 13/11
+};
 
 // ---------- Posts (um por horário) ----------
 // status: preparando | aguardando (sua aprovação) | aprovado | postado | perdido | erro
@@ -302,10 +307,16 @@ async function comando(texto, citado = '') {
     return `🕐 Reels #${p.n} remarcado para ${nomeDia(o.dia)} às ${o.hora}h.`;
   }
   if (/^(reels|insta)$/i.test(texto)) {
-    const ativos = lerPosts().filter((p) => !['postado'].includes(p.status)).slice(-10);
-    if (!ativos.length) return '📸 Nenhum Reels na fila agora.';
-    return '📸 *Reels*\n' + ativos.map((p) => `#${p.n} · ${nomeDia(p.dia)} ${p.hora}h · ${p.status}`).join('\n') +
-      (config.ativo ? '' : '\n⚠️ Postagens desligadas (ativo: false).');
+    const todos = lerPosts();
+    const linha = (p) => `#${p.n} · ${nomeDia(p.dia)} ${p.hora}h`;
+    const grupo = (titulo, lista, fmt = linha) => `*${titulo}*\n` + (lista.length ? lista.map(fmt).join('\n') : '—');
+    const pendentes = todos.filter((p) => !['aprovado', 'postado'].includes(p.status));
+    const rotulo = { aguardando: 'esperando aprovar', perdido: 'perdeu o horário, escolha outro', novo: 'na fila', preparando: 'preparando', trocar: 'procurando outro vídeo', erro: 'erro' };
+    return '📸 *Reels*\n\n' +
+      grupo('⏳ Esperando sua aprovação', pendentes, (p) => `${linha(p)} · ${rotulo[p.status] || p.status}`) + '\n\n' +
+      grupo('✅ Aprovados (vão ser postados)', todos.filter((p) => p.status === 'aprovado')) + '\n\n' +
+      grupo('📤 Postados (últimos 5)', todos.filter((p) => p.status === 'postado').slice(-5).reverse()) +
+      (config.ativo ? '' : '\n\n⚠️ Postagens desligadas (ativo: false).');
   }
   return null;
 }
