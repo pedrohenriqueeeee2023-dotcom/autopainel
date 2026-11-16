@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const config = require('./config');
 const ig = require('./ig');
-const { editar, duracao } = require('./editar');
+const { editar, duracao, quadros } = require('./editar');
 const { headlineDoTitulo } = require('./cabecalho');
 const ia = require('./ia');
 
@@ -121,7 +121,9 @@ async function preparar(pasta, headlineFixa, evitar = []) {
       // Headline e legenda pelo Gemini (se tiver a chave); senão, as automáticas
       let textos = null;
       try {
-        textos = await ia.gerarTextos(m.titulo, { nome: config.marca.nome, conta: usuario });
+        const imagens = await quadros(path.join(pasta, 'orig.mp4')).catch(() => []);
+        const usadas = ler(path.join(DADOS, 'posts.json'), []).map((p) => p.headline).filter(Boolean).slice(-20);
+        textos = await ia.gerarTextos(m.titulo, { nome: config.marca.nome, conta: usuario, imagens, usadas });
       } catch (e) {
         registrar('Gemini falhou, usando texto automático: ' + e.message);
       }

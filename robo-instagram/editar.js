@@ -35,20 +35,53 @@ async function temAudio(arquivo) {
   return out.trim().length > 0;
 }
 
+// Tira alguns quadros espalhados pelo vídeo (JPEG pequeno) para o Gemini ver o produto
+async function quadros(arquivo, quantos = 4) {
+  const dur = await duracao(arquivo);
+  const lista = [];
+  for (let i = 1; i <= quantos; i++) {
+    const t = (dur * i) / (quantos + 1);
+    try {
+      const saida = `${arquivo}.q${i}.jpg`;
+      await rodar(FFMPEG, ['-y', '-hide_banner', '-loglevel', 'error', '-ss', t.toFixed(2), '-i', arquivo,
+        '-frames:v', '1', '-vf', 'scale=512:-2', '-q:v', '4', saida], undefined, 2);
+      lista.push(fs.readFileSync(saida));
+      fs.rmSync(saida, { force: true });
+    } catch { /* um quadro a menos não faz mal */ }
+  }
+  return lista;
+}
+
+// Margens do layout (em pixels, vídeo 1080x1920). O Instagram cobre o topo (barra "Reels"),
+// a direita (curtir/comentar) e o rodapé (nome e legenda), então nada importante fica colado nas bordas.
+const LATERAL = 72;   // margem dos lados do vídeo
+const RODAPE = 300;   // faixa branca livre embaixo
+const CANTO = 32;     // arredondado dos cantos do vídeo
+
 // pasta: onde está "orig.mp4"; gera "cabecalho.png" e "final.mp4" na mesma pasta
 // dados: { nome, usuario, headline, verificado, duracaoMaxima }
 async function editar(pasta, dados) {
   const altura = await gerarCabecalho(dados, path.join(pasta, 'cabecalho.png'));
-  const area = 1920 - altura; // espaço do vídeo
+  const larg = 1080 - 2 * LATERAL;            // largura do vídeo
+  const alt = Math.floor((1920 - altura - RODAPE) / 2) * 2; // altura do espaço do vídeo
 
   const dur = Math.min(await duracao(path.join(pasta, 'orig.mp4')), dados.duracaoMaxima || 90);
   const audio = await temAudio(path.join(pasta, 'orig.mp4'));
 
+  // máscara dos cantos arredondados (uma imagem só, rápida)
+  await rodar(FFMPEG, ['-y', '-hide_banner', '-loglevel', 'error', '-f', 'lavfi', '-i', `color=c=black:s=${larg}x${alt}`,
+    '-frames:v', '1', '-vf',
+    `format=gray,geq=lum='if(gt(abs(X-${larg}/2+0.5),${larg}/2-${CANTO})*gt(abs(Y-${alt}/2+0.5),${alt}/2-${CANTO}),` +
+    `if(lte(hypot(abs(X-${larg}/2+0.5)-(${larg}/2-${CANTO}),abs(Y-${alt}/2+0.5)-(${alt}/2-${CANTO})),${CANTO}),255,0),255)'`,
+    'mascara.png'], pasta, 2);
+
   const filtro = [
-    // vídeo na largura toda; se for mais alto que o espaço, corta o excesso de cima e de baixo
-    `[0:v]scale=1080:-2,crop=1080:min(ih\\,${area}),setsar=1,fps=30[v]`,
+    // vídeo preenche o espaço (corta o excesso no meio) e ganha cantos arredondados
+    `[0:v]scale=${larg}:${alt}:force_original_aspect_ratio=increase,crop=${larg}:${alt},setsar=1,fps=30,format=rgba[v0]`,
+    `[3:v]format=gray[m]`,
+    `[v0][m]alphamerge[v]`,
     `[2:v][1:v]overlay=0:0[a]`,
-    `[a][v]overlay=0:${altura}+(${area}-h)/2:shortest=1,format=yuv420p[saida]`,
+    `[a][v]overlay=${LATERAL}:${altura}:shortest=1,format=yuv420p[saida]`,
   ].join(';');
 
   const args = [
@@ -56,6 +89,7 @@ async function editar(pasta, dados) {
     '-i', 'orig.mp4',
     '-i', 'cabecalho.png',
     '-f', 'lavfi', '-i', 'color=c=white:s=1080x1920:r=30',
+    '-loop', '1', '-i', 'mascara.png',
     '-t', String(dur),
     '-filter_complex', filtro,
     '-map', '[saida]',
@@ -70,4 +104,4 @@ async function editar(pasta, dados) {
   return path.join(pasta, 'final.mp4');
 }
 
-module.exports = { editar, duracao };
+module.exports = { editar, duracao, quadros };

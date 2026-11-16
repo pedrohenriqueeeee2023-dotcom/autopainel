@@ -32,7 +32,8 @@ function html({ nome, usuario, headline, verificado }) {
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { width: 1080px; background: #fff; }
   body { font-family: 'Inter', 'Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Emoji', sans-serif; color: #0f1419; }
-  #topo { padding: 150px 60px 40px; }
+  /* topo longe da barra "Reels" do Instagram; lados alinhados com o vídeo (72px) */
+  #topo { padding: 200px 80px 40px; }
   .perfil { display: flex; align-items: center; gap: 26px; }
   .foto { width: 124px; height: 124px; border-radius: 50%; object-fit: cover; flex: none; }
   .nome { font-size: 46px; font-weight: 700; display: flex; align-items: center; gap: 10px; letter-spacing: -0.5px; }
