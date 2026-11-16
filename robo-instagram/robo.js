@@ -366,6 +366,31 @@ async function cuidarDoToken() {
 }
 
 // ---------- Início ----------
+// Se o Instagram recusar na hora de ligar (ex.: app bloqueado pela Meta), espera e tenta de novo,
+// em vez de sair: o pm2 reiniciaria na hora e o robô martelaria a API várias vezes por segundo.
+const ESPERA_RECONEXAO = 30 * 60 * 1000;
+async function conectarInstagram() {
+  let avisou = false;
+  for (;;) {
+    try {
+      const c = await ig.minhaConta();
+      if (avisou) {
+        registrar('O Instagram voltou a responder.');
+        await avisar('✅ Robô do Instagram: o acesso ao Instagram voltou. Robô ligado de novo.');
+      }
+      return c;
+    } catch (e) {
+      registrar(`Erro ao ligar: ${e.message}. Tento de novo em ${ESPERA_RECONEXAO / 60000} minutos.`);
+      if (!avisou) {
+        avisou = true;
+        await avisar(`⚠️ Robô do Instagram: o Instagram recusou o acesso (${e.message}). ` +
+          `Vou tentar de novo a cada ${ESPERA_RECONEXAO / 60000} minutos. Confira o app em developers.facebook.com.`);
+      }
+      await new Promise((r) => setTimeout(r, ESPERA_RECONEXAO));
+    }
+  }
+}
+
 async function iniciar() {
   const modo = process.argv[2];
   if (modo === 'conta') {
@@ -378,7 +403,7 @@ async function iniciar() {
     console.log('Original:', midia.permalink, `(${midia.views} visualizações)`, '\nHeadline:', midia.headline);
     return;
   }
-  conta = await ig.minhaConta();
+  conta = await conectarInstagram();
   // Se o robô reiniciou no meio de uma preparação, recomeça
   const lista = lerPosts();
   for (const p of lista) if (p.status === 'preparando') p.status = p.midia ? 'aguardando' : 'novo';
