@@ -45,7 +45,8 @@ async function candidatos(evitar = []) {
   for (const perfil of config.tiktokPerfis) {
     const nome = perfil.replace(/^@/, '');
     try {
-      const out = await ytdlp(['--flat-playlist', '--no-warnings', '-I', `1:${config.videosPorPerfil}`,
+      const limite = config.videosPorPerfil > 0 ? ['-I', `1:${config.videosPorPerfil}`] : []; // 0 = todos
+      const out = await ytdlp(['--flat-playlist', '--no-warnings', ...limite,
         '--print', '%(id)s\t%(view_count)s\t%(duration)s\t%(title).200s', `https://www.tiktok.com/@${nome}`]);
       for (const linha of out.trim().split('\n').filter(Boolean)) {
         const [id, views, dur, titulo = ''] = linha.split('\t');
@@ -174,4 +175,4 @@ async function reeditar(pasta, midia, headline) {
   gravar(path.join(pasta, 'midia.json'), { ...midia, headline });
 }
 
-module.exports = { preparar, reeditar, marcarUsado };
+module.exports = { preparar, reeditar, marcarUsado, candidatos };

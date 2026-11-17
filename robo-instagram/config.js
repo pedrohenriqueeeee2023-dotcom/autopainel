@@ -15,8 +15,8 @@ const padrao = {
 
   // Perfis do TikTok de onde o robô pega os vídeos (o mais visto que ainda não usou)
   tiktokPerfis: ['cavatioficial', 'achadinhosdolima.08', 'acheishopeeaqui', 'albandivulga', '_achadinhosdoshopee'],
-  // Quantos vídeos recentes olhar em cada perfil
-  videosPorPerfil: 15,
+  // Quantos vídeos olhar em cada perfil (os mais novos primeiro). 0 = todos os vídeos do perfil
+  videosPorPerfil: 0,
 
   // Só pega vídeos com pelo menos isso de visualizações e de 5 a 90 segundos
   minimoVisualizacoes: 1000,
