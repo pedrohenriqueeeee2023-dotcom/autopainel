@@ -321,6 +321,18 @@
         <div><label for="cfgMlSemDesconto">Sem desconto</label>
           <select id="cfgMlSemDesconto"><option value="0">Só com desconto</option><option value="1">Aceitar também</option></select></div>
       </div>
+      <h3>Marcas e preço (ML)</h3>
+      <p class="ajuda" style="margin:4px 0 0">Só manda produto de marca conhecida e barato. Marca boa abaixo do preço "sem desconto até" entra mesmo sem desconto.</p>
+      <div class="linha">
+        <div><label for="cfgMlSoMarcas">Marcas</label>
+          <select id="cfgMlSoMarcas"><option value="1">Só marcas da lista</option><option value="0">Qualquer marca</option></select></div>
+        <div><label for="cfgMlPrecoMax">Preço máximo (R$, 0 = sem limite)</label><input id="cfgMlPrecoMax" type="number" min="0"></div>
+        <div><label for="cfgMlSemDescAte">Sem desconto até (R$)</label><input id="cfgMlSemDescAte" type="number" min="0"></div>
+      </div>
+      <label for="cfgMarcas">Marcas boas (uma por linha)</label>
+      <textarea id="cfgMarcas" style="min-height:120px"></textarea>
+      <label for="cfgMlBuscasExtras">Buscas extras no ML, além dos mais vendidos (uma por linha)</label>
+      <textarea id="cfgMlBuscasExtras" style="min-height:90px"></textarea>
       <label for="cfgMlPalavras">Palavras buscadas no ML (uma por linha; em branco = mais vendidos de beleza)</label>
       <textarea id="cfgMlPalavras" style="min-height:90px"></textarea>
       <h3>Destaques (ticket mais alto)</h3>
@@ -646,6 +658,10 @@ function preencherConfig(e) {
   $('cfgMlDesconto').value = c.mlDescontoMinimo; $('cfgMlPorDia').value = c.mlOfertasPorDia;
   $('cfgMlSemDesconto').value = c.mlAceitarSemDesconto ? '1' : '0';
   $('cfgProibidas').value = (c.palavrasProibidas || []).join('\n');
+  $('cfgMlSoMarcas').value = c.mlSoMarcas === false ? '0' : '1';
+  $('cfgMlPrecoMax').value = c.mlPrecoMaximo ?? 0; $('cfgMlSemDescAte').value = c.mlSemDescontoAte ?? 0;
+  $('cfgMarcas').value = (c.marcasBoas || []).join('\n');
+  $('cfgMlBuscasExtras').value = (c.mlBuscasExtras || []).join('\n');
   $('cfgDestAtivo').value = c.destaqueAtivo ? '1' : '0'; $('cfgDestPreco').value = c.destaquePrecoMinimo;
   $('cfgDestPorDia').value = c.destaquesPorDia; $('cfgDestHoras').value = (c.destaqueHorarios || []).join(', ');
   $('cfgMlPalavras').value = (c.mlPalavras || []).join('\n');
@@ -727,6 +743,8 @@ $('formConfig').onsubmit = async (ev) => {
     mlAtivo: $('cfgMlAtivo').value === '1', mlDescontoMinimo: $('cfgMlDesconto').value, mlOfertasPorDia: $('cfgMlPorDia').value,
     mlAceitarSemDesconto: $('cfgMlSemDesconto').value === '1', mlPalavras: $('cfgMlPalavras').value,
     palavrasProibidas: $('cfgProibidas').value,
+    mlSoMarcas: $('cfgMlSoMarcas').value === '1', mlPrecoMaximo: $('cfgMlPrecoMax').value, mlSemDescontoAte: $('cfgMlSemDescAte').value,
+    marcasBoas: $('cfgMarcas').value, mlBuscasExtras: $('cfgMlBuscasExtras').value,
     destaqueAtivo: $('cfgDestAtivo').value === '1', destaquePrecoMinimo: $('cfgDestPreco').value,
     destaquesPorDia: $('cfgDestPorDia').value, destaqueHorarios: $('cfgDestHoras').value,
   });

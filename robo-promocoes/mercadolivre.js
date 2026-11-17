@@ -3,7 +3,7 @@
 // subcategoria e ficamos só com os que estão com desconto.
 // O link de afiliado vem do Gerador de links do ML (você cola no painel).
 const config = require('./config');
-const { temPalavraProibida } = require('./filtros');
+const { temPalavraProibida, marcaBoa } = require('./filtros');
 
 const API = 'https://api.mercadolibre.com';
 let token = null;
@@ -58,6 +58,13 @@ async function montarOferta(produtoId, produto, regras = {}) {
   const aceitarSemDesconto = regras.aceitarSemDesconto ?? Boolean(config.mlAceitarSemDesconto);
   const descontoMinimo = regras.descontoMinimo ?? config.mlDescontoMinimo;
   const precoMinimo = regras.precoMinimo || 0;
+  // Ofertas normais (não destaques): só marca boa, até o preço máximo
+  const normal = Boolean(regras.normal);
+  if (normal && (!produto || !produto.attributes)) produto = await chamar(`/products/${produtoId}`);
+  const marcaAttr = produto && (produto.attributes || []).find((a) => a.id === 'BRAND');
+  const marca = marcaAttr ? marcaAttr.value_name : '';
+  const daMarca = produto && produto.name ? marcaBoa(marca, produto.name) : false;
+  if (normal && config.mlSoMarcas !== false && !daMarca) return null;
   let melhor = null;
   try {
     const anuncios = await chamar(`/products/${produtoId}/items?limit=1`);
@@ -67,7 +74,12 @@ async function montarOferta(produtoId, produto, regras = {}) {
   }
   const temDesconto = melhor && melhor.original_price && melhor.original_price > melhor.price;
   const desconto = temDesconto ? Math.round(100 - (100 * melhor.price) / melhor.original_price) : 0;
-  if (!aceitarSemDesconto && (!temDesconto || desconto < descontoMinimo)) return null;
+  const precoMaximo = normal ? Number(config.mlPrecoMaximo) || 0 : 0;
+  if (precoMaximo && !(melhor && melhor.price <= precoMaximo)) return null;
+  // marca boa e barata: entra mesmo sem desconto
+  const semDescontoAte = normal ? Number(config.mlSemDescontoAte) || 0 : 0;
+  const barataDeMarca = daMarca && semDescontoAte && melhor && melhor.price <= semDescontoAte;
+  if (!aceitarSemDesconto && !barataDeMarca && (!temDesconto || desconto < descontoMinimo)) return null;
   if (precoMinimo && !(melhor && melhor.price >= precoMinimo)) return null;
 
   if (!produto || !produto.pictures) produto = await chamar(`/products/${produtoId}`);
@@ -78,6 +90,7 @@ async function montarOferta(produtoId, produto, regras = {}) {
     loja: 'Mercado Livre',
     automatica: true, // veio da busca automática (as coladas à mão não têm isso)
     titulo: produto.name,
+    marca: marca || null,
     preco: melhor ? melhor.price : null,
     precoAntes: temDesconto ? melhor.original_price : null,
     desconto,
@@ -154,12 +167,26 @@ async function acharCandidatos(registrar, grupoDe = new Map()) {
       await esperar(300);
     }
   }
+  // Buscas extras (marcas e produtos que vendem bem), sempre, além do resto
+  for (const palavra of config.mlBuscasExtras || []) {
+    try {
+      const r = await chamar(`/products/search?status=active&site_id=MLB&limit=${config.mlPorPalavra || 30}&q=${encodeURIComponent(palavra)}`);
+      for (const p of r.results || []) if (!candidatos.has(p.id)) { candidatos.set(p.id, p); grupoDe.set(p.id, 'beleza'); }
+    } catch (erro) {
+      registrar(`Mercado Livre: não consegui buscar "${palavra}" (${erro.message}).`);
+    }
+    await esperar(300);
+  }
   return candidatos;
 }
 
 // Escolhe "vagas" ofertas: primeiro garante o mínimo de cada grupo (os de maior desconto
 // de cada um), depois completa com os maiores descontos de qualquer grupo.
-const nota = (o) => (o.desconto || 0) * 1000 + (o.preco ? 1 : 0);
+// Maior desconto primeiro; produto barato ganha uns pontos (marca boa e barata vale mesmo sem desconto)
+const nota = (o) => {
+  const ate = Number(config.mlSemDescontoAte) || 0;
+  return ((o.desconto || 0) + (ate && o.preco && o.preco <= ate ? 15 : 0)) * 1000 + (o.preco ? 1 : 0);
+};
 // limites: { casa: { minimo: 5, maximo: 5 } } muda o mínimo/máximo de um grupo específico
 function escolherComMinimo(ofertas, vagas, minimoPorGrupo, limites = {}) {
   const ordenadas = [...ofertas].sort((a, b) => nota(b) - nota(a));
@@ -167,14 +194,21 @@ function escolherComMinimo(ofertas, vagas, minimoPorGrupo, limites = {}) {
   const minimo = (g) => (limites[g] && limites[g].minimo != null ? limites[g].minimo : minimoPorGrupo);
   const maximo = (g) => (limites[g] && limites[g].maximo != null ? limites[g].maximo : Infinity);
   const doGrupo = (g) => [...escolhidas].filter((o) => o.grupo === g).length;
+  // no máximo N da mesma marca (as de maior desconto ficam)
+  const porMarca = Number(config.mlMaximoPorMarca) || 0;
+  const marcaDe = (o) => String(o.marca || '').toLowerCase();
+  const cabeMarca = (o) => !porMarca || !o.marca || [...escolhidas].filter((x) => marcaDe(x) === marcaDe(o)).length < porMarca;
   const grupos = [...new Set(ordenadas.map((o) => o.grupo))];
   for (const g of grupos) {
     const qtd = Math.min(minimo(g) || 0, maximo(g));
-    ordenadas.filter((o) => o.grupo === g).slice(0, qtd).forEach((o) => escolhidas.add(o));
+    for (const o of ordenadas.filter((x) => x.grupo === g)) {
+      if (doGrupo(g) >= qtd) break;
+      if (cabeMarca(o)) escolhidas.add(o);
+    }
   }
   for (const o of ordenadas) {
     if (escolhidas.size >= vagas) break;
-    if (!escolhidas.has(o) && doGrupo(o.grupo) < maximo(o.grupo)) escolhidas.add(o);
+    if (!escolhidas.has(o) && doGrupo(o.grupo) < maximo(o.grupo) && cabeMarca(o)) escolhidas.add(o);
   }
   // se o mínimo de todos os grupos passar das vagas, os de menor desconto saem
   return [...escolhidas].sort((a, b) => nota(b) - nota(a)).slice(0, vagas);
@@ -195,7 +229,7 @@ async function buscarOfertasML(jaEnviados, registrar = console.log) {
   for (const [id, produto] of candidatos) {
     if (jaEnviados.has('ml-' + id)) continue;
     try {
-      const o = await montarOferta(id, produto);
+      const o = await montarOferta(id, produto, { normal: true });
       if (o) ofertas.push({ ...o, grupo: grupoDe.get(id) || 'geral' });
     } catch {
       // produto sem dados ou bloqueado: pula

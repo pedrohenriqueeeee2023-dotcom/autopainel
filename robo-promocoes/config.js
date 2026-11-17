@@ -58,6 +58,40 @@ const padrao = {
   // Ofertas com qualquer uma destas palavras no nome são descartadas (Shopee e ML)
   palavrasProibidas: [],
 
+  // Só marcas conhecidas no ML (true) e a lista delas. Confere a marca do produto no ML
+  // (ou o nome, se o ML não informar a marca). Não vale para os destaques.
+  mlSoMarcas: true,
+  marcasBoas: [
+    // perfumaria e corpo
+    'Wepink', 'Natura', 'O Boticário', 'Boticário', 'Eudora', 'Avon', 'Quem Disse Berenice', 'Granado', 'Phebo',
+    "Victoria's Secret", 'Bath & Body Works', 'Carolina Herrera', 'Lancôme', 'Paco Rabanne', 'Antonio Banderas',
+    'Shakira', 'Calvin Klein', 'Nivea', 'Dove', 'Monange', 'Rexona', 'Veet', 'Gillette Venus',
+    // maquiagem
+    'Vult', 'Ruby Rose', 'Dailus', 'Bruna Tavares', 'Boca Rosa', 'Mari Maria', 'Océane', 'Fran By Franciny Ehlke',
+    'Niina Secrets', 'Max Love', 'Vizzela', 'Maybelline', "L'Oréal", 'Revlon', 'MAC', 'Melu', 'Payot',
+    // skincare
+    'Sallve', 'Principia', 'Creamy', 'Simple Organic', 'Adcos', 'Garnier', 'Neutrogena', 'La Roche-Posay',
+    'CeraVe', 'Cetaphil', 'Vichy', 'Bioderma', 'Avène', 'Eucerin', 'ISDIN', 'Episol', 'Darrow', 'Mantecorp',
+    // cabelo
+    'Elseve', 'Pantene', 'Seda', 'Tresemmé', 'Siàge', 'Lola Cosmetics', 'Salon Line', 'Inoar', 'Truss', 'Wella',
+    'Kérastase', 'Redken', 'Amend', 'Haskell', 'Taiff', 'Philips', 'Gama', 'Babyliss', 'Britânia', 'Mondial', 'Philco',
+    // casa
+    'Tramontina', 'Electrolux', 'Brastemp', 'Consul', 'Oster', 'Arno', 'WAP', 'Oxford', 'Mallory', 'Black+Decker',
+    'Brinox', 'Ordene', 'Coza', 'Rochedo', 'Polishop', 'Cadence', 'Multilaser',
+  ],
+  // Preço máximo das ofertas normais do ML (R$). 0 = sem limite. Não vale para os destaques.
+  mlPrecoMaximo: 150,
+  // No máximo quantas ofertas da mesma marca por busca (pra não vir 8 batons iguais de cores diferentes)
+  mlMaximoPorMarca: 2,
+  // Marca boa e barata entra mesmo sem desconto, até este preço (R$). 0 = não aceita sem desconto.
+  mlSemDescontoAte: 60,
+  // Buscas extras no catálogo do ML, além dos mais vendidos (ex.: marcas e produtos que vendem bem)
+  mlBuscasExtras: [
+    'wepink body splash', 'body splash', 'boticário', 'natura', 'eudora', 'vult', 'ruby rose', 'bruna tavares',
+    'boca rosa beauty', 'mari maria makeup', 'principia', 'creamy skincare', 'sallve', 'cerave', 'la roche-posay',
+    'lola cosmetics', 'salon line', 'nivea', 'victorias secret body splash', 'granado',
+  ],
+
   // Destaques: produtos de ticket mais alto (ex.: celulares e eletrodomésticos),
   // no máximo "destaquesPorDia" por dia, nos horários de "destaqueHorarios"
   destaqueAtivo: false,
@@ -90,7 +124,7 @@ Object.defineProperty(config, 'salvar', {
     for (const chave of Object.keys(padrao)) {
       if (!(chave in novos)) continue;
       const valor = novos[chave];
-      if (chave === 'palavras' || chave === 'mlPalavras' || chave === 'palavrasProibidas') {
+      if (chave === 'palavras' || chave === 'mlPalavras' || chave === 'palavrasProibidas' || chave === 'marcasBoas' || chave === 'mlBuscasExtras') {
         const lista = Array.isArray(valor) ? valor : String(valor).split('\n');
         config[chave] = lista.map((p) => p.trim()).filter(Boolean);
       } else if (chave === 'cidade' || chave === 'nichoContexto') {
@@ -100,7 +134,7 @@ Object.defineProperty(config, 'salvar', {
         config.gatilhosDesligados = lista.map((g) => String(g).trim()).filter(Boolean);
       } else if (chave === 'nomeDoGrupo') {
         config.nomeDoGrupo = String(valor).trim();
-      } else if (chave === 'enviosAtivos' || chave === 'mlAtivo' || chave === 'mlAceitarSemDesconto' || chave === 'destaqueAtivo') {
+      } else if (chave === 'enviosAtivos' || chave === 'mlAtivo' || chave === 'mlAceitarSemDesconto' || chave === 'destaqueAtivo' || chave === 'mlSoMarcas') {
         config[chave] = Boolean(valor);
       } else if (chave === 'destaqueHorarios') {
         const horas = (Array.isArray(valor) ? valor : String(valor).split(/[^0-9]+/))
